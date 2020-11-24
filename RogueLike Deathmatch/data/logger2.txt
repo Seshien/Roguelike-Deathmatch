@@ -1,0 +1,1 @@
+Config file opened:time:60special:yes
