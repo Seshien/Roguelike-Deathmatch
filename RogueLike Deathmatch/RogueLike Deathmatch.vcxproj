@@ -158,6 +158,7 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="Network.cpp" />
+    <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RogueLike Deathmatch.cpp" />
     <ClCompile Include="Server.cpp" />
@@ -168,6 +169,7 @@
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Network.h" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Server.h" />
   </ItemGroup>

@@ -2,9 +2,12 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <string>
+#include <vector>
+#include <stdio.h>
 
 #include "Logger.h"
 #include "Client.h"
+
 class Network
 {
 public:
@@ -12,10 +15,15 @@ public:
 	{
 
 	}
+	~Network()
+	{
+		WSACleanup();
+	}
 	int startNetwork(std::string port)
 	{
 		this->clientAmount = 0;
 		this->port = port;
+		playerID = 0;
 
 		WSADATA wsaData;
 		int iResult;
@@ -29,11 +37,18 @@ public:
 
 	}
 private:
-	Client clientList[16];
+	//Client clientList[16];
+	std::vector <Client> clientList;
 	SOCKET listenSocket;
 	std::string port;
 	pollfd descrList[17];
+
+	//decrease or increase, depending on connected clients
 	int clientAmount;
+
+	//player id, only increases so two players never have the same id
+	int playerID;
+
 	int createServerSocket()
 	{
 		this->listenSocket = INVALID_SOCKET;
@@ -122,7 +137,93 @@ private:
 		}
 
 	}
-	void manageServerEvent();
-	void manageClientEvent(int index);
+	void manageServerEvent()
+	{
+		auto revent = descrList[0].revents;
+		if (revent & POLLIN) 
+		{
+			acceptClient();
+		}
+
+	}
+	void acceptClient()
+	{
+		struct addrinfo result;
+		auto client = Client();
+
+		auto clientFd = accept(this->listenSocket, (sockaddr*)&result.ai_addr, (int *)&result.ai_addrlen);
+		unsigned long mode = 1;
+		ioctlsocket(clientFd, FIONBIO, &mode);
+
+		if (clientFd == -1)
+		{
+			Logger::log("Accepting new client failed");
+			return;
+		}
+
+		descrList[this->clientAmount].fd = clientFd;
+		descrList[this->clientAmount].events = POLLIN;
+		this->clientAmount++;
+
+		client.initClient(playerID++, clientFd, result);
+
+		auto address = (sockaddr_in*)result.ai_addr;
+
+		Logger::log("New connection accepted");
+		std::string message = std::string(inet_ntoa(address->sin_addr)) + ":" + std::to_string(ntohs(address->sin_port)) 
+			+ ":" + std::to_string(clientFd);
+		Logger::log(message);
+
+		//Parser wiadomosc o przyjeciu nowego gracza
+		this->clientList.push_back(client);
+	}
+
+	void manageClientEvent(int descrIndex)
+	{
+		auto sock = this->descrList[descrIndex].fd;
+		int index = -1;
+		Client * managed = NULL;
+		if (clientList[descrIndex].clientSocket == sock)
+		{
+			managed = &clientList[descrIndex];
+			index = descrIndex;
+		}
+		else
+		{
+			for (int i=0;i<clientList.size();i++)
+				if (clientList[i].clientSocket = sock)
+				{
+					managed = &clientList[i];
+					index = i;
+					break;
+				}
+		}
+
+		if (managed == NULL)
+		{
+			Logger::log("Client not found. Socket index:", int(sock));
+			return;
+		}
+
+		auto revent = descrList[descrIndex].revents;
+		if (revent & POLLIN)
+		{
+			readFromClient(index);
+		}
+		if (revent & POLLHUP)
+			deleteClient(index);
+	}
+	void readFromClient(int index)
+	{
+		
+		//Parser wiadomosc o dostaniu informacji 
+	}
+
+	void deleteClient(int index)
+	{
+		int playerIndex = clientList[index].playerId;
+		clientList.erase(clientList.begin() + index);
+		//Parser wiadomosc o usunieciu playera
+	}
 };
 
