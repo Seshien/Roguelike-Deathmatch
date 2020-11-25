@@ -5,6 +5,7 @@
 
 #include "Map.h"
 #include "Logger.h"
+#include "Network.h"
 
 class Server
 {
@@ -20,22 +21,19 @@ class Server
 			startLogger();
 			loadConfig();
 			startMap();
-			return;
-			//StartNetwork();
+			network.startNetwork(this->port);
 			//StartLobby();
 			//LoopLobby();
 			//StartGame();
 			//LoopGame();
-
+			return;
 		}
 
 	private:
 		void startLogger()
 		{
-		//this->logger = Logger()
+			Logger::startLogger();
 		}
-
-		void startNetwork();
 
 		// void GenerateMap();
 		void startMap()
@@ -55,15 +53,15 @@ class Server
 			file.open(this->confName);
 			if (file.is_open())
 			{
-				this->logger.log("Config file opened:");
+				Logger::log("Config file opened:");
 				while (std::getline(file, line))
 				{
-					this->logger.log(line);
+					Logger::log(line);
 					this->processConfigLine(line);
 				}
 			}
 
-			else this->logger.log("Config file not found");
+			else Logger::log("Config file not found");
 			file.close();
 		}
 
@@ -73,12 +71,12 @@ class Server
 			int pos = line.find(delimiter);
 			if (pos == -1)
 			{
-				this->logger.log("Error during parsing of config file");
+				Logger::log("Error during parsing of config file");
 				return;
 			}
 			std::string token = line.substr(0, pos);
 			std::string value = line.substr(pos + 1, line.length() - 1);
-			this->logger.log("Token: " + token + " Value: " + value);
+			Logger::log("Token: " + token + " Value: " + value);
 			this->setConfigValue(token, value);
 			return;
 		}
@@ -87,12 +85,13 @@ class Server
 		{
 			if (token == "time") this->time = std::stoi(value);
 			else if (token == "special") return;
+			else if (token == "port") this->port = value;
 		}
-		Logger logger;
 		std::string confName = "data/config.txt";
 		std::string mapPath = "data/world0.txt";
+		std::string port = "7777";
 		Map map;
-
+		Network network;
 
 		int time;
 };
