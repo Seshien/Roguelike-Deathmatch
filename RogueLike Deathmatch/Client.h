@@ -10,10 +10,13 @@ public:
 		this->playerId = clientId;
 		this->clientSocket = clientSocket;
 		this->clientInfo = clientInfo;
+		this->timeoutTimer = 0;
 	}
 	int playerId;
 	SOCKET clientSocket;
 	struct addrinfo clientInfo;
+	int timeoutTimer;
 private:
+
 };
 

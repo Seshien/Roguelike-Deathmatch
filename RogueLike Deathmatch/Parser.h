@@ -1,5 +1,38 @@
 #pragma once
+#include <vector>
+
 class Parser
 {
+public:
+	struct Event
+	{
+		int sender; // od kogo jest ta wiadomosc
+		int receiver; // dla kogo jest ta wiadomosc, 0 to serwer, reszta to playerId poszczegolnych graczy
+		//gracz sie polaczyl, gracz sie rozlaczyl, gracz wykonal ruch, gracz wykonal akcje, zmiana stanu gracza, gracz zaglosowal, timeout, 
+		int type; // typ eventu, moze dac jako enumerator 
+		char data[];
+	};
+	Parser()
+	{
+
+	}
+	//ogolnie to jest raczej zle
+	void addEvent(int sender, int receiver, int type, char data[])
+	{
+		Event ev = { sender,receiver,type,*data };
+		eventList.push_back(ev);
+	}
+	
+	Event decodeBytes(char data[])
+	{
+		return Event();
+	}
+	char * encodeBytes(Event ev)
+	{
+		char data[] = "TODO";
+		return data ;
+	}
+	std::vector<Event> eventList;
+
 };
 

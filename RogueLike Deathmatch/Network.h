@@ -23,7 +23,8 @@ public:
 	{
 		this->clientAmount = 0;
 		this->port = port;
-		playerID = 0;
+		//serwer ma player id 0, a wiec pierwszy mozliwy playerId to 1
+		playerID = 1;
 
 		WSADATA wsaData;
 		int iResult;
@@ -46,7 +47,9 @@ private:
 	//decrease or increase, depending on connected clients
 	int clientAmount;
 
-	//player id, only increases so two players never have the same id
+	// player id, only increases so two players never have the same id
+	// przepraszam za ten polnglish
+	// teoretycznie mozemy sprawdzac id lub cus, i jezeli jest takie samo to nadawac to samo player id 
 	int playerID;
 
 	int createServerSocket()
@@ -117,6 +120,9 @@ private:
 	}
 	void loopNetwork()
 	{
+		//timeout to bedzie kiedy cos ostatnio dzialo sie z klientem
+		// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
+		increaseTimeout();
 		updateDescrList();
 		int result = WSAPoll(this->descrList, this->clientAmount + 1, 0);
 		if (result == -1) {
@@ -124,14 +130,19 @@ private:
 		}
 		else if (result > 0) this->manageEvents(result);
 	}
+
 	void manageEvents(int events)
 	{
-		for (int i = 0; i <= this->clientAmount && events > 0; i++) {
+		//ktos dolacza
+		if (this->descrList[0].revents)
+		{
+			manageServerEvent();
+			events--;
+		}
+		//klient cos robi
+		for (int i = 1; i <= this->clientAmount && events > 0; i++) {
 			if (this->descrList[i].revents) {
-				if (this->descrList[i].fd == this->listenSocket)
-					manageServerEvent();
-				else
-					manageClientEvent(i);
+				manageClientEvent(i);
 				events--;
 			}
 		}
@@ -139,7 +150,7 @@ private:
 	}
 	void manageServerEvent()
 	{
-		auto revent = descrList[0].revents;
+		auto revent = this->descrList[0].revents;
 		if (revent & POLLIN) 
 		{
 			acceptClient();
@@ -178,6 +189,7 @@ private:
 		this->clientList.push_back(client);
 	}
 
+
 	void manageClientEvent(int descrIndex)
 	{
 		auto sock = this->descrList[descrIndex].fd;
@@ -212,6 +224,9 @@ private:
 		}
 		if (revent & POLLHUP)
 			deleteClient(index);
+
+		// resetujemy timeout, bo cos sie stalo z klientem
+		managed->timeoutTimer = 0;
 	}
 	void readFromClient(int index)
 	{
@@ -224,6 +239,11 @@ private:
 		int playerIndex = clientList[index].playerId;
 		clientList.erase(clientList.begin() + index);
 		//Parser wiadomosc o usunieciu playera
+	}
+	void increaseTimeout()
+	{
+		for (auto & client : this->clientList)
+			client.timeoutTimer++;
 	}
 };
 
