@@ -17,6 +17,7 @@ public:
 
 	}
 	//ogolnie to jest raczej zle
+	// moze uzyc json'a do tego?
 	void addEvent(int sender, int receiver, int type, char data[])
 	{
 		Event ev = { sender,receiver,type,*data };

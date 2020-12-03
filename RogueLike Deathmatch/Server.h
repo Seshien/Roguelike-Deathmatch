@@ -30,6 +30,9 @@ class Server
 		}
 
 	private:
+		Parser output;
+		Parser input;
+
 		void startLogger()
 		{
 			Logger::startLogger();
@@ -41,10 +44,34 @@ class Server
 			this->map.init(mapPath);
 		}
 
-		void startLobby();
-		void loopLobby();
-		void startGame();
-		void loopGame();
+		void startLobby()
+		{
+			//poczatek prawdziwej dzialalnosci serwera, nie wiem co tu dac zbytnio
+		}
+		void loopLobby()
+		{
+			while (true)
+			{
+				input = this->network.inputNetwork;
+				for (auto ev : input.eventList)
+					handleEvent(ev);
+				for (auto ev: output)
+
+			}
+
+		}
+		void startGame()
+		{
+
+		}
+		void loopGame()
+		{
+
+		}
+		void handleEvent(Parser::Event ev)
+		{
+			//zaleznie od typu eventu cos by trzeba bylo zrobic 
+		}
 
 		void loadConfig()
 		{

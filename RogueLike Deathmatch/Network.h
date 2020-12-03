@@ -37,6 +37,29 @@ public:
 		}
 
 	}
+	Parser inputNetwork()
+	{
+		//timeout to bedzie kiedy cos ostatnio dzialo sie z klientem
+		// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
+		this->input = Parser();
+		increaseTimeout();
+		int result = WSAPoll(this->descrList, this->clientAmount + 1, 0);
+		if (result == -1) {
+			Logger::log("Poll failed");
+		}
+		else if (result > 0) this->manageEvents(result);
+
+		//Zwroc parser albo liste eventow
+		return input;
+	}
+	void outputNetwork(Parser _output)
+	{
+		updateDescrList();
+		this->output = _output;
+		for (auto ev : this->output.eventList)
+			handleEvent(ev);
+		//Zwroc parser albo liste eventow
+	}
 private:
 	//Client clientList[16];
 	std::vector <Client> clientList;
@@ -47,10 +70,16 @@ private:
 	//decrease or increase, depending on connected clients
 	int clientAmount;
 
+	Parser input;
+	Parser output;
 	// player id, only increases so two players never have the same id
 	// przepraszam za ten polnglish
 	// teoretycznie mozemy sprawdzac id lub cus, i jezeli jest takie samo to nadawac to samo player id 
 	int playerID;
+	void handleEvent(Parser::Event ev) 
+	{
+
+	}
 
 	int createServerSocket()
 	{
@@ -118,18 +147,6 @@ private:
 			i++;
 		}
 	}
-	void loopNetwork()
-	{
-		//timeout to bedzie kiedy cos ostatnio dzialo sie z klientem
-		// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
-		increaseTimeout();
-		updateDescrList();
-		int result = WSAPoll(this->descrList, this->clientAmount + 1, 0);
-		if (result == -1) {
-			Logger::log("Poll failed");
-		}
-		else if (result > 0) this->manageEvents(result);
-	}
 
 	void manageEvents(int events)
 	{
@@ -195,6 +212,8 @@ private:
 		auto sock = this->descrList[descrIndex].fd;
 		int index = -1;
 		Client * managed = NULL;
+		//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach
+		//moze byc nie potrzebne, ale wolalem to zrobic dla sanity
 		if (clientList[descrIndex].clientSocket == sock)
 		{
 			managed = &clientList[descrIndex];
@@ -230,8 +249,10 @@ private:
 	}
 	void readFromClient(int index)
 	{
-		
+		//jezeli je za krotka zapisac w bufferze klienta i czekac za reszt¹
+
 		//Parser wiadomosc o dostaniu informacji 
+
 	}
 
 	void deleteClient(int index)
