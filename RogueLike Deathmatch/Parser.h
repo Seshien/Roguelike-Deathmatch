@@ -10,7 +10,7 @@ public:
 		int receiver; // dla kogo jest ta wiadomosc, 0 to serwer, reszta to playerId poszczegolnych graczy
 		//gracz sie polaczyl, gracz sie rozlaczyl, gracz wykonal ruch, gracz wykonal akcje, zmiana stanu gracza, gracz zaglosowal, timeout, 
 		int type; // typ eventu, moze dac jako enumerator 
-		char data[];
+		char subdata[];
 	};
 	Parser()
 	{
@@ -23,15 +23,19 @@ public:
 		Event ev = { sender,receiver,type,*data };
 		eventList.push_back(ev);
 	}
+
+	void addEvent(Event ev) {
+		eventList.push_back(ev);
+	}
 	
 	Event decodeBytes(char data[])
 	{
 		return Event();
 	}
-	char * encodeBytes(Event ev)
+	char* encodeBytes(Event ev)
 	{
-		char data[] = "TODO";
-		return data ;
+		char data[5] = "TODO";
+		return data;
 	}
 	std::vector<Event> eventList;
 

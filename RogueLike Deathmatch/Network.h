@@ -4,9 +4,12 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
+#include <cstring>
 
 #include "Logger.h"
 #include "Client.h"
+#include "Parser.h"
+
 
 class Network
 {
@@ -35,6 +38,8 @@ public:
 			Logger::log("WSAStartup failed", iResult);
 			return 1;
 		}
+		createServerSocket();
+		updateDescrList();
 
 	}
 	Parser inputNetwork()
@@ -45,7 +50,8 @@ public:
 		increaseTimeout();
 		int result = WSAPoll(this->descrList, this->clientAmount + 1, 0);
 		if (result == -1) {
-			Logger::log("Poll failed");
+			Logger::log("Poll failed\n");
+			Logger::logNetworkError();
 		}
 		else if (result > 0) this->manageEvents(result);
 
@@ -56,8 +62,13 @@ public:
 	{
 		updateDescrList();
 		this->output = _output;
-		for (auto ev : this->output.eventList)
+		for (auto ev : this->output.eventList) {
 			handleEvent(ev);
+			for (auto client : this->clientList) {
+				sendToClient(&client);
+			}
+		}
+		
 		//Zwroc parser albo liste eventow
 	}
 private:
@@ -78,7 +89,7 @@ private:
 	int playerID;
 	void handleEvent(Parser::Event ev) 
 	{
-
+		char *data = output.encodeBytes(ev);
 	}
 
 	int createServerSocket()
@@ -137,8 +148,8 @@ private:
 	}
 	void updateDescrList()
 	{
-		this->descrList->fd = listenSocket;
-		this->descrList->events = POLLIN;
+		this->descrList[0].fd = listenSocket;
+		this->descrList[0].events = POLLIN;
 		int i = 1;
 		for (auto & client : this->clientList)
 		{
@@ -176,16 +187,28 @@ private:
 	}
 	void acceptClient()
 	{
-		struct addrinfo result;
+		sockaddr_in infoStorage;
+		addrinfo result;
+		socklen_t addressSize;
 		auto client = Client();
 
-		auto clientFd = accept(this->listenSocket, (sockaddr*)&result.ai_addr, (int *)&result.ai_addrlen);
-		unsigned long mode = 1;
-		ioctlsocket(clientFd, FIONBIO, &mode);
 
+		auto clientFd = accept(this->listenSocket, (struct sockaddr*)& infoStorage, &addressSize);
 		if (clientFd == -1)
 		{
 			Logger::log("Accepting new client failed");
+			Logger::logNetworkError();
+			return;
+		}
+		result.ai_addr = (sockaddr*)&infoStorage;
+		result.ai_addrlen = addressSize;
+
+		unsigned long mode = 1;
+
+		if (ioctlsocket(clientFd, FIONBIO, &mode) != 0)
+		{
+			Logger::log("ioctl failed\n");
+			Logger::logNetworkError();
 			return;
 		}
 
@@ -198,9 +221,9 @@ private:
 		auto address = (sockaddr_in*)result.ai_addr;
 
 		Logger::log("New connection accepted");
-		std::string message = std::string(inet_ntoa(address->sin_addr)) + ":" + std::to_string(ntohs(address->sin_port)) 
-			+ ":" + std::to_string(clientFd);
-		Logger::log(message);
+		//std::string message = std::string(inet_ntoa(address->sin_addr)) + ":" + std::to_string(ntohs(address->sin_port)) 
+		//	+ ":" + std::to_string(clientFd);
+		//Logger::log(message);
 
 		//Parser wiadomosc o przyjeciu nowego gracza
 		this->clientList.push_back(client);
@@ -249,10 +272,35 @@ private:
 	}
 	void readFromClient(int index)
 	{
+		Client* currentClient = &clientList[index];
+		int result = recv(currentClient->clientSocket, currentClient->bufferInput + currentClient->bufferInputCounter, Constants::msgLength - currentClient->bufferInputCounter, 0);
 		//jezeli je za krotka zapisac w bufferze klienta i czekac za reszt¹
-
+		if (result == -1 || result == 0) {
+			Logger::log("Recv error on client: %d\n", index);
+		}
+		else {
+			currentClient->bufferInputCounter += result;
+		}
 		//Parser wiadomosc o dostaniu informacji 
+		if (currentClient->bufferInputCounter == Constants::msgLength) {
+			input.addEvent(input.decodeBytes(currentClient->bufferInput));
+			currentClient->bufferInputCounter = 0;
+		}
+	}
 
+	void sendToClient(Client* client) {
+		int result = send(client->clientSocket, client->bufferOutput, Constants::bufferLength - client->bufferOutputCounter, 0);
+		if (SOCKET_ERROR) {
+			Logger::log("Send error on player id: %d\n", client->playerId);
+		}
+		else {
+			// Przesuwanie bufora wzgledem ilosci wyslanych juz znakow (tak, aby zawsze wysylac go wzgledem poczatku)
+			strcpy_s(client->bufferOutput, Constants::bufferLength - client->bufferOutputCounter, client->bufferOutput + client->bufferOutputCounter);
+			client->bufferOutputCounter += result;
+			if (client->bufferOutputCounter == Constants::msgLength) {
+				client->bufferOutputCounter = 0;
+			}
+		}
 	}
 
 	void deleteClient(int index)

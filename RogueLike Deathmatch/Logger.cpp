@@ -1,6 +1,7 @@
 #include "Logger.h"
 
 
+
 namespace Logger
 {
 	std::ofstream file;
@@ -49,7 +50,17 @@ namespace Logger
 			std::cout << "Logger is not initialized" << std::endl;
 			return;
 		}
-		std::cout << text << std::endl << "Error code:" << error_code << std::endl;
 		file << text;
+	}
+
+	void logNetworkError() {
+		wchar_t* s = NULL;
+		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL, WSAGetLastError(),
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPWSTR)&s, 0, NULL);
+		fprintf(stderr, "%S\n", s);
+		file << s << std::endl;
+		LocalFree(s);
 	}
 };

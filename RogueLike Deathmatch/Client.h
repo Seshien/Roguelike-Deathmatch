@@ -1,6 +1,7 @@
 #pragma once
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include "Constants.h"
 class Client
 {
 public:
@@ -16,7 +17,13 @@ public:
 	SOCKET clientSocket;
 	struct addrinfo clientInfo;
 	int timeoutTimer;
+	char bufferInput[Constants::bufferLength];
+	char bufferOutput[Constants::bufferLength];
+	int bufferInputCounter;
+	int bufferOutputCounter;
 private:
 
 };
+
+
 

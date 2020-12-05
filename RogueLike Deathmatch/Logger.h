@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <winsock2.h>
 
 namespace Logger
 {
@@ -11,6 +12,7 @@ namespace Logger
 	void endLogger();
 	void log(std::string text);
 	void log(std::string text, int error_code);
+	void logNetworkError();
 
 };
 

@@ -22,10 +22,10 @@ class Server
 			loadConfig();
 			startMap();
 			network.startNetwork(this->port);
-			//StartLobby();
-			//LoopLobby();
-			//StartGame();
-			//LoopGame();
+			startLobby();
+			loopLobby();
+			//startGame();
+			//loopGame();
 			return;
 		}
 
@@ -52,10 +52,12 @@ class Server
 		{
 			while (true)
 			{
-				input = this->network.inputNetwork;
+				input = this->network.inputNetwork();
 				for (auto ev : input.eventList)
 					handleEvent(ev);
-				for (auto ev: output)
+				for (auto ev : output.eventList) {
+					std::cout << "x" << std::endl;
+				}
 
 			}
 

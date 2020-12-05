@@ -1,0 +1,58 @@
+Config file opened:time:60Token: time Value: 60special:yesToken: special Value: yesPoll failed
+00D9C2E0
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
+Poll failed
+00D85A10
