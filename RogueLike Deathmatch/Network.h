@@ -189,7 +189,7 @@ private:
 	{
 		sockaddr_in infoStorage;
 		addrinfo result;
-		socklen_t addressSize;
+		socklen_t addressSize = sizeof(infoStorage);
 		auto client = Client();
 
 
@@ -211,10 +211,10 @@ private:
 			Logger::logNetworkError();
 			return;
 		}
-
+		this->clientAmount++;
 		descrList[this->clientAmount].fd = clientFd;
 		descrList[this->clientAmount].events = POLLIN;
-		this->clientAmount++;
+
 
 		client.initClient(playerID++, clientFd, result);
 
@@ -233,14 +233,17 @@ private:
 	void manageClientEvent(int descrIndex)
 	{
 		auto sock = this->descrList[descrIndex].fd;
+		auto revent = descrList[descrIndex].revents;
 		int index = -1;
 		Client * managed = NULL;
+		//ogolnie descrList  0 to jest serwer
+		int clientIndex = descrIndex - 1;
 		//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach
 		//moze byc nie potrzebne, ale wolalem to zrobic dla sanity
-		if (clientList[descrIndex].clientSocket == sock)
+		if (clientList[clientIndex].clientSocket == sock)
 		{
-			managed = &clientList[descrIndex];
-			index = descrIndex;
+			managed = &clientList[clientIndex];
+			index = clientIndex;
 		}
 		else
 		{
@@ -258,8 +261,10 @@ private:
 			Logger::log("Client not found. Socket index:", int(sock));
 			return;
 		}
+		auto message = "Client: " + std::to_string(index) + " player_id:" + std::to_string(managed->playerId) 
+			+ " socket: "+ std::to_string(sock) +" event";
+		Logger::log(message);
 
-		auto revent = descrList[descrIndex].revents;
 		if (revent & POLLIN)
 		{
 			readFromClient(index);
@@ -275,6 +280,9 @@ private:
 		Client* currentClient = &clientList[index];
 		int result = recv(currentClient->clientSocket, currentClient->bufferInput + currentClient->bufferInputCounter, Constants::msgLength - currentClient->bufferInputCounter, 0);
 		//jezeli je za krotka zapisac w bufferze klienta i czekac za reszt¹
+		Logger::log("Przyjeto " + std::to_string(result) + " Razem " + std::to_string(result + currentClient->bufferInputCounter)
+			+ " Pozostalo " + std::to_string(Constants::msgLength - (currentClient->bufferInputCounter + result)));
+		Logger::log("Tresc " + std::string(currentClient->bufferInput));
 		if (result == -1 || result == 0) {
 			Logger::log("Recv error on client: %d\n", index);
 		}
