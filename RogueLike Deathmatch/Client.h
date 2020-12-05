@@ -12,6 +12,7 @@ public:
 		this->clientSocket = clientSocket;
 		this->clientInfo = clientInfo;
 		this->timeoutTimer = 0;
+		this->msgNumberToSend = 0;
 	}
 	int playerId;
 	SOCKET clientSocket;
@@ -21,6 +22,7 @@ public:
 	char bufferOutput[Constants::bufferLength];
 	int bufferInputCounter;
 	int bufferOutputCounter;
+	int msgNumberToSend;
 private:
 
 };

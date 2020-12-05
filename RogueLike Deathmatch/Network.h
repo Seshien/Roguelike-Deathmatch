@@ -64,9 +64,9 @@ public:
 		this->output = _output;
 		for (auto ev : this->output.eventList) {
 			handleEvent(ev);
-			for (auto client : this->clientList) {
-				sendToClient(&client);
-			}
+		}
+		for (auto client : this->clientList) {
+			sendToClient(&client);
 		}
 		
 		//Zwroc parser albo liste eventow
@@ -89,7 +89,14 @@ private:
 	int playerID;
 	void handleEvent(Parser::Event ev) 
 	{
-		char *data = output.encodeBytes(ev);
+		//char *data = output.encodeBytes(ev);
+		int receiver = ev.receiver;
+		for (auto &client : clientList) {
+			if (client.playerId == receiver - 47) {
+				strcpy_s(client.bufferOutput + client.bufferOutputCounter, Constants::msgLength, output.encodeBytes(ev));
+				client.msgNumberToSend += 1;
+			}
+		}
 	}
 
 	int createServerSocket()
@@ -297,8 +304,11 @@ private:
 	}
 
 	void sendToClient(Client* client) {
-		int result = send(client->clientSocket, client->bufferOutput, Constants::bufferLength - client->bufferOutputCounter, 0);
-		if (SOCKET_ERROR) {
+		if (client->msgNumberToSend == 0) {
+			return;
+		}
+		int result = send(client->clientSocket, client->bufferOutput, Constants::msgLength - client->bufferOutputCounter, 0);
+		if (result == SOCKET_ERROR) {
 			Logger::log("Send error on player id: %d\n", client->playerId);
 		}
 		else {
@@ -307,6 +317,7 @@ private:
 			client->bufferOutputCounter += result;
 			if (client->bufferOutputCounter == Constants::msgLength) {
 				client->bufferOutputCounter = 0;
+				client->msgNumberToSend -= 1;
 			}
 		}
 	}

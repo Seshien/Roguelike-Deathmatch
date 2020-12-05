@@ -1,5 +1,8 @@
 #pragma once
 #include <vector>
+#include <cstring>
+#include <string.h>
+#include "Constants.h"
 
 class Parser
 {
@@ -10,7 +13,7 @@ public:
 		int receiver; // dla kogo jest ta wiadomosc, 0 to serwer, reszta to playerId poszczegolnych graczy
 		//gracz sie polaczyl, gracz sie rozlaczyl, gracz wykonal ruch, gracz wykonal akcje, zmiana stanu gracza, gracz zaglosowal, timeout, 
 		int type; // typ eventu, moze dac jako enumerator 
-		char subdata[];
+		char subdata[100];
 	};
 	Parser()
 	{
@@ -28,10 +31,17 @@ public:
 		eventList.push_back(ev);
 	}
 	
-	Event decodeBytes(char data[])
+	Event decodeBytes(char* data)
 	{
-		return Event();
+		Event ev;
+		ev.sender = data[0];
+		ev.receiver = data[1];
+		ev.type = data[2];
+		//strcpy_s(ev.subdata, 3, data + 3);// Constants::msgLength - 3, data + 3);
+		strncpy_s(ev.subdata, 100, data + 3, 47);
+		return ev;
 	}
+
 	char* encodeBytes(Event ev)
 	{
 		char data[5] = "TODO";

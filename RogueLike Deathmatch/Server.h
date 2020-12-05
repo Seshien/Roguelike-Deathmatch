@@ -52,13 +52,9 @@ class Server
 		{
 			while (true)
 			{
-				input = this->network.inputNetwork();
-				for (auto ev : input.eventList)
-					handleEvent(ev);
-				for (auto ev : output.eventList) {
-					std::cout << "x" << std::endl;
-				}
-
+				this->input = this->network.inputNetwork();
+				handleEvents(this->input);
+				this->network.outputNetwork(this->output);
 			}
 
 		}
@@ -70,9 +66,15 @@ class Server
 		{
 
 		}
-		void handleEvent(Parser::Event ev)
+		void handleEvents(Parser parser)
 		{
-			//zaleznie od typu eventu cos by trzeba bylo zrobic 
+			this->output = Parser();
+			for (auto& ev : parser.eventList) {
+				// Wykonaj logike
+				Parser::Event newEv = { 0, ev.sender, ev.type, *ev.subdata};
+				// Wpisz wynik w output parser
+				this->output.addEvent(newEv);
+			}
 		}
 
 		void loadConfig()
