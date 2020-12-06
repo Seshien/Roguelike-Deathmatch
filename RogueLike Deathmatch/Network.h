@@ -28,6 +28,8 @@ public:
 		this->port = port;
 		//serwer ma player id 0, a wiec pierwszy mozliwy playerId to 1
 		playerID = 1;
+		this->input = Parser();
+		this->output = Parser();
 
 		WSADATA wsaData;
 		int iResult;
@@ -62,12 +64,12 @@ public:
 	{
 		updateDescrList();
 		this->output = _output;
-		for (auto ev : this->output.eventList) {
+		for (auto & ev : this->output.eventList) {
 			handleEvent(ev);
 		}
-		for (auto client : this->clientList) {
-			sendToClient(&client);
-		}
+		for (auto & client : this->clientList)
+			if (client.msgNumberToSend > 0)
+				sendToClient(&client);
 		
 		//Zwroc parser albo liste eventow
 	}
@@ -92,8 +94,11 @@ private:
 		//char *data = output.encodeBytes(ev);
 		int receiver = ev.receiver;
 		for (auto &client : clientList) {
-			if (client.playerId == receiver - 47) {
-				strcpy_s(client.bufferOutput + client.bufferOutputCounter, Constants::msgLength, output.encodeBytes(ev));
+			if (client.playerId == receiver) 
+			{
+				char data[Constants::msgLength];
+				output.encodeBytes(ev, data);
+				strncpy_s(client.bufferOutput + client.bufferOutputCounter,Constants::bufferLength, data, Constants::msgLength - 1);
 				client.msgNumberToSend += 1;
 			}
 		}
@@ -298,20 +303,30 @@ private:
 		}
 		//Parser wiadomosc o dostaniu informacji 
 		if (currentClient->bufferInputCounter == Constants::msgLength) {
-			input.addEvent(input.decodeBytes(currentClient->bufferInput));
+			Parser::Event ev = input.decodeBytes(currentClient->bufferInput);
+			if (ev.receiver != 0)
+			{
+				Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev.receiver) + ":0");
+				ev.receiver = 0;
+			}
+			if (ev.sender != currentClient->playerId)
+			{
+				Logger::log("Wrong message sender on client. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(currentClient->playerId));
+				ev.sender = currentClient->playerId;
+			}
+			input.addEvent(ev);
 			currentClient->bufferInputCounter = 0;
 		}
 	}
 
 	void sendToClient(Client* client) {
-		if (client->msgNumberToSend == 0) {
-			return;
-		}
 		int result = send(client->clientSocket, client->bufferOutput, Constants::msgLength - client->bufferOutputCounter, 0);
 		if (result == SOCKET_ERROR) {
 			Logger::log("Send error on player id: %d\n", client->playerId);
 		}
 		else {
+			Logger::log("Wyslano " + std::to_string(result) + " Razem " + std::to_string(result + client->bufferInputCounter)
+				+ " Pozostalo " + std::to_string(Constants::msgLength - (client->bufferInputCounter + result)));
 			// Przesuwanie bufora wzgledem ilosci wyslanych juz znakow (tak, aby zawsze wysylac go wzgledem poczatku)
 			strcpy_s(client->bufferOutput, Constants::bufferLength - client->bufferOutputCounter, client->bufferOutput + client->bufferOutputCounter);
 			client->bufferOutputCounter += result;
