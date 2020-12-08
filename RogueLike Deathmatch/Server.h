@@ -72,7 +72,7 @@ class Server
 			for (auto& ev : parser.eventList) {
 				// Wykonaj logike
 				//sender, receiver, type, subdata
-				Parser::Event newEv = { 0, ev.sender, ev.type, ev.subdata};
+				Parser::Event newEv = { 0, ev.sender, ev.type, ev.subtype, ev.subdata};
 				// Wpisz wynik w output parser
 				this->output.addEvent(newEv);
 			}
