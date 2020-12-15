@@ -28,8 +28,8 @@ public:
 		this->port = port;
 		//serwer ma player id 0, a wiec pierwszy mozliwy playerId to 1
 		playerID = 1;
-		this->input = Parser();
-		this->output = Parser();
+		this->input = Parser::Messenger();
+		this->output = Parser::Messenger();
 
 		WSADATA wsaData;
 		int iResult;
@@ -44,11 +44,11 @@ public:
 		updateDescrList();
 
 	}
-	Parser inputNetwork()
+	Parser::Messenger inputNetwork()
 	{
 		//timeout to bedzie kiedy cos ostatnio dzialo sie z klientem
 		// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
-		this->input = Parser();
+		this->input = Parser::Messenger();
 		increaseTimeout();
 		int result = WSAPoll(this->descrList, this->clientAmount + 1, 0);
 		if (result == -1) {
@@ -60,7 +60,9 @@ public:
 		//Zwroc parser albo liste eventow
 		return input;
 	}
-	void outputNetwork(Parser _output)
+	//moze przechowywac eventy do zrobienia w outpucie zamiast bufforach klientow? chociaz nie wiem jak by to mialo dzialac
+	//wtedy bysmy zamiast zastepowac outputa, appendowaæ zawartoœæ nowego do starego
+	void outputNetwork(Parser::Messenger _output)
 	{
 		updateDescrList();
 		this->output = _output;
@@ -71,7 +73,6 @@ public:
 			if (client.msgNumberToSend > 0)
 				sendToClient(&client);
 		
-		//Zwroc parser albo liste eventow
 	}
 private:
 	//Client clientList[16];
@@ -83,8 +84,8 @@ private:
 	//decrease or increase, depending on connected clients
 	int clientAmount;
 
-	Parser input;
-	Parser output;
+	Parser::Messenger input;
+	Parser::Messenger output;
 	// player id, only increases so two players never have the same id
 	// przepraszam za ten polnglish
 	// teoretycznie mozemy sprawdzac id lub cus, i jezeli jest takie samo to nadawac to samo player id 
@@ -97,7 +98,7 @@ private:
 			if (client.playerId == receiver) 
 			{
 				char data[Constants::msgLength];
-				output.encodeBytes(ev, data);
+				Parser::encodeBytes(ev, data);
 				strncpy_s(client.bufferOutput + client.bufferOutputCounter,Constants::bufferLength, data, Constants::msgLength - 1);
 				client.msgNumberToSend += 1;
 			}
@@ -236,8 +237,8 @@ private:
 		//std::string message = std::string(inet_ntoa(address->sin_addr)) + ":" + std::to_string(ntohs(address->sin_port)) 
 		//	+ ":" + std::to_string(clientFd);
 		//Logger::log(message);
-
 		//Parser wiadomosc o przyjeciu nowego gracza
+		input.addEventNewPlayer(playerID, 0);
 		this->clientList.push_back(client);
 	}
 
@@ -301,9 +302,9 @@ private:
 		else {
 			currentClient->bufferInputCounter += result;
 		}
-		//Parser wiadomosc o dostaniu informacji 
 		if (currentClient->bufferInputCounter == Constants::msgLength) {
-			Parser::Event ev = input.decodeBytes(currentClient->bufferInput);
+			Parser::Event ev = Parser::decodeBytes(currentClient->bufferInput);
+			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
 			if (ev.receiver != 0)
 			{
 				Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev.receiver) + ":0");
@@ -314,6 +315,7 @@ private:
 				Logger::log("Wrong message sender on client. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(currentClient->playerId));
 				ev.sender = currentClient->playerId;
 			}
+			//Parser wiadomosc o dostaniu informacji 
 			input.addEvent(ev);
 			currentClient->bufferInputCounter = 0;
 		}
@@ -342,11 +344,17 @@ private:
 		int playerIndex = clientList[index].playerId;
 		clientList.erase(clientList.begin() + index);
 		//Parser wiadomosc o usunieciu playera
+		input.addEventDiscPlayer(playerIndex, 0);
 	}
 	void increaseTimeout()
 	{
-		for (auto & client : this->clientList)
-			client.timeoutTimer++;
+		for (int i = 0; i < this->clientList.size(); i++)
+		{
+			clientList[i].timeoutTimer++;
+			if (clientList[i].timeoutTimer > Constants::timeoutValue * 2) this->deleteClient(i);
+			else if (clientList[i].timeoutTimer > Constants::timeoutValue) this->input.addEventTimeoutReached(clientList[i].playerId, 0);
+		}
+
 	}
 };
 

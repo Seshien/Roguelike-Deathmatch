@@ -30,8 +30,8 @@ class Server
 		}
 
 	private:
-		Parser output;
-		Parser input;
+		Parser::Messenger output;
+		Parser::Messenger input;
 
 		void startLogger()
 		{
@@ -66,9 +66,9 @@ class Server
 		{
 
 		}
-		void handleEvents(Parser parser)
+		void handleEvents(Parser::Messenger parser)
 		{
-			this->output = Parser();
+			this->output = Parser::Messenger();
 			for (auto& ev : parser.eventList) {
 				// Wykonaj logike
 				//sender, receiver, type, subdata
