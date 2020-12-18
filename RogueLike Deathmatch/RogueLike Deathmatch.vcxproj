@@ -153,26 +153,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Client.cpp" />
-    <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="Map.cpp" />
-    <ClCompile Include="Network.cpp" />
-    <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="RogueLike Deathmatch.cpp" />
-    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="src\Client.cpp" />
+    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\Map.cpp" />
+    <ClCompile Include="src\Network.cpp" />
+    <ClCompile Include="src\Parser.cpp" />
+    <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\RogueLike Deathmatch.cpp" />
+    <ClCompile Include="src\Server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Constants.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="Client.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="Map.h" />
-    <ClInclude Include="Network.h" />
-    <ClInclude Include="Parser.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Server.h" />
+    <ClInclude Include="src\Client.h" />
+    <ClInclude Include="src\Constants.h" />
+    <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\Map.h" />
+    <ClInclude Include="src\Network.h" />
+    <ClInclude Include="src\Parser.h" />
+    <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\Server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
