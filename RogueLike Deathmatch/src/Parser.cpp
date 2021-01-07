@@ -47,25 +47,26 @@ SubType Parser::convertToSubType(int type)
 	return SubType::ERRSUB;
 }
 
-Event Parser::decodeBytes(char * data)
+Event Parser::decodeBytes(std::string data)
 {
 	//sender, receiver, type, subtype, data
-	Event ev(data[0] - 48, data[1] - 48, data[2] - 48, data[3] - 48, data + 4);
+	Event ev(data[0] - '0', data[1] - '0', data[2], data[3], std::string(data,4));
 	return ev;
 }
 
-char * Parser::encodeBytes(Event ev, char(&data)[50])
+std::string Parser::encodeBytes(Event ev)
 {
 	//char data[50];
-	data[0] = ev.sender + 48;
-	data[1] = ev.receiver + 48;
-	data[2] = ev.type + 48;
-	data[3] = ev.subtype + 48;
-	strncpy_s(data + 4, 46, ev.subdata, 45);
+	std::string data = std::string(ev.size);
+	data.push_back(ev.sender + '0');
+	data.push_back(ev.receiver + '0');
+	data.push_back(ev.type);
+	data.push_back(ev.subtype);
+	data.append(ev.subdata);
 	return data;
 }
 
-void Messenger::addEvent(int sender, int receiver, int type, int subtype, char data[])
+void Messenger::addEvent(int sender, int receiver, int type, int subtype, std::string data)
 {
 	Event ev = Event(sender, receiver, type, subtype, data);
 	eventList.push_back(ev);
@@ -76,16 +77,16 @@ void Messenger::addEvent(Event ev) {
 }
 
 void Messenger::addEventNewPlayer(int sender, int receiver) {
-	Event ev = Event(sender, receiver, Type::SERVER, SubType::NEWPLAYER, NULL);
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::NEWPLAYER, std::string());
 	eventList.push_back(ev);
 }
 
 void Messenger::addEventDiscPlayer(int sender, int receiver) {
-	Event ev = Event(sender, receiver, Type::SERVER, SubType::DISCPLAYER, NULL);
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::DISCPLAYER, std::string());
 	eventList.push_back(ev);
 }
 
 void Messenger::addEventTimeoutReached(int sender, int receiver) {
-	Event ev = Event(sender, receiver, Type::SERVER, SubType::TIMEOUT, NULL);
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::TIMEOUT, std::string());
 	eventList.push_back(ev);
 }

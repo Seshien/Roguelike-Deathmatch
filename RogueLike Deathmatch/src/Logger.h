@@ -2,11 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <filesystem>
 #include <winsock2.h>
 
 namespace Logger
 {
-
 	void startLogger();
 
 	void endLogger();

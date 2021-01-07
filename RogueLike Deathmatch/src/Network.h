@@ -14,10 +14,7 @@
 class Network
 {
 public:
-	Network()
-	{
-
-	}
+	Network();
 	~Network()
 	{
 		WSACleanup();
@@ -32,10 +29,11 @@ private:
 	std::vector <Client> clientList;
 	SOCKET listenSocket;
 	std::string port;
-	pollfd descrList[17];
+	std::vector<pollfd> descrList;
+	//pollfd descrList[17];
 
-	//decrease or increase, depending on connected clients
-	int clientAmount;
+	//decrease or increase, depending on connected clients, obsoleted
+	//int clientAmount;
 
 	Parser::Messenger input;
 	Parser::Messenger output;
@@ -54,7 +52,9 @@ private:
 
 
 	void manageClientEvent(int descrIndex);
+
 	void readFromClient(int index);
+	void readFromClient(Client* client);
 
 	void sendToClient(Client* client);
 

@@ -1,14 +1,8 @@
 #include "Network.h"
 
-int Network::startNetwork(std::string port)
-{
-	this->clientAmount = 0;
-	this->port = port;
-	//serwer ma player id 0, a wiec pierwszy mozliwy playerId to 1
-	playerID = 1;
-	this->input = Parser::Messenger();
-	this->output = Parser::Messenger();
 
+Network::Network()
+{
 	WSADATA wsaData;
 	int iResult;
 
@@ -16,10 +10,20 @@ int Network::startNetwork(std::string port)
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0) {
 		Logger::log("WSAStartup failed", iResult);
-		return 1;
 	}
+}
+
+int Network::startNetwork(std::string port)
+{
+	this->port = port;
+	//serwer ma player id 0, a wiec pierwszy mozliwy playerId to 1
+	this->playerID = 1;
+	this->input = Parser::Messenger();
+	this->output = Parser::Messenger();
+
+
 	createServerSocket();
-	updateDescrList();
+	//updateDescrList();
 	return 0;
 }
 
@@ -28,8 +32,8 @@ Parser::Messenger Network::inputNetwork()
 	//timeout to bedzie kiedy cos ostatnio dzialo sie z klientem
 	// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
 	this->input = Parser::Messenger();
-	increaseTimeout();
-	int result = WSAPoll(this->descrList, this->clientAmount + 1, 0);
+	this->increaseTimeout();
+	int result = WSAPoll(&this->descrList[0], this->descrList.size(), 0);
 	if (result == -1) {
 		Logger::log("Poll failed\n");
 		Logger::logNetworkError();
@@ -45,13 +49,13 @@ Parser::Messenger Network::inputNetwork()
 
 void Network::outputNetwork(Parser::Messenger _output)
 {
-	updateDescrList();
+	//updateDescrList();
 	this->output = _output;
 	for (auto & ev : this->output.eventList) {
 		handleEvent(ev);
 	}
 	for (auto & client : this->clientList)
-		if (client.msgNumberToSend > 0)
+		if (client.bufferOutput.size() > 0)
 			sendToClient(&client);
 
 }
@@ -63,10 +67,8 @@ void Network::handleEvent(Parser::Event ev)
 	for (auto &client : clientList) {
 		if (client.playerId == receiver)
 		{
-			char data[Constants::msgLength];
-			Parser::encodeBytes(ev, data);
-			strncpy_s(client.bufferOutput + client.bufferOutputCounter, Constants::bufferLength, data, Constants::msgLength - 1);
-			client.msgNumberToSend += 1;
+			std::string data = Parser::encodeBytes(ev);
+			client.bufferOutput.append(data);
 		}
 	}
 }
@@ -122,10 +124,17 @@ int Network::createServerSocket()
 		WSACleanup();
 		return 1;
 	}
+	pollfd fd = pollfd();
+	fd.fd = listenSocket;
+	fd.events = POLLIN;
+	descrList.push_back(fd);
+
 	//Everything worked
+
+
 	return 0;
 }
-
+//Raczej to nie bedzie potrzebne po updacie
 void Network::updateDescrList()
 {
 	this->descrList[0].fd = listenSocket;
@@ -148,7 +157,7 @@ void Network::manageEvents(int events)
 		events--;
 	}
 	//klient cos robi
-	for (int i = 1; i <= this->clientAmount && events > 0; i++) {
+	for (int i = 1; i < this->descrList.size() && events > 0; i++) {
 		if (this->descrList[i].revents) {
 			manageClientEvent(i);
 			events--;
@@ -170,7 +179,6 @@ void Network::manageServerEvent()
 void Network::acceptClient()
 {
 	sockaddr_in infoStorage;
-	addrinfo result;
 	socklen_t addressSize = sizeof(infoStorage);
 	auto client = Client();
 
@@ -182,8 +190,6 @@ void Network::acceptClient()
 		Logger::logNetworkError();
 		return;
 	}
-	result.ai_addr = (sockaddr*)&infoStorage;
-	result.ai_addrlen = addressSize;
 
 	unsigned long mode = 1;
 
@@ -193,14 +199,14 @@ void Network::acceptClient()
 		Logger::logNetworkError();
 		return;
 	}
-	this->clientAmount++;
-	descrList[this->clientAmount].fd = clientFd;
-	descrList[this->clientAmount].events = POLLIN;
+	pollfd fd = pollfd();
+	fd.fd = clientFd;
+	fd.events = POLLIN;
+	descrList.push_back(fd);
 
 
-	client.initClient(playerID++, clientFd, result);
+	client.initClient(playerID++, clientFd, infoStorage);
 
-	auto address = (sockaddr_in*)result.ai_addr;
 
 	Logger::log("New connection accepted");
 	//std::string message = std::string(inet_ntoa(address->sin_addr)) + ":" + std::to_string(ntohs(address->sin_port)) 
@@ -216,7 +222,7 @@ void Network::manageClientEvent(int descrIndex)
 	auto sock = this->descrList[descrIndex].fd;
 	auto revent = descrList[descrIndex].revents;
 	int index = -1;
-	Client * managed = NULL;
+	Client * managed = nullptr;
 	//ogolnie descrList  0 to jest serwer
 	int clientIndex = descrIndex - 1;
 	//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach
@@ -237,7 +243,7 @@ void Network::manageClientEvent(int descrIndex)
 			}
 	}
 
-	if (managed == NULL)
+	if (managed == nullptr)
 	{
 		Logger::log("Client not found. Socket index:", int(sock));
 		return;
@@ -260,51 +266,88 @@ void Network::manageClientEvent(int descrIndex)
 void Network::readFromClient(int index)
 {
 	Client* currentClient = &clientList[index];
-	int result = recv(currentClient->clientSocket, currentClient->bufferInput + currentClient->bufferInputCounter, Constants::msgLength - currentClient->bufferInputCounter, 0);
-	//jezeli je za krotka zapisac w bufferze klienta i czekac za reszt¹
-	Logger::log("Przyjeto " + std::to_string(result) + " Razem " + std::to_string(result + currentClient->bufferInputCounter)
-		+ " Pozostalo " + std::to_string(Constants::msgLength - (currentClient->bufferInputCounter + result)));
-	Logger::log("Tresc " + std::string(currentClient->bufferInput));
-	if (result == -1 || result == 0) {
-		Logger::log("Recv error on client: %d\n", index);
-	}
-	else {
-		currentClient->bufferInputCounter += result;
-	}
-	if (currentClient->bufferInputCounter == Constants::msgLength) {
-		Parser::Event ev = Parser::decodeBytes(currentClient->bufferInput);
-		//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
-		if (ev.receiver != 0)
+	readFromClient(currentClient);
+}
+
+void Network::readFromClient(Client* currentClient)
+{
+	//nie znamy jeszcze dlugosci wiadomosci
+	if (currentClient->msgExpectedLenght = -1)
+	{
+		int result = recv(currentClient->clientSocket, &currentClient->bufferInput[0] + currentClient->bufferInputCounter, Constants::msgLengthLimit - currentClient->bufferInputCounter, 0);
+
+		Logger::log("Przyjeto " + std::to_string(result) + " Razem " + std::to_string(result + currentClient->bufferInputCounter)
+			+ " Pozostalo " + std::to_string(Constants::msgLengthLimit - (currentClient->bufferInputCounter + result)));
+		Logger::log("Tresc " + std::string(currentClient->bufferInput));
+		if (result == -1 || result == 0) 
 		{
-			Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev.receiver) + ":0");
-			ev.receiver = 0;
+			Logger::log("Recv error on client: %d\n", currentClient->playerId);
 		}
-		if (ev.sender != currentClient->playerId)
+		else 
 		{
-			Logger::log("Wrong message sender on client. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(currentClient->playerId));
-			ev.sender = currentClient->playerId;
+			currentClient->bufferInputCounter += result;
 		}
-		//Parser wiadomosc o dostaniu informacji 
-		input.addEvent(ev);
-		currentClient->bufferInputCounter = 0;
+		int pos = currentClient->bufferInput.find('|');
+		if (pos != -1)
+		{
+			//bierzemy bez znaku |
+			currentClient->msgExpectedLenght = std::stoi(currentClient->bufferInput.substr(0, pos));
+			//usuwamy takze znak |
+			currentClient->bufferInput.erase(0, pos + 1);
+			currentClient->bufferInputCounter -= pos + 1;
+		}
 	}
+	//znamy dlugosc wiadomosci
+	else
+	{
+		int result = recv(currentClient->clientSocket, &currentClient->bufferInput[0] + currentClient->bufferInputCounter, currentClient->msgExpectedLenght - currentClient->bufferInputCounter, 0);
+		//jezeli je za krotka zapisac w bufferze klienta i czekac za reszt¹
+		Logger::log("Przyjeto " + std::to_string(result) + " Razem " + std::to_string(result + currentClient->bufferInputCounter)
+			+ " Pozostalo " + std::to_string(Constants::msgLengthLimit - (currentClient->bufferInputCounter + result)));
+		Logger::log("Tresc " + std::string(currentClient->bufferInput));
+		if (result == -1 || result == 0) {
+			Logger::log("Recv error on client: %d\n", currentClient->playerId);
+		}
+		else {
+			currentClient->bufferInputCounter += result;
+		}
+		if (currentClient->bufferInputCounter == currentClient->msgExpectedLenght) {
+			Parser::Event ev = Parser::decodeBytes(currentClient->bufferInput);
+			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
+			if (ev.receiver != 0)
+			{
+				Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev.receiver) + ":0");
+				ev.receiver = 0;
+			}
+			if (ev.sender != currentClient->playerId)
+			{
+				Logger::log("Wrong message sender on client. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(currentClient->playerId));
+				ev.sender = currentClient->playerId;
+			}
+			//Parser wiadomosc o dostaniu informacji 
+			input.addEvent(ev);
+			currentClient->bufferInput.erase(0, currentClient->msgExpectedLenght);
+			currentClient->bufferInputCounter = 0;
+			currentClient->msgExpectedLenght = -1;
+		}
+	}
+
 }
 
 void Network::sendToClient(Client * client) {
-	int result = send(client->clientSocket, client->bufferOutput, Constants::msgLength - client->bufferOutputCounter, 0);
-	if (result == SOCKET_ERROR) {
+	int result = send(client->clientSocket, &client->bufferOutput[0], client->bufferOutput.size(), 0);
+	if (result == SOCKET_ERROR) 
+	{
 		Logger::log("Send error on player id: %d\n", client->playerId);
 	}
-	else {
+	else 
+	{
 		Logger::log("Wyslano " + std::to_string(result) + " Razem " + std::to_string(result + client->bufferInputCounter)
-			+ " Pozostalo " + std::to_string(Constants::msgLength - (client->bufferInputCounter + result)));
+			+ " Pozostalo " + std::to_string(Constants::msgLengthLimit - (client->bufferInputCounter + result)));
 		// Przesuwanie bufora wzgledem ilosci wyslanych juz znakow (tak, aby zawsze wysylac go wzgledem poczatku)
-		strcpy_s(client->bufferOutput, Constants::bufferLength - client->bufferOutputCounter, client->bufferOutput + client->bufferOutputCounter);
-		client->bufferOutputCounter += result;
-		if (client->bufferOutputCounter == Constants::msgLength) {
-			client->bufferOutputCounter = 0;
-			client->msgNumberToSend -= 1;
-		}
+		client->bufferOutput.erase(0, result);
+		//to ze wiadomosc dotarla uznajemy przynajmniej na razie ze jest dobrze
+		client->timeoutTimer = 0;
 	}
 }
 
@@ -312,6 +355,7 @@ void Network::deleteClient(int index)
 {
 	int playerIndex = clientList[index].playerId;
 	clientList.erase(clientList.begin() + index);
+	descrList.erase(descrList.begin() + index);
 	//Parser wiadomosc o usunieciu playera
 	input.addEventDiscPlayer(playerIndex, 0);
 }

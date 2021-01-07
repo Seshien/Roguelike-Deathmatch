@@ -10,19 +10,16 @@ namespace Logger
 	void startLogger()
 	{
 		int number = 0;
-		std::ifstream check;
 		while (true)
 		{
-			check.open("data/logger" + std::to_string(number) + ".txt");
-			if (check.good())
+			std::string filename = "data/logger" + std::to_string(number) + ".txt";
+			if (std::filesystem::exists(filename))
 			{
 				number++;
-				check.close();
 			}
 			else
 			{
-				check.close();
-				file.open("data/logger" + std::to_string(number) + ".txt");
+				file.open(filename);
 				break;
 			}
 		}
@@ -41,7 +38,7 @@ namespace Logger
 			return;
 		}
 		std::cout << text << std::endl;
-		file << text;
+		file << text << std::flush;
 	}
 	void log(std::string text, int error_code)
 	{
@@ -50,7 +47,7 @@ namespace Logger
 			std::cout << "Logger is not initialized" << std::endl;
 			return;
 		}
-		file << text;
+		file << text << std::flush;
 	}
 
 	void logNetworkError() {
@@ -63,7 +60,7 @@ namespace Logger
 		std::cout << "Error: " << err << std::endl;
 		fprintf(stderr, "%S\n", s);
 		file << "Error: "<< err << std::endl;
-		file << s << std::endl;
+		file << s << std::endl << std::flush;
 		LocalFree(s);
 	}
 };

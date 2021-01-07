@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <cstring>
-#include <string.h>
+#include <string>
 #include "Constants.h"
 namespace Parser
 {
@@ -13,34 +13,38 @@ namespace Parser
 
 	struct Event
 	{
+		std::string size;
 		int sender; // od kogo jest ta wiadomosc
 		int receiver; // dla kogo jest ta wiadomosc, 0 to serwer, reszta to playerId poszczegolnych graczy
 		//serwer, lobby, gra
 		Type type;
 		//gracz sie polaczyl, gracz sie rozlaczyl, gracz wykonal ruch, gracz wykonal akcje, zmiana stanu gracza, gracz zaglosowal, timeout, 
 		SubType subtype; // typ eventu, moze dac jako enumerator 
-		char subdata[50];
-		Event(int _sender, int _receiver, Type _type, SubType _subtype, char _subdata[])
+		std::string subdata;
+
+		Event(int _sender, int _receiver, Type _type, SubType _subtype, std::string _subdata)
 		{
+			size = std::to_string((4 * sizeof(char)+ sizeof(_subdata))/8) + "|";
 			sender = _sender;
 			receiver = _receiver;
 			type = _type;
 			subtype = _subtype;
-			strncpy_s(subdata, 46, _subdata, 45);
+			subdata = std::string(_subdata);
 		}
-		Event(int _sender, int _receiver, int _type, int _subtype, char _subdata[])
+		Event(int _sender, int _receiver, int _type, int _subtype, std::string _subdata)
 		{
+			size = std::to_string((4 * sizeof(char) + sizeof(_subdata)) / 8) + "|";
 			sender = _sender;
 			receiver = _receiver;
 			type = convertToType(_type);
 			subtype = convertToSubType(_subtype);
-			strncpy_s(subdata, 46, _subdata, 45);
+			subdata = std::string(_subdata);
 		}
 	};
 
-	Event decodeBytes(char* data);
+	Event decodeBytes(std::string data);
 
-	char* encodeBytes(Event ev, char(&data)[50]);
+	std::string encodeBytes(Event ev);
 
 	class Messenger
 	{
@@ -51,7 +55,7 @@ namespace Parser
 
 		}
 
-		void addEvent(int sender, int receiver, int type, int subtype, char data[]);
+		void addEvent(int sender, int receiver, int type, int subtype, std::string);
 
 		void addEvent(Event ev);
 

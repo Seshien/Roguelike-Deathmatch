@@ -75,4 +75,5 @@ void Server::setConfigValue(std::string token, std::string value)
 	if (token == "time") this->time = std::stoi(value);
 	else if (token == "special") return;
 	else if (token == "port") this->port = value;
+	else Logger::log("Unknown line in config file");
 }
