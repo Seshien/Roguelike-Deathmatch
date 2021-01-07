@@ -33,7 +33,19 @@ Parser::Messenger Network::inputNetwork()
 	// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
 	this->input = Parser::Messenger();
 	this->increaseTimeout();
-	int result = WSAPoll(&this->descrList[0], this->descrList.size(), 100);
+	//czas w sekundach, ile ma trwac jeden cykl
+	double time = 0.1;
+	int result = -1;
+	//koniec cyklu
+	std::chrono::duration<double> diff = std::chrono::system_clock::now() - timer;
+	//czas w sekundach, ile trwal jeden cykl
+	auto t = diff.count();
+	if (t > time) 
+		result = WSAPoll(&this->descrList[0], this->descrList.size(), 0);
+	else
+		result = WSAPoll(&this->descrList[0], this->descrList.size(),(time - t) * 1000);
+	//poczatek cyklu
+	timer = std::chrono::system_clock::now();
 	if (result == -1) {
 		Logger::log("Poll failed\n");
 		Logger::logNetworkError();
@@ -368,11 +380,13 @@ void Network::sendToClient(Client * client) {
 
 void Network::deleteClient(int index)
 {
+
 	int playerIndex = clientList[index].playerId;
 	closesocket(clientList[index].clientSocket);
 	clientList.erase(clientList.begin() + index);
-	descrList.erase(descrList.begin() + index);
+	descrList.erase(descrList.begin() + index + 1);
 	//Parser wiadomosc o usunieciu playera
+	Logger::log("Klient " + std::to_string(playerIndex) + " zostal usuniety");
 	input.addEventDiscPlayer(playerIndex, 0);
 }
 

@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
-#include <cstring>
+#include <string>
+#include <chrono>
 
 #include "Logger.h"
 #include "Client.h"
@@ -41,6 +42,10 @@ private:
 	// przepraszam za ten polnglish
 	// teoretycznie mozemy sprawdzac id lub cus, i jezeli jest takie samo to nadawac to samo player id 
 	int playerID;
+
+
+	std::chrono::system_clock::time_point timer = std::chrono::system_clock::now();
+
 	void handleEvent(Parser::Event ev);
 
 	int createServerSocket();
