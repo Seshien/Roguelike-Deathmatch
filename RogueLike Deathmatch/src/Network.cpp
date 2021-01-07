@@ -33,7 +33,7 @@ Parser::Messenger Network::inputNetwork()
 	// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
 	this->input = Parser::Messenger();
 	this->increaseTimeout();
-	int result = WSAPoll(&this->descrList[0], this->descrList.size(), 0);
+	int result = WSAPoll(&this->descrList[0], this->descrList.size(), 100);
 	if (result == -1) {
 		Logger::log("Poll failed\n");
 		Logger::logNetworkError();
@@ -271,48 +271,56 @@ void Network::readFromClient(int index)
 
 void Network::readFromClient(Client* currentClient)
 {
+	char bufferTemp[Constants::bufferLength];
 	//nie znamy jeszcze dlugosci wiadomosci
-	if (currentClient->msgExpectedLenght = -1)
-	{
-		int result = recv(currentClient->clientSocket, &currentClient->bufferInput[0] + currentClient->bufferInputCounter, Constants::msgLengthLimit - currentClient->bufferInputCounter, 0);
+	int limit = max(Constants::msgLengthLimit, currentClient->msgExpectedLenght);
 
-		Logger::log("Przyjeto " + std::to_string(result) + " Razem " + std::to_string(result + currentClient->bufferInputCounter)
-			+ " Pozostalo " + std::to_string(Constants::msgLengthLimit - (currentClient->bufferInputCounter + result)));
-		Logger::log("Tresc " + std::string(currentClient->bufferInput));
-		if (result == -1 || result == 0) 
-		{
-			Logger::log("Recv error on client: %d\n", currentClient->playerId);
-		}
-		else 
-		{
-			currentClient->bufferInputCounter += result;
-		}
-		int pos = currentClient->bufferInput.find('|');
-		if (pos != -1)
-		{
-			//bierzemy bez znaku |
-			currentClient->msgExpectedLenght = std::stoi(currentClient->bufferInput.substr(0, pos));
-			//usuwamy takze znak |
-			currentClient->bufferInput.erase(0, pos + 1);
-			currentClient->bufferInputCounter -= pos + 1;
-		}
+	//odbieranie wiadomosci
+	int result = recv(currentClient->clientSocket, &bufferTemp[0], limit - currentClient->bufferInput.size(), 0);
+
+
+	if (result == -1 || result == 0)
+	{
+		Logger::log("Recv error on client: %d\n", currentClient->playerId);
 	}
-	//znamy dlugosc wiadomosci
 	else
 	{
-		int result = recv(currentClient->clientSocket, &currentClient->bufferInput[0] + currentClient->bufferInputCounter, currentClient->msgExpectedLenght - currentClient->bufferInputCounter, 0);
-		//jezeli je za krotka zapisac w bufferze klienta i czekac za reszt¹
-		Logger::log("Przyjeto " + std::to_string(result) + " Razem " + std::to_string(result + currentClient->bufferInputCounter)
-			+ " Pozostalo " + std::to_string(Constants::msgLengthLimit - (currentClient->bufferInputCounter + result)));
-		Logger::log("Tresc " + std::string(currentClient->bufferInput));
-		if (result == -1 || result == 0) {
-			Logger::log("Recv error on client: %d\n", currentClient->playerId);
+		currentClient->bufferInput.append(std::string(&bufferTemp[0], result));
+		currentClient->bufferInputCounter += result;
+	}
+
+
+	Logger::log("Tresc " + std::string(currentClient->bufferInput));
+
+	//przetwarzanie wiadomosci
+	while (true)
+	{
+		if (currentClient->msgExpectedLenght = -1)
+		{
+			Logger::log("Brak rozmiaru wiadomosci\n");
+
+			int pos = currentClient->bufferInput.find('|');
+
+			if (pos != -1)
+			{
+				//bierzemy bez znaku |
+				currentClient->msgExpectedLenght = std::stoi(currentClient->bufferInput.substr(0, pos));
+
+				Logger::log("Rozmiar wiadomosci uzyskany: " + currentClient->bufferInput.substr(0, pos));
+
+				//usuwamy takze znak |
+				currentClient->bufferInput.erase(0, pos + 1);
+
+			}
+			//nie mamy rozmiaru wiadomosci nawet, nic wiecej tu nie zrobimy
+			else
+				return;
 		}
-		else {
-			currentClient->bufferInputCounter += result;
-		}
-		if (currentClient->bufferInputCounter == currentClient->msgExpectedLenght) {
-			Parser::Event ev = Parser::decodeBytes(currentClient->bufferInput);
+		if (currentClient->bufferInput.size() >= currentClient->msgExpectedLenght)
+		{
+			Logger::log("Buffer wiekszy lub rowny spodziewanej wiadomosci");
+			Parser::Event ev = Parser::decodeBytes(std::string(currentClient->bufferInput, 0, currentClient->msgExpectedLenght));
+			Logger::log("Wiadomosc stworzona");
 			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
 			if (ev.receiver != 0)
 			{
@@ -326,11 +334,18 @@ void Network::readFromClient(Client* currentClient)
 			}
 			//Parser wiadomosc o dostaniu informacji 
 			input.addEvent(ev);
+			Logger::log("Wiadomosc dodana");
+
 			currentClient->bufferInput.erase(0, currentClient->msgExpectedLenght);
-			currentClient->bufferInputCounter = 0;
 			currentClient->msgExpectedLenght = -1;
+
+			Logger::log("Buffer wyczyszczony");
 		}
+		//nie mamy wystarczajaco duzo wiadomosci by cos z tym zrobic, nic wiecej nie zrobimy
+		else
+			return;
 	}
+
 
 }
 
@@ -342,8 +357,8 @@ void Network::sendToClient(Client * client) {
 	}
 	else 
 	{
-		Logger::log("Wyslano " + std::to_string(result) + " Razem " + std::to_string(result + client->bufferInputCounter)
-			+ " Pozostalo " + std::to_string(Constants::msgLengthLimit - (client->bufferInputCounter + result)));
+		//Logger::log("Wyslano " + std::to_string(result) + " Razem " + std::to_string(result + client->bufferInputCounter)
+		//	+ " Pozostalo " + std::to_string(Constants::msgLengthLimit - (client->bufferInputCounter + result)));
 		// Przesuwanie bufora wzgledem ilosci wyslanych juz znakow (tak, aby zawsze wysylac go wzgledem poczatku)
 		client->bufferOutput.erase(0, result);
 		//to ze wiadomosc dotarla uznajemy przynajmniej na razie ze jest dobrze
@@ -354,6 +369,7 @@ void Network::sendToClient(Client * client) {
 void Network::deleteClient(int index)
 {
 	int playerIndex = clientList[index].playerId;
+	closesocket(clientList[index].clientSocket);
 	clientList.erase(clientList.begin() + index);
 	descrList.erase(descrList.begin() + index);
 	//Parser wiadomosc o usunieciu playera
@@ -365,8 +381,10 @@ void Network::increaseTimeout()
 	for (int i = 0; i < this->clientList.size(); i++)
 	{
 		clientList[i].timeoutTimer++;
-		if (clientList[i].timeoutTimer > Constants::timeoutValue * 2) this->deleteClient(i);
-		else if (clientList[i].timeoutTimer > Constants::timeoutValue) this->input.addEventTimeoutReached(clientList[i].playerId, 0);
+		if (clientList[i].timeoutTimer > Constants::timeoutValue * 2) 
+			this->deleteClient(i);
+		else if (clientList[i].timeoutTimer > Constants::timeoutValue) 
+			this->input.addEventTimeoutReached(clientList[i].playerId, 0);
 	}
 
 }
