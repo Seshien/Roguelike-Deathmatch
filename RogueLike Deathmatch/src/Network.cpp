@@ -201,7 +201,7 @@ int Network::createClientSocket()
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE;
 
-	// Resolve the server address and port
+
 	iResult = getaddrinfo(this->ipAddress.c_str(), this->port.c_str(), &hints, &result);
 	if (iResult != 0) {
 		Logger::log("getaddrinfo failed with error: %d\n", iResult);
@@ -217,21 +217,6 @@ int Network::createClientSocket()
 		return 1;
 	}
 
-	//----------------------
-	// The sockaddr_in structure specifies the address family,
-	// IP address, and port of the server to be connected to.
-	sockaddr_in clientService;
-	int size = sizeof(clientService);
-	clientService.sin_family = AF_INET;
-	//clientService.sin_addr.s_addr = inet_addr(this->ipAddress.c_str());
-	//Iresult = WSAStringToAddress((LPWSTR)this->ipAddress.c_str(), AF_INET, NULL, (SOCKADDR *)&clientService, &size);
-	//result = InetPton(AF_INET, tem, &clientService.sin_addr.s_addr);
-	//if (Iresult != 1) Logger::logNetworkError();
-	int temp = std::stoi(this->port);
-	clientService.sin_port = htons(temp);
-
-	//----------------------
-	// Connect to server.
 	Logger::log("Connecting to server.");
 
 	Iresult = connect(mainSocket, result->ai_addr, (int)result->ai_addrlen);
@@ -255,8 +240,11 @@ int Network::createClientSocket()
 	fd.events = POLLIN;
 	descrList.push_back(fd);
 
+	//czy to w ogole zadziala?
+	sockaddr_in clientData = *((sockaddr_in *)result->ai_addr);
 
-	client.initClient(playerID++, mainSocket, clientService);
+
+	client.initClient(playerID++, mainSocket, clientData);
 
 	input.addEventNewPlayer(playerID, 0);
 	this->clientList.push_back(client);
@@ -264,6 +252,7 @@ int Network::createClientSocket()
 	Logger::log("Client created.");
 
 }
+
 void Network::manageEvents(int events)
 {
 	//ktos dolacza
