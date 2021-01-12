@@ -21,7 +21,7 @@ class Server
 			startLogger();
 			loadConfig();
 			startMap();
-			network.startNetwork(this->port);
+			network.startServer(this->port);
 			startLobby();
 			loopLobby();
 			//startGame();

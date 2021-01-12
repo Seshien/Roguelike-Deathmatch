@@ -5,7 +5,8 @@ Network::Network()
 {
 	WSADATA wsaData;
 	int iResult;
-
+	this->isServer = false;
+	this->isClient = false;
 	// Initialize Winsock
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0) {
@@ -13,11 +14,14 @@ Network::Network()
 	}
 }
 
-int Network::startNetwork(std::string port)
+int Network::startServer(std::string port)
 {
+	this->ipAddress = "127.0.0.1";
 	this->port = port;
 	//serwer ma player id 0, a wiec pierwszy mozliwy playerId to 1
+	this->networkID = 0;
 	this->playerID = 1;
+	this->isServer = true;
 	this->input = Parser::Messenger();
 	this->output = Parser::Messenger();
 
@@ -27,21 +31,36 @@ int Network::startNetwork(std::string port)
 	return 0;
 }
 
+int Network::startClient(std::string ipAdress, std::string port)
+{
+	this->isClient = true;
+
+	this->ipAddress = ipAddress;
+	this->port = port;
+	this->input = Parser::Messenger();
+	this->output = Parser::Messenger();
+
+	createClientSocket();
+	return 0;
+}
+
 Parser::Messenger Network::inputNetwork()
 {
 	//timeout to bedzie kiedy cos ostatnio dzialo sie z klientem
 	// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
 	this->input = Parser::Messenger();
+	int result = -1;
 	this->increaseTimeout();
 	//czas w sekundach, ile ma trwac jeden cykl
 	double time = 0.1;
-	int result = -1;
 	//koniec cyklu
 	std::chrono::duration<double> diff = std::chrono::system_clock::now() - timer;
 	//czas w sekundach, ile trwal jeden cykl
 	auto t = diff.count();
+	//jezeli czas trwania cyklu jest dluzszy od ustalonego, WSAPoll jest natychmiastowy
 	if (t > time) 
 		result = WSAPoll(&this->descrList[0], this->descrList.size(), 0);
+	//inaczej trwa tyle ile 
 	else
 		result = WSAPoll(&this->descrList[0], this->descrList.size(),(time - t) * 1000);
 	//poczatek cyklu
@@ -81,13 +100,14 @@ void Network::handleEvent(Parser::Event ev)
 		{
 			std::string data = Parser::encodeBytes(ev);
 			client.bufferOutput.append(data);
+			return;
 		}
 	}
 }
 
 int Network::createServerSocket()
 {
-	this->listenSocket = INVALID_SOCKET;
+	this->mainSocket = INVALID_SOCKET;
 
 	struct addrinfo *result = NULL;
 	struct addrinfo hints;
@@ -100,7 +120,7 @@ int Network::createServerSocket()
 	hints.ai_flags = AI_PASSIVE;
 
 	// Resolve the server address and port
-	iResult = getaddrinfo(NULL, port.c_str(), &hints, &result);
+	iResult = getaddrinfo(NULL, this->port.c_str(), &hints, &result);
 	if (iResult != 0) {
 		Logger::log("getaddrinfo failed with error: %d\n", iResult);
 		WSACleanup();
@@ -108,8 +128,8 @@ int Network::createServerSocket()
 	}
 
 	// Create a SOCKET for connecting to server
-	listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (listenSocket == INVALID_SOCKET) {
+	mainSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (mainSocket == INVALID_SOCKET) {
 		Logger::log("Socket failed", WSAGetLastError());
 		freeaddrinfo(result);
 		WSACleanup();
@@ -118,26 +138,26 @@ int Network::createServerSocket()
 
 
 	// Setup the TCP listening socket
-	iResult = bind(listenSocket, result->ai_addr, (int)result->ai_addrlen);
+	iResult = bind(mainSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (iResult == SOCKET_ERROR) {
 		Logger::log("Bind failed", WSAGetLastError());
 		freeaddrinfo(result);
-		closesocket(listenSocket);
+		closesocket(mainSocket);
 		WSACleanup();
 		return 1;
 	}
 
 	freeaddrinfo(result);
 
-	iResult = listen(listenSocket, SOMAXCONN);
+	iResult = listen(mainSocket, SOMAXCONN);
 	if (iResult == SOCKET_ERROR) {
 		Logger::log("Listen failed", WSAGetLastError());
-		closesocket(listenSocket);
+		closesocket(mainSocket);
 		WSACleanup();
 		return 1;
 	}
 	pollfd fd = pollfd();
-	fd.fd = listenSocket;
+	fd.fd = mainSocket;
 	fd.events = POLLIN;
 	descrList.push_back(fd);
 
@@ -146,45 +166,99 @@ int Network::createServerSocket()
 
 	return 0;
 }
-//Raczej to nie bedzie potrzebne po updacie
-void Network::updateDescrList()
-{
-	this->descrList[0].fd = listenSocket;
-	this->descrList[0].events = POLLIN;
-	int i = 1;
-	for (auto & client : this->clientList)
-	{
-		this->descrList[i].fd = client.clientSocket;
-		this->descrList[i].events = POLLIN;
-		i++;
-	}
-}
 
+int Network::createClientSocket()
+{
+	// Create a SOCKET for connecting to server
+	int result;
+	mainSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (mainSocket == INVALID_SOCKET) {
+		Logger::log("Socket function failed");
+		Logger::logNetworkError();
+		return 1;
+	}
+	//----------------------
+	// The sockaddr_in structure specifies the address family,
+	// IP address, and port of the server to be connected to.
+	sockaddr_in clientService;
+	clientService.sin_family = AF_INET;
+	//clientService.sin_addr.s_addr = inet_addr(this->ipAddress.c_str());
+	InetPton(AF_INET, (PCWSTR)this->ipAddress.c_str(), &clientService.sin_addr.s_addr);
+	clientService.sin_port = htons(std::stoi(this->port));
+
+	//----------------------
+	// Connect to server.
+	result = connect(mainSocket, (SOCKADDR *)& clientService, sizeof(clientService));
+	if (result == SOCKET_ERROR) {
+		Logger::log("Connect function failed");
+		Logger::logNetworkError();
+		return 1;
+	}
+
+	auto client = Client();
+
+	pollfd fd = pollfd();
+	fd.fd = mainSocket;
+	fd.events = POLLIN;
+	descrList.push_back(fd);
+
+
+	client.initClient(playerID++, mainSocket, clientService);
+
+	input.addEventNewPlayer(playerID, 0);
+	this->clientList.push_back(client);
+	Logger::log("Connected to server.\n");
+
+}
 void Network::manageEvents(int events)
 {
 	//ktos dolacza
-	if (this->descrList[0].revents)
+	while (events > 0)
 	{
-		manageServerEvent();
-		events--;
-	}
-	//klient cos robi
-	for (int i = 1; i < this->descrList.size() && events > 0; i++) {
-		if (this->descrList[i].revents) {
-			manageClientEvent(i);
+		if (this->isServer)
+		{
+			if (this->descrList[0].revents)
+			{
+				manageListenEvent();
+				events--;
+			}
+			//klient cos robi
+			for (int i = 1; i < this->descrList.size() && events > 0; i++) {
+				if (this->descrList[i].revents) {
+					manageClientEvent(i);
+					events--;
+				}
+			}
+		}
+		else if (this->isClient && this->descrList[0].revents)
+		{
+			manageConnectionEvent();
 			events--;
 		}
 	}
 
 }
 
-void Network::manageServerEvent()
+void Network::manageListenEvent()
 {
 	auto revent = this->descrList[0].revents;
 	if (revent & POLLIN)
 	{
 		acceptClient();
 	}
+
+}
+
+void Network::manageConnectionEvent()
+{
+	auto sock = this->descrList[0].fd;
+	auto revent = descrList[0].revents;
+	if (revent & POLLIN)
+	{
+		readFromClient(0);
+	}
+	if (revent & POLLHUP)
+		deleteClient(0);
 
 }
 
@@ -195,7 +269,7 @@ void Network::acceptClient()
 	auto client = Client();
 
 
-	auto clientFd = accept(this->listenSocket, (struct sockaddr*)& infoStorage, &addressSize);
+	auto clientFd = accept(this->mainSocket, (struct sockaddr*)& infoStorage, &addressSize);
 	if (clientFd == -1)
 	{
 		Logger::log("Accepting new client failed");
@@ -281,75 +355,75 @@ void Network::readFromClient(int index)
 	readFromClient(currentClient);
 }
 
-void Network::readFromClient(Client* currentClient)
+void Network::readFromClient(Client* client)
 {
 	char bufferTemp[Constants::bufferLength];
 	//nie znamy jeszcze dlugosci wiadomosci
-	int limit = max(Constants::msgLengthLimit, currentClient->msgExpectedLenght);
+	int limit = max(Constants::msgLengthLimit, client->msgExpectedLenght);
 
 	//odbieranie wiadomosci
-	int result = recv(currentClient->clientSocket, &bufferTemp[0], limit - currentClient->bufferInput.size(), 0);
+	int result = recv(client->clientSocket, &bufferTemp[0], limit - client->bufferInput.size(), 0);
 
 
 	if (result == -1 || result == 0)
 	{
-		Logger::log("Recv error on client: %d\n", currentClient->playerId);
+		Logger::log("Recv error on client: %d\n", client->playerId);
 	}
 	else
 	{
-		currentClient->bufferInput.append(std::string(&bufferTemp[0], result));
-		currentClient->bufferInputCounter += result;
+		client->bufferInput.append(std::string(&bufferTemp[0], result));
+		client->bufferInputCounter += result;
 	}
 
 
-	Logger::log("Tresc " + std::string(currentClient->bufferInput));
+	Logger::log("Tresc " + std::string(client->bufferInput));
 
 	//przetwarzanie wiadomosci
 	while (true)
 	{
-		if (currentClient->msgExpectedLenght = -1)
+		if (client->msgExpectedLenght = -1)
 		{
 			Logger::log("Brak rozmiaru wiadomosci\n");
 
-			int pos = currentClient->bufferInput.find('|');
+			int pos = client->bufferInput.find('|');
 
 			if (pos != -1)
 			{
 				//bierzemy bez znaku |
-				currentClient->msgExpectedLenght = std::stoi(currentClient->bufferInput.substr(0, pos));
+				client->msgExpectedLenght = std::stoi(client->bufferInput.substr(0, pos));
 
-				Logger::log("Rozmiar wiadomosci uzyskany: " + currentClient->bufferInput.substr(0, pos));
+				Logger::log("Rozmiar wiadomosci uzyskany: " + client->bufferInput.substr(0, pos));
 
 				//usuwamy takze znak |
-				currentClient->bufferInput.erase(0, pos + 1);
+				client->bufferInput.erase(0, pos + 1);
 
 			}
 			//nie mamy rozmiaru wiadomosci nawet, nic wiecej tu nie zrobimy
 			else
 				return;
 		}
-		if (currentClient->bufferInput.size() >= currentClient->msgExpectedLenght)
+		if (client->bufferInput.size() >= client->msgExpectedLenght)
 		{
 			Logger::log("Buffer wiekszy lub rowny spodziewanej wiadomosci");
-			Parser::Event ev = Parser::decodeBytes(std::string(currentClient->bufferInput, 0, currentClient->msgExpectedLenght));
+			Parser::Event ev = Parser::decodeBytes(std::string(client->bufferInput, 0, client->msgExpectedLenght));
 			Logger::log("Wiadomosc stworzona");
 			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
-			if (ev.receiver != 0)
+			if (ev.receiver != this->networkID)
 			{
 				Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev.receiver) + ":0");
-				ev.receiver = 0;
+				ev.receiver = this->networkID;
 			}
-			if (ev.sender != currentClient->playerId)
+			if (ev.sender != client->playerId)
 			{
-				Logger::log("Wrong message sender on client. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(currentClient->playerId));
-				ev.sender = currentClient->playerId;
+				Logger::log("Wrong message sender on client. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(client->playerId));
+				ev.sender = client->playerId;
 			}
 			//Parser wiadomosc o dostaniu informacji 
 			input.addEvent(ev);
 			Logger::log("Wiadomosc dodana");
 
-			currentClient->bufferInput.erase(0, currentClient->msgExpectedLenght);
-			currentClient->msgExpectedLenght = -1;
+			client->bufferInput.erase(0, client->msgExpectedLenght);
+			client->msgExpectedLenght = -1;
 
 			Logger::log("Buffer wyczyszczony");
 		}
@@ -357,8 +431,6 @@ void Network::readFromClient(Client* currentClient)
 		else
 			return;
 	}
-
-
 }
 
 void Network::sendToClient(Client * client) {

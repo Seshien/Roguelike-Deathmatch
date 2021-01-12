@@ -20,7 +20,9 @@ public:
 	{
 		WSACleanup();
 	}
-	int startNetwork(std::string port);
+	int startServer(std::string port);
+	int startClient(std::string ipAdress, std::string port);
+
 	Parser::Messenger inputNetwork();
 	//moze przechowywac eventy do zrobienia w outpucie zamiast bufforach klientow? chociaz nie wiem jak by to mialo dzialac
 	//wtedy bysmy zamiast zastepowac outputa, appendowaæ zawartoœæ nowego do starego
@@ -28,7 +30,8 @@ public:
 private:
 	//Client clientList[16];
 	std::vector <Client> clientList;
-	SOCKET listenSocket;
+	SOCKET mainSocket;
+	std::string ipAddress;
 	std::string port;
 	std::vector<pollfd> descrList;
 	//pollfd descrList[17];
@@ -38,6 +41,9 @@ private:
 
 	Parser::Messenger input;
 	Parser::Messenger output;
+	int networkID;
+	bool isServer;
+	bool isClient;
 	// player id, only increases so two players never have the same id
 	// przepraszam za ten polnglish
 	// teoretycznie mozemy sprawdzac id lub cus, i jezeli jest takie samo to nadawac to samo player id 
@@ -49,10 +55,13 @@ private:
 	void handleEvent(Parser::Event ev);
 
 	int createServerSocket();
-	void updateDescrList();
+	int createClientSocket();
 
 	void manageEvents(int events);
-	void manageServerEvent();
+
+	void manageConnectionEvent();
+
+	void manageListenEvent();
 	void acceptClient();
 
 
