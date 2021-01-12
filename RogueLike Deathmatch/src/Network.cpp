@@ -26,7 +26,8 @@ int Network::startServer(std::string port)
 	this->output = Parser::Messenger();
 
 
-	createServerSocket();
+	if (createServerSocket())
+		return 1;
 	//updateDescrList();
 	return 0;
 }
@@ -34,13 +35,13 @@ int Network::startServer(std::string port)
 int Network::startClient(std::string ipAdress, std::string port)
 {
 	this->isClient = true;
-
-	this->ipAddress = ipAddress;
+	this->ipAddress = ipAdress;
 	this->port = port;
 	this->input = Parser::Messenger();
 	this->output = Parser::Messenger();
 
-	createClientSocket();
+	if (createClientSocket())
+		return 1;
 	return 0;
 }
 
@@ -107,6 +108,9 @@ void Network::handleEvent(Parser::Event ev)
 
 int Network::createServerSocket()
 {
+
+	Logger::log("Creating server socket.");
+
 	this->mainSocket = INVALID_SOCKET;
 
 	struct addrinfo *result = NULL;
@@ -136,7 +140,14 @@ int Network::createServerSocket()
 		return 1;
 	}
 
+	unsigned long mode = 1;
 
+	if (ioctlsocket(mainSocket, FIONBIO, &mode) != 0)
+	{
+		Logger::log("ioctl failed");
+		Logger::logNetworkError();
+		return 1;
+	}
 	// Setup the TCP listening socket
 	iResult = bind(mainSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (iResult == SOCKET_ERROR) {
@@ -147,7 +158,10 @@ int Network::createServerSocket()
 		return 1;
 	}
 
+
 	freeaddrinfo(result);
+
+	Logger::log("Bind succecced.");
 
 	iResult = listen(mainSocket, SOMAXCONN);
 	if (iResult == SOCKET_ERROR) {
@@ -156,6 +170,10 @@ int Network::createServerSocket()
 		WSACleanup();
 		return 1;
 	}
+
+	Logger::log("Listen succecced.");
+
+
 	pollfd fd = pollfd();
 	fd.fd = mainSocket;
 	fd.events = POLLIN;
@@ -169,33 +187,68 @@ int Network::createServerSocket()
 
 int Network::createClientSocket()
 {
+	Logger::log("Creating client socket.");
 	// Create a SOCKET for connecting to server
-	int result;
-	mainSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+
+	struct addrinfo *result = NULL;
+	struct addrinfo hints;
+	int iResult;
+
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = AI_PASSIVE;
+
+	// Resolve the server address and port
+	iResult = getaddrinfo(this->ipAddress.c_str(), this->port.c_str(), &hints, &result);
+	if (iResult != 0) {
+		Logger::log("getaddrinfo failed with error: %d\n", iResult);
+		WSACleanup();
+		return 1;
+	}
+
+	int Iresult;
+	mainSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 	if (mainSocket == INVALID_SOCKET) {
 		Logger::log("Socket function failed");
 		Logger::logNetworkError();
 		return 1;
 	}
+
 	//----------------------
 	// The sockaddr_in structure specifies the address family,
 	// IP address, and port of the server to be connected to.
 	sockaddr_in clientService;
+	int size = sizeof(clientService);
 	clientService.sin_family = AF_INET;
 	//clientService.sin_addr.s_addr = inet_addr(this->ipAddress.c_str());
-	InetPton(AF_INET, (PCWSTR)this->ipAddress.c_str(), &clientService.sin_addr.s_addr);
-	clientService.sin_port = htons(std::stoi(this->port));
+	//Iresult = WSAStringToAddress((LPWSTR)this->ipAddress.c_str(), AF_INET, NULL, (SOCKADDR *)&clientService, &size);
+	//result = InetPton(AF_INET, tem, &clientService.sin_addr.s_addr);
+	//if (Iresult != 1) Logger::logNetworkError();
+	int temp = std::stoi(this->port);
+	clientService.sin_port = htons(temp);
 
 	//----------------------
 	// Connect to server.
-	result = connect(mainSocket, (SOCKADDR *)& clientService, sizeof(clientService));
-	if (result == SOCKET_ERROR) {
+	Logger::log("Connecting to server.");
+
+	Iresult = connect(mainSocket, result->ai_addr, (int)result->ai_addrlen);
+	if (Iresult == SOCKET_ERROR) {
 		Logger::log("Connect function failed");
 		Logger::logNetworkError();
 		return 1;
 	}
+	Logger::log("Connected to server.");
+
+	freeaddrinfo(result);
+
+	Logger::log("Creating client.");
 
 	auto client = Client();
+
+
 
 	pollfd fd = pollfd();
 	fd.fd = mainSocket;
@@ -207,7 +260,8 @@ int Network::createClientSocket()
 
 	input.addEventNewPlayer(playerID, 0);
 	this->clientList.push_back(client);
-	Logger::log("Connected to server.\n");
+
+	Logger::log("Client created.");
 
 }
 void Network::manageEvents(int events)
@@ -281,7 +335,7 @@ void Network::acceptClient()
 
 	if (ioctlsocket(clientFd, FIONBIO, &mode) != 0)
 	{
-		Logger::log("ioctl failed\n");
+		Logger::log("ioctl failed");
 		Logger::logNetworkError();
 		return;
 	}

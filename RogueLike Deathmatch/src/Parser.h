@@ -6,7 +6,7 @@
 namespace Parser
 {
 	enum Type { SLASH = '/', SERVER, LOBBY, GAME};
-	enum SubType { ERRSUB = '/', NEWPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION, CHANGESTATE, START};
+	enum SubType { ERRSUB = '/', NEWPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION, CHANGESTATE, START, ERRORNET};
 
 	Type convertToType(int type);
 	SubType convertToSubType(int type);

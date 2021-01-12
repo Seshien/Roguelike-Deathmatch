@@ -21,7 +21,12 @@ class Server
 			startLogger();
 			loadConfig();
 			startMap();
-			network.startServer(this->port);
+			char c;
+			std::cin >> c;
+			if (c == 'S')
+				network.startServer(this->port);
+			else
+				network.startClient("127.0.0.1", this->port);
 			startLobby();
 			loopLobby();
 			//startGame();
