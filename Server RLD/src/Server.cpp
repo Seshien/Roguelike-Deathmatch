@@ -37,7 +37,7 @@ void Server::handleEvents(Parser::Messenger parser)
 
 void Server::loadConfig()
 {
-	std::ifstream file;
+	std::fstream file;
 	std::string line;
 	file.open(this->confName);
 	if (file.is_open())
@@ -50,7 +50,13 @@ void Server::loadConfig()
 		}
 	}
 
-	else Logger::log("Config file not found");
+	else
+	{
+		Logger::log("Config file not found");
+		Logger::log("Creating default config file TODO");
+		//something something
+
+	}
 	file.close();
 }
 

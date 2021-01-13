@@ -4,9 +4,9 @@
 #include <string>
 
 #include "Map.h"
-#include "Logger.h"
-#include "Network.h"
-#include "Parser.h"
+#include "../../Utilities/Logger.h"
+#include "../../Utilities/Network.h"
+#include "../../Utilities/Parser.h"
 class Server
 {
 

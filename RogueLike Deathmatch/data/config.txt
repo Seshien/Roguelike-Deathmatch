@@ -1,2 +1,0 @@
-time:60
-special:yes

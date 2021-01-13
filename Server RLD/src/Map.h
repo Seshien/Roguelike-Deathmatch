@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 
-#include "Logger.h"
+#include "../../Utilities/Logger.h"
 class Map
 {
 	static const int MAP_HEIGHT = 100;
