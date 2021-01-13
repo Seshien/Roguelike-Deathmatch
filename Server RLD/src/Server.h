@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Map.h"
+#include "Player.h"
 #include "../../Utilities/Logger.h"
 #include "../../Utilities/Network.h"
 #include "../../Utilities/Parser.h"
@@ -58,17 +59,25 @@ class Server
 		}
 		void handleEvents(Parser::Messenger parser);
 
+		void handleServer(Parser::Event ev);
+		void handleLobby(Parser::Event ev);
+		void handleGame(Parser::Event ev);
+
+		void handleNewPlayer(Parser::Event ev);
+		void handleTimeout(Parser::Event ev);
+		void handleDisconnect(Parser::Event ev);
+
 		void loadConfig();
 
 		void processConfigLine(std::string line);
 
 		void setConfigValue(std::string token, std::string value);
+		std::vector<Player> playerList;
 		std::string confName = "./data/config.txt";
 		std::string mapPath = "./data/world0.txt";
 		std::string port = "7777";
 		Map map;
 		Network network;
-
 		int time;
 };
 

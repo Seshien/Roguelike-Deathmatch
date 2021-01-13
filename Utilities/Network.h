@@ -52,7 +52,8 @@ private:
 
 	std::chrono::system_clock::time_point timer = std::chrono::system_clock::now();
 
-	void handleEvent(Parser::Event ev);
+	void handleOutputEvent(Parser::Event ev);
+	void handleInnerEvent(Parser::Event ev);
 
 	int createServerSocket();
 	int createClientSocket();
@@ -73,6 +74,9 @@ private:
 	void sendToClient(Client* client);
 
 	void deleteClient(int index);
+	void deleteClient(Client* client);
+
 	void increaseTimeout();
+	Client * FindClient(int index, SOCKET sock);
 };
 

@@ -6,7 +6,7 @@
 namespace Parser
 {
 	enum Type { SLASH = '/', SERVER, LOBBY, GAME};
-	enum SubType { ERRSUB = '/', NEWPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION, CHANGESTATE, START, ERRORNET};
+	enum SubType { ERRSUB = '/', NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION, CHANGESTATE, START, ERRORNET};
 
 	Type convertToType(int type);
 	SubType convertToSubType(int type);
@@ -59,9 +59,13 @@ namespace Parser
 
 		void addEvent(Event ev);
 
-		void addEventNewPlayer(int sender, int receiver);
+		void addInnerNewPlayer(int sender, int receiver, int ID);
 
-		void addEventDiscPlayer(int sender, int receiver);
+		void addInnerDiscPlayer(int sender, int receiver);
+
+		void addEventNewPlayer(int sender, int receiver, std::string name);
+
+		void addEventDiscPlayer(int sender, int receiver, std::string name);
 
 		void addEventTimeoutReached(int sender, int receiver);
 
@@ -72,6 +76,11 @@ namespace Parser
 	/*
 	//Lobby
 	Klient do³¹cza
+	Klient wysyla wiadomosc o swoim nicku i checi dolaczenia do gry
+	Serwer przyjmuje wiadomosc, sprawdza czy taki gracz istnieje (jezeli tak to odmawia polaczenia), sprawdza czy taki gracz istnial ( jezeli tak to uzywa tego gracza),
+	jezeli taki gracz nie istnial, tworzy nowego. W kazdym przypadku wysyla wiadomosc powrotn¹.
+
+
 	Serwer wysyla mu wiadomosc o ustawieniach lobby
 	Serwer wysyla mu wiadomosci o innych graczach
 	Serwer wysyla mu wiadomosc o tym ze ktos zaglosowal

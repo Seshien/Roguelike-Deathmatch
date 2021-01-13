@@ -18,9 +18,10 @@ int Network::startServer(std::string port)
 {
 	this->ipAddress = "127.0.0.1";
 	this->port = port;
-	//serwer ma player id 0, a wiec pierwszy mozliwy playerId to 1
+	//serwer ma player id 0
 	this->networkID = 0;
-	this->playerID = 1;
+	//ogolnie playerID ktore nadaje Network s¹ tymczasowe, bêd¹ siê zmieniaæ po nadaniu przez grê
+	this->playerID = -1;
 	this->isServer = true;
 	this->input = Parser::Messenger();
 	this->output = Parser::Messenger();
@@ -36,6 +37,7 @@ int Network::startClient(std::string ipAdress, std::string port)
 {
 	this->isClient = true;
 	this->ipAddress = ipAdress;
+	this->networkID = -1;
 	this->port = port;
 	this->input = Parser::Messenger();
 	this->output = Parser::Messenger();
@@ -83,8 +85,13 @@ void Network::outputNetwork(Parser::Messenger _output)
 {
 	//updateDescrList();
 	this->output = _output;
-	for (auto & ev : this->output.eventList) {
-		handleEvent(ev);
+	for (auto & ev : this->output.eventList) 
+	{
+		//jezeli receiver eventu to nasze wlasne id, to jest to event wewnetrzny
+		if (ev.receiver == networkID)
+			handleInnerEvent(ev);
+		else
+			handleOutputEvent(ev);
 	}
 	for (auto & client : this->clientList)
 		if (client.bufferOutput.size() > 0)
@@ -92,17 +99,68 @@ void Network::outputNetwork(Parser::Messenger _output)
 
 }
 
-void Network::handleEvent(Parser::Event ev)
+void Network::handleOutputEvent(Parser::Event ev)
 {
 	//char *data = output.encodeBytes(ev);
 	int receiver = ev.receiver;
-	for (auto &client : clientList) {
+	for (auto &client : clientList)
+	{
 		if (client.playerId == receiver)
 		{
 			std::string data = Parser::encodeBytes(ev);
 			client.bufferOutput.append(data);
 			return;
 		}
+	}
+	Logger::log("Event nie zostal obsluzony");
+}
+
+void Network::handleInnerEvent(Parser::Event ev)
+{
+	if (ev.type == Parser::SERVER && ev.subtype == Parser::INITPLAYER)
+	{
+		//tu powinno byc zapisane nowe id
+		int newID = ev.subdata[0];
+
+		if (isServer)
+			for (auto & client : clientList)
+			{
+				if (client.playerId == ev.sender)
+				{
+					client.playerId = newID;
+					Logger::log("New ID was given to client. n:o " + std::to_string(newID) + ":" + std::to_string(ev.sender));
+					//kazdy poczatkowy client ma playerid = -1, mimo ze serwer nadaje jakies swoje id 
+					ev.receiver = -1;
+					ev.sender = 0;
+					std::string data = Parser::encodeBytes(ev);
+					client.bufferOutput.append(data);
+					return;
+				}
+			}
+		else if (isClient && this->networkID == -1)
+		{
+			this->networkID = ev.sender;
+		}
+		else
+		{
+			Logger::log("Error: Client already have ID");
+		}
+	}
+	else if (ev.type == Parser::SERVER && ev.subtype == Parser::DISCPLAYER)
+	{
+		for (auto & client : clientList)
+		{
+			if (client.playerId == ev.sender)
+			{
+				Logger::log("Deleting Client");
+				this->deleteClient(&client);
+				return;
+			}
+		}
+	}
+	else
+	{
+		Logger::log("Error: Event with no existing receiver");
 	}
 }
 
@@ -243,10 +301,10 @@ int Network::createClientSocket()
 	//czy to w ogole zadziala?
 	sockaddr_in clientData = *((sockaddr_in *)result->ai_addr);
 
-
-	client.initClient(playerID++, mainSocket, clientData);
-
-	input.addEventNewPlayer(playerID, 0);
+	//w tym wypadku klientem jest serwer, serwer ma zawsze playerID = 0
+	client.initClient(playerID, mainSocket, clientData);
+	// addEventNewPlayer bedzie sie robil w kliencie, nie tutaj
+	//input.addEventNewPlayer(playerID, -1);
 	this->clientList.push_back(client);
 
 	Logger::log("Client created.");
@@ -268,7 +326,7 @@ void Network::manageEvents(int events)
 			//klient cos robi
 			for (int i = 1; i < this->descrList.size() && events > 0; i++) {
 				if (this->descrList[i].revents) {
-					manageClientEvent(i);
+					manageClientEvent(i - 1);
 					events--;
 				}
 			}
@@ -334,26 +392,31 @@ void Network::acceptClient()
 	descrList.push_back(fd);
 
 
-	client.initClient(playerID++, clientFd, infoStorage);
+	client.initClient(playerID, clientFd, infoStorage);
 
 
 	Logger::log("New connection accepted");
 	//std::string message = std::string(inet_ntoa(address->sin_addr)) + ":" + std::to_string(ntohs(address->sin_port)) 
 	//	+ ":" + std::to_string(clientFd);
 	//Logger::log(message);
-	//Parser wiadomosc o przyjeciu nowego gracza
-	input.addEventNewPlayer(playerID, 0);
+	//Parser wiadomosc o przyjeciu nowego gracza z tymczasowym ID
+	//jednak z tego rezygnujemy, tymczasowy gracz istnieje, ale musi poprosic o dostep i podac swoj nick
+	//input.addEventNewPlayer(playerID, 0);
+
+	playerID--;
+
 	this->clientList.push_back(client);
 }
 
 void Network::manageClientEvent(int descrIndex)
 {
-	auto sock = this->descrList[descrIndex].fd;
-	auto revent = descrList[descrIndex].revents;
+	auto sock = this->descrList[descrIndex + 1].fd;
+	auto revent = descrList[descrIndex + 1].revents;
+
 	int index = -1;
 	Client * managed = nullptr;
 	//ogolnie descrList  0 to jest serwer
-	int clientIndex = descrIndex - 1;
+	int clientIndex = descrIndex;
 	//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach
 	//moze byc nie potrzebne, ale wolalem to zrobic dla sanity
 	if (clientList[clientIndex].clientSocket == sock)
@@ -386,7 +449,8 @@ void Network::manageClientEvent(int descrIndex)
 		readFromClient(index);
 	}
 	if (revent & POLLHUP)
-		deleteClient(index);
+		input.addEventDiscPlayer(clientList[index].playerId, 0);
+		//deleteClient(index);
 
 	// resetujemy timeout, bo cos sie stalo z klientem
 	managed->timeoutTimer = 0;
@@ -495,14 +559,23 @@ void Network::sendToClient(Client * client) {
 
 void Network::deleteClient(int index)
 {
-
 	int playerIndex = clientList[index].playerId;
 	closesocket(clientList[index].clientSocket);
 	clientList.erase(clientList.begin() + index);
 	descrList.erase(descrList.begin() + index + 1);
 	//Parser wiadomosc o usunieciu playera
-	Logger::log("Klient " + std::to_string(playerIndex) + " zostal usuniety");
-	input.addEventDiscPlayer(playerIndex, 0);
+	Logger::log("Client " + std::to_string(playerIndex) + " was deleted");
+}
+void Network::deleteClient(Client * client)
+{
+	for (int i = 0; i < clientList.size(); i++)
+		if (client->clientSocket = clientList[i].clientSocket)
+		{
+			this->deleteClient(i);
+			return;
+		}
+			
+	Logger::log("Error: Client not found");
 }
 
 void Network::increaseTimeout()
@@ -510,10 +583,33 @@ void Network::increaseTimeout()
 	for (int i = 0; i < this->clientList.size(); i++)
 	{
 		clientList[i].timeoutTimer++;
-		if (clientList[i].timeoutTimer > Constants::timeoutValue * 2) 
-			this->deleteClient(i);
-		else if (clientList[i].timeoutTimer > Constants::timeoutValue) 
+		if (clientList[i].timeoutTimer > Constants::timeoutValue) 
 			this->input.addEventTimeoutReached(clientList[i].playerId, 0);
 	}
 
+}
+
+Client * Network::FindClient(int index, SOCKET sock = -1)
+{
+	Client * managed = nullptr;
+	//ogolnie descrList  0 to jest serwer
+	int clientIndex = index;
+	//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach
+	//moze byc nie potrzebne, ale wolalem to zrobic dla sanity
+	if (sock == -1)
+		return &clientList[clientIndex];
+	else
+		if (clientList[clientIndex].clientSocket == sock)
+		{
+			return &clientList[clientIndex];
+		}
+		else
+		{
+			for (int i = 0; i < clientList.size(); i++)
+				if (clientList[i].clientSocket = sock)
+				{
+					return &clientList[i];
+					break;
+				}
+		}
 }
