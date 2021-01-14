@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /RogueLike Deathmatch/data
+/Server RLD/data
+/Client RLD/data

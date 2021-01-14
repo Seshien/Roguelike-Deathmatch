@@ -1,2 +1,0 @@
-Config file opened:time:60Token: time Value: 60special:yesToken: special Value: yesAccepting new client failed001CDD28
-Accepting new client failed001CE170
