@@ -29,14 +29,17 @@ void Client::mainLoop()
 	while (true)
 	{
 		//odbieranie wiadomosci
-		Logger::log("------------ Input Phase ------------");
 		this->input = this->network.inputNetwork();
+		if (input.eventList.size())
+			Logger::log("------------ Handling Phase ------------");
 		//przetwarzanie ich
-		Logger::log("------------ Handling Phase ------------");
 		handleEvents(this->input);
+		if (output.eventList.size())
+			Logger::log("------------ Output Phase ------------");
 		//wysylanie ich
-		Logger::log("------------ Output Phase ------------");
 		this->network.outputNetwork(this->output);
+		if (output.eventList.size())
+			Logger::log("------------ Input Phase ------------");
 		this->output = Parser::Messenger();
 	}
 }
