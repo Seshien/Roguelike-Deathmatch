@@ -45,7 +45,7 @@ private:
 	bool isServer;
 	bool isClient;
 	// player id, only increases so two players never have the same id
-	// przepraszam za ten polnglish
+	// przepraszam za ten ponglish
 	// teoretycznie mozemy sprawdzac id lub cus, i jezeli jest takie samo to nadawac to samo player id 
 	int playerID;
 

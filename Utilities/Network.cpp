@@ -23,12 +23,15 @@ int Network::startServer(std::string port)
 	//ogolnie playerID ktore nadaje Network s¹ tymczasowe, bêd¹ siê zmieniaæ po nadaniu przez grê
 	this->playerID = -1;
 	this->isServer = true;
+	this->clientList.clear();
+	this->descrList.clear();
 	this->input = Parser::Messenger();
 	this->output = Parser::Messenger();
 
 
 	if (createServerSocket())
 		return 1;
+	Logger::log("Starting server network succeed");
 	//updateDescrList();
 	return 0;
 }
@@ -39,11 +42,14 @@ int Network::startClient(std::string ipAdress, std::string port)
 	this->ipAddress = ipAdress;
 	this->networkID = -1;
 	this->port = port;
+	this->clientList.clear();
+	this->descrList.clear();
 	this->input = Parser::Messenger();
 	this->output = Parser::Messenger();
 
 	if (createClientSocket())
 		return 1;
+	Logger::log("Starting client network succeed");
 	return 0;
 }
 
@@ -53,7 +59,8 @@ Parser::Messenger Network::inputNetwork()
 	// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
 	this->input = Parser::Messenger();
 	int result = -1;
-	this->increaseTimeout();
+	if (isServer)
+		this->increaseTimeout();
 	//czas w sekundach, ile ma trwac jeden cykl
 	double time = 0.1;
 	//koniec cyklu
@@ -61,11 +68,20 @@ Parser::Messenger Network::inputNetwork()
 	//czas w sekundach, ile trwal jeden cykl
 	auto t = diff.count();
 	//jezeli czas trwania cyklu jest dluzszy od ustalonego, WSAPoll jest natychmiastowy
-	if (t > time) 
-		result = WSAPoll(&this->descrList[0], this->descrList.size(), 0);
-	//inaczej trwa tyle ile 
+	if (descrList.size() > 0)
+	{
+		if (t > time)
+			result = WSAPoll(&this->descrList[0], this->descrList.size(), 0);
+		//inaczej trwa tyle ile 
+		else
+			result = WSAPoll(&this->descrList[0], this->descrList.size(), (time - t) * 1000);
+	}
 	else
-		result = WSAPoll(&this->descrList[0], this->descrList.size(),(time - t) * 1000);
+	{
+		//to znaczy ze klient nie jest podlaczony do serwera, albo cos zlego sie stalo z serwerem. Chyba najlepszym wyjsciem bylby reset aplikacji?
+		Logger::log("Your application is not connected to any contact. Do you want to restart connection?");
+		std::getchar();
+	}
 	//poczatek cyklu
 	timer = std::chrono::system_clock::now();
 	if (result == -1) {
@@ -102,21 +118,24 @@ void Network::outputNetwork(Parser::Messenger _output)
 void Network::handleOutputEvent(Parser::Event ev)
 {
 	//char *data = output.encodeBytes(ev);
+	Logger::log("Output Event handling.");
 	int receiver = ev.receiver;
 	for (auto &client : clientList)
 	{
 		if (client.playerId == receiver)
 		{
+			Logger::log("Message was added to buffer.");
 			std::string data = Parser::encodeBytes(ev);
 			client.bufferOutput.append(data);
 			return;
 		}
 	}
-	Logger::log("Event nie zostal obsluzony");
+	Logger::log("Event was not served.");
 }
 
 void Network::handleInnerEvent(Parser::Event ev)
 {
+	Logger::log("Inner Event handling.");
 	if (ev.type == Parser::SERVER && ev.subtype == Parser::INITPLAYER)
 	{
 		//tu powinno byc zapisane nowe id
@@ -130,7 +149,7 @@ void Network::handleInnerEvent(Parser::Event ev)
 					client.playerId = newID;
 					Logger::log("New ID was given to client. n:o " + std::to_string(newID) + ":" + std::to_string(ev.sender));
 					//kazdy poczatkowy client ma playerid = -1, mimo ze serwer nadaje jakies swoje id 
-					ev.receiver = -1;
+					ev.receiver = newID;
 					ev.sender = 0;
 					std::string data = Parser::encodeBytes(ev);
 					client.bufferOutput.append(data);
@@ -139,7 +158,8 @@ void Network::handleInnerEvent(Parser::Event ev)
 			}
 		else if (isClient && this->networkID == -1)
 		{
-			this->networkID = ev.sender;
+			this->networkID = newID;
+			Logger::log("New ID was assigned to network");
 		}
 		else
 		{
@@ -302,12 +322,14 @@ int Network::createClientSocket()
 	sockaddr_in clientData = *((sockaddr_in *)result->ai_addr);
 
 	//w tym wypadku klientem jest serwer, serwer ma zawsze playerID = 0
-	client.initClient(playerID, mainSocket, clientData);
+	client.initClient(0, mainSocket, clientData);
 	// addEventNewPlayer bedzie sie robil w kliencie, nie tutaj
 	//input.addEventNewPlayer(playerID, -1);
 	this->clientList.push_back(client);
 
 	Logger::log("Client created.");
+
+	return 0;
 
 }
 
@@ -449,8 +471,11 @@ void Network::manageClientEvent(int descrIndex)
 		readFromClient(index);
 	}
 	if (revent & POLLHUP)
+	{
+		Logger::log("Contact disconnected: creating disconnect Event");
 		input.addEventDiscPlayer(clientList[index].playerId, 0);
-		//deleteClient(index);
+	}
+
 
 	// resetujemy timeout, bo cos sie stalo z klientem
 	managed->timeoutTimer = 0;
@@ -469,6 +494,7 @@ void Network::readFromClient(Contact* client)
 	int limit = max(Constants::msgLengthLimit, client->msgExpectedLenght);
 
 	//odbieranie wiadomosci
+	Logger::log("Receiving message");
 	int result = recv(client->clientSocket, &bufferTemp[0], limit - client->bufferInput.size(), 0);
 
 
@@ -483,14 +509,14 @@ void Network::readFromClient(Contact* client)
 	}
 
 
-	Logger::log("Tresc " + std::string(client->bufferInput));
+	Logger::log("Content of buffer:  " + std::string(client->bufferInput));
 
 	//przetwarzanie wiadomosci
 	while (true)
 	{
 		if (client->msgExpectedLenght = -1)
 		{
-			Logger::log("Brak rozmiaru wiadomosci\n");
+			Logger::log("Trying to get message lenght");
 
 			int pos = client->bufferInput.find('|');
 
@@ -499,7 +525,7 @@ void Network::readFromClient(Contact* client)
 				//bierzemy bez znaku |
 				client->msgExpectedLenght = std::stoi(client->bufferInput.substr(0, pos));
 
-				Logger::log("Rozmiar wiadomosci uzyskany: " + client->bufferInput.substr(0, pos));
+				Logger::log("Message lenght: " + client->bufferInput.substr(0, pos));
 
 				//usuwamy takze znak |
 				client->bufferInput.erase(0, pos + 1);
@@ -511,9 +537,9 @@ void Network::readFromClient(Contact* client)
 		}
 		if (client->bufferInput.size() >= client->msgExpectedLenght)
 		{
-			Logger::log("Buffer wiekszy lub rowny spodziewanej wiadomosci");
+			Logger::log("Buffer is bigger or same size as message lenght.");
 			Parser::Event ev = Parser::decodeBytes(std::string(client->bufferInput, 0, client->msgExpectedLenght));
-			Logger::log("Wiadomosc stworzona");
+			Logger::log("Message created");
 			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
 			if (ev.receiver != this->networkID)
 			{
@@ -522,17 +548,17 @@ void Network::readFromClient(Contact* client)
 			}
 			if (ev.sender != client->playerId)
 			{
-				Logger::log("Wrong message sender on client. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(client->playerId));
+				Logger::log("Wrong message sender. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(client->playerId));
 				ev.sender = client->playerId;
 			}
 			//Parser wiadomosc o dostaniu informacji 
 			input.addEvent(ev);
-			Logger::log("Wiadomosc dodana");
+			Logger::log("Message added to input");
 
 			client->bufferInput.erase(0, client->msgExpectedLenght);
 			client->msgExpectedLenght = -1;
 
-			Logger::log("Buffer wyczyszczony");
+			Logger::log("Buffer erased.");
 		}
 		//nie mamy wystarczajaco duzo wiadomosci by cos z tym zrobic, nic wiecej nie zrobimy
 		else
@@ -540,7 +566,9 @@ void Network::readFromClient(Contact* client)
 	}
 }
 
-void Network::sendToClient(Contact * client) {
+void Network::sendToClient(Contact * client) 
+{
+	Logger::log("Sending message");
 	int result = send(client->clientSocket, &client->bufferOutput[0], client->bufferOutput.size(), 0);
 	if (result == SOCKET_ERROR) 
 	{
@@ -551,6 +579,7 @@ void Network::sendToClient(Contact * client) {
 		//Logger::log("Wyslano " + std::to_string(result) + " Razem " + std::to_string(result + client->bufferInputCounter)
 		//	+ " Pozostalo " + std::to_string(Constants::msgLengthLimit - (client->bufferInputCounter + result)));
 		// Przesuwanie bufora wzgledem ilosci wyslanych juz znakow (tak, aby zawsze wysylac go wzgledem poczatku)
+		Logger::log("Message was send successfully");
 		client->bufferOutput.erase(0, result);
 		//to ze wiadomosc dotarla uznajemy przynajmniej na razie ze jest dobrze
 		client->timeoutTimer = 0;
@@ -562,14 +591,17 @@ void Network::deleteClient(int index)
 	int playerIndex = clientList[index].playerId;
 	closesocket(clientList[index].clientSocket);
 	clientList.erase(clientList.begin() + index);
-	descrList.erase(descrList.begin() + index + 1);
+	if (isServer)
+		descrList.erase(descrList.begin() + index + 1);
+	else
+		descrList.erase(descrList.begin() + index);
 	//Parser wiadomosc o usunieciu playera
 	Logger::log("Client " + std::to_string(playerIndex) + " was deleted");
 }
 void Network::deleteClient(Contact * client)
 {
 	for (int i = 0; i < clientList.size(); i++)
-		if (client->clientSocket = clientList[i].clientSocket)
+		if (client->clientSocket == clientList[i].clientSocket)
 		{
 			this->deleteClient(i);
 			return;

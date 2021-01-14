@@ -16,17 +16,23 @@ void Server::loopLobby()
 {
 	while (true)
 	{
+		//odbieranie wiadomosci
+		Logger::log("------------ Input Phase ------------");
 		this->input = this->network.inputNetwork();
+		//przetwarzanie ich
+		Logger::log("------------ Handling Phase ------------");
 		handleEvents(this->input);
+		//wysylanie ich
+		Logger::log("------------ Output Phase ------------");
 		this->network.outputNetwork(this->output);
+		this->output = Parser::Messenger();
 	}
 
 }
 
-void Server::handleEvents(Parser::Messenger parser)
+void Server::handleEvents(Parser::Messenger mess)
 {
-	this->output = Parser::Messenger();
-	for (auto& ev : parser.eventList) {
+	for (auto& ev : mess.eventList) {
 		switch (ev.type)
 		{
 			case Parser::SERVER:
@@ -44,9 +50,9 @@ void Server::handleEvents(Parser::Messenger parser)
 
 		// Wykonaj logike
 		//sender, receiver, type, subdata
-		Parser::Event newEv = { 0, ev.sender, ev.type, ev.subtype, ev.subdata };
+		//Parser::Event newEv = { 0, ev.sender, ev.type, ev.subtype, ev.subdata };
 		// Wpisz wynik w output parser
-		this->output.addEvent(newEv);
+		//this->output.addEvent(newEv);
 	}
 }
 
@@ -70,6 +76,7 @@ void Server::handleServer(Parser::Event ev)
 		Logger::log("Error, event type not found.");
 	}
 }
+
 void Server::handleLobby(Parser::Event ev)
 {
 
@@ -129,8 +136,9 @@ void Server::handleDisconnect(Parser::Event ev)
 
 void Server::handleDisconnect(int playerID)
 {
-	std::string playerName = playerList[playerID].name;
-	playerList[playerID].state = Player::INACTIVE;
+	int pIndex = playerID - 1;
+	std::string playerName = playerList[pIndex].name;
+	playerList[pIndex].state = Player::INACTIVE;
 
 	//rzeczy zwiazane z wewnetrzna logika gry,
 	// TODO
@@ -163,7 +171,7 @@ void Server::handleTimeout(Parser::Event ev)
 
 void Server::handleTimeoutAnswer(Parser::Event ev)
 {
-	Player * player = &playerList[ev.sender];
+	Player * player = &playerList[ev.sender - 1];
 	//wylaczamy timeout bo odpowiedzial
 	player->timeout = false;
 }

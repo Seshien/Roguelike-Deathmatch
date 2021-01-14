@@ -3,6 +3,7 @@
 #include <cstring>
 #include <string>
 #include "Constants.h"
+#include "Logger.h"
 namespace Parser
 {
 	enum Type { SLASH = '/', SERVER, LOBBY, GAME};
@@ -24,7 +25,8 @@ namespace Parser
 
 		Event(int _sender, int _receiver, Type _type, SubType _subtype, std::string _subdata)
 		{
-			size = std::to_string((4 * sizeof(char)+ sizeof(_subdata))/8) + "|";
+			int temp = 4 * sizeof(char) + _subdata.size();
+			size = std::to_string((temp)) + "|";
 			sender = _sender;
 			receiver = _receiver;
 			type = _type;
@@ -33,7 +35,8 @@ namespace Parser
 		}
 		Event(int _sender, int _receiver, int _type, int _subtype, std::string _subdata)
 		{
-			size = std::to_string((4 * sizeof(char) + sizeof(_subdata)) / 8) + "|";
+			int temp = 4 * sizeof(char) + _subdata.size();
+			size = std::to_string((temp)) + "|";
 			sender = _sender;
 			receiver = _receiver;
 			type = convertToType(_type);
@@ -68,6 +71,8 @@ namespace Parser
 		void addEventDiscPlayer(int sender, int receiver, std::string name = std::string());
 
 		void addEventTimeoutReached(int sender, int receiver);
+
+		void addEventTimeoutAnswer(int sender, int receiver);
 
 		std::vector<Event> eventList;
 

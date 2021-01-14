@@ -70,33 +70,46 @@ void Messenger::addEvent(int sender, int receiver, int type, int subtype, std::s
 {
 	Event ev = Event(sender, receiver, type, subtype, data);
 	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
 }
 
 void Messenger::addEvent(Event ev) {
 	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
 }
 
 void Messenger::addInnerNewPlayer(int sender, int receiver, int ID) {
 	Event ev = Event(sender, receiver, Type::SERVER, SubType::INITPLAYER, std::string(1,(char) ID));
 	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
 }
 
 void Messenger::addInnerDiscPlayer(int sender, int receiver) {
 	Event ev = Event(sender, receiver, Type::SERVER, SubType::DISCPLAYER, std::string());
 	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
 }
 
 void Messenger::addEventNewPlayer(int sender, int receiver, std::string name) {
 	Event ev = Event(sender, receiver, Type::SERVER, SubType::NEWPLAYER, name);
 	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
 }
 
 void Messenger::addEventDiscPlayer(int sender, int receiver, std::string name) {
 	Event ev = Event(sender, receiver, Type::SERVER, SubType::DISCPLAYER, name);
 	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
+}
+
+void Messenger::addEventTimeoutAnswer(int sender, int receiver) {
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::TIMEOUTANSWER, std::string());
+	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
 }
 
 void Messenger::addEventTimeoutReached(int sender, int receiver) {
 	Event ev = Event(sender, receiver, Type::SERVER, SubType::TIMEOUT, std::string());
 	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
 }

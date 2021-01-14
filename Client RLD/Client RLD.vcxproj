@@ -159,8 +159,8 @@
     <ClCompile Include="..\Utilities\Logger.cpp" />
     <ClCompile Include="..\Utilities\Network.cpp" />
     <ClCompile Include="..\Utilities\Parser.cpp" />
-    <ClCompile Include="Client RLD.cpp" />
-    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="src\Client RLD.cpp" />
+    <ClCompile Include="src\Client.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Utilities\Contact.h" />
@@ -168,7 +168,7 @@
     <ClInclude Include="..\Utilities\Logger.h" />
     <ClInclude Include="..\Utilities\Network.h" />
     <ClInclude Include="..\Utilities\Parser.h" />
-    <ClInclude Include="Client.h" />
+    <ClInclude Include="src\Client.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
