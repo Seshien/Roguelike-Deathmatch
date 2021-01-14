@@ -583,8 +583,12 @@ void Network::increaseTimeout()
 	for (int i = 0; i < this->clientList.size(); i++)
 	{
 		clientList[i].timeoutTimer++;
-		if (clientList[i].timeoutTimer > Constants::timeoutValue) 
+		if (clientList[i].timeoutTimer > Constants::timeoutValue)
+		{
 			this->input.addEventTimeoutReached(clientList[i].playerId, 0);
+			clientList[i].timeoutTimer = 0;
+		}
+
 	}
 
 }

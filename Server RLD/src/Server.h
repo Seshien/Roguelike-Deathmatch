@@ -65,7 +65,10 @@ class Server
 
 		void handleNewPlayer(Parser::Event ev);
 		void handleTimeout(Parser::Event ev);
+		void handleTimeoutAnswer(Parser::Event ev);
+
 		void handleDisconnect(Parser::Event ev);
+		void handleDisconnect(int playerID);
 
 		void loadConfig();
 

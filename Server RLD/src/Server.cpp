@@ -63,6 +63,9 @@ void Server::handleServer(Parser::Event ev)
 	case Parser::TIMEOUT:
 		handleTimeout(ev);
 		break;
+	case Parser::TIMEOUTANSWER:
+		handleTimeoutAnswer(ev);
+		break;
 	default:
 		Logger::log("Error, event type not found.");
 	}
@@ -118,12 +121,19 @@ void Server::handleNewPlayer(Parser::Event ev)
 	
 }
 
+
 void Server::handleDisconnect(Parser::Event ev)
 {
-	int playerID = ev.sender;
+	handleDisconnect(ev.sender);
+}
+
+void Server::handleDisconnect(int playerID)
+{
 	std::string playerName = playerList[playerID].name;
 	playerList[playerID].state = Player::INACTIVE;
+
 	//rzeczy zwiazane z wewnetrzna logika gry,
+	// TODO
 
 	//powiadomienie networka o usunieciu tego gracza
 	output.addInnerDiscPlayer(playerID, 0);
@@ -135,9 +145,27 @@ void Server::handleDisconnect(Parser::Event ev)
 		output.addEventDiscPlayer(0, player.playerID, playerName);
 	}
 }
+
 void Server::handleTimeout(Parser::Event ev)
 {
+	Player * player = &playerList[ev.sender];
+	//sprawdzamy czy jest zagrozony
+	if (player->timeout)
+	{
+		handleDisconnect(ev.sender);
+	}
+	else
+	{
+		output.addEventTimeoutReached(0, ev.sender);
+	}
 
+}
+
+void Server::handleTimeoutAnswer(Parser::Event ev)
+{
+	Player * player = &playerList[ev.sender];
+	//wylaczamy timeout bo odpowiedzial
+	player->timeout = false;
 }
 
 void Server::loadConfig()
