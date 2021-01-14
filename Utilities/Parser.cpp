@@ -113,3 +113,28 @@ void Messenger::addEventTimeoutReached(int sender, int receiver) {
 	eventList.push_back(ev);
 	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
 }
+
+void Messenger::addEventLobby(int sender, int receiver, int numOfVotes) {
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::INFODUMP_LOBBY, std::to_string(numOfVotes));
+	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
+}
+
+void Messenger::addEventMapID(int sender, int receiver, int mapID) {
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::MAP, std::to_string(mapID));
+	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
+}
+
+// Wysyla aktualny czas trwania gry w unsigned int
+void Messenger::addEventGame(int sender, int receiver, std::chrono::duration<double> time) {
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::GAME, std::to_string(time.count()));
+	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
+}
+
+void Messenger::addEventGameEnd(int sender, int receiver, std::string results) {
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::GAME_END, results);
+	eventList.push_back(ev);
+	Logger::log(ev.sender, ev.receiver, ev.type, ev.subtype, ev.subdata);
+}

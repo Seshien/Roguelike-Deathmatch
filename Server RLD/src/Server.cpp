@@ -119,7 +119,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 	output.addInnerNewPlayer(ev.sender, 0, playerID);
 
 	//teraz powinnismy podac info o tej grze Playerowi
-	//InfoDump(playerID);
+	this->InfoDump(playerID);
 
 	//Podanie kazdemu graczowi informacje ze nowy gracz dolaczyc
 	for (Player &player : this->playerList)
@@ -178,6 +178,44 @@ void Server::handleTimeoutAnswer(Parser::Event ev)
 	//wylaczamy timeout bo odpowiedzial
 	player->timeout = false;
 }
+
+// TO DO
+std::string Server::getResults() {
+	return std::string();
+}
+
+std::chrono::duration<double> Server::getCurrentGameTime() {
+	return std::chrono::system_clock::now() - this->gameStartTime;
+}
+
+void Server::InfoDump(int playerId) {
+	std::string subdata;
+	// Wysylamy graczowi nazwy wszystkich pozostalych graczy w przypadku dolaczenia do gry
+	for (auto player : this->playerList) {
+		if (player.playerID != playerId) {
+			output.addEventNewPlayer(SERVER_ID, playerId, player.name);
+		}
+	}
+	// Wysylamy ID mapy w kazdym wypadku niezaleznie od stanu gry
+	output.addEventMapID(SERVER_ID, playerId, this->map.getMapID());
+
+	// Wiadomosci zalezne od stanu gry
+	switch (gameState) {
+	case LOBBY:
+		output.addEventLobby(SERVER_ID, playerId, numOfVotes);
+		break;
+	case GAME:
+		// Wysylamy fakt, ze jest w grze oraz czas trwania danej gry. (za pomoca subType?)
+		output.addEventGame(SERVER_ID, playerId, getCurrentGameTime());
+		break;
+	case GAME_END:
+		// wysylamy wyniki wszystkich graczy (nazwy juz dostanie)
+		output.addEventGameEnd(SERVER_ID, playerId, getResults());
+		break;
+	}
+	//output.addEvent(SERVER_ID, playerId, Parser::SERVER, Parser::INFODUMP, subdata);
+}
+
 
 void Server::loadConfig()
 {

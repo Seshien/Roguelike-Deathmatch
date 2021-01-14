@@ -7,7 +7,7 @@
 namespace Parser
 {
 	enum Type { SLASH = '/', SERVER, LOBBY, GAME};
-	enum SubType { ERRSUB = '/', NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION, CHANGESTATE, START, ERRORNET};
+	enum SubType { ERRSUB = '/', NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION, CHANGESTATE, START, ERRORNET, INFODUMP_LOBBY, MAP, GAME_END, GAME};
 
 	Type convertToType(int type);
 	SubType convertToSubType(int type);
@@ -73,6 +73,14 @@ namespace Parser
 		void addEventTimeoutReached(int sender, int receiver);
 
 		void addEventTimeoutAnswer(int sender, int receiver);
+
+		void addEventLobby(int sender, int receiver, int numOfVotes);
+
+		void addEventGame(int sender, int receiver, std::chrono::duration<double>);
+
+		void addEventGameEnd(int sender, int receiver, std::string results);
+
+		void addEventMapID(int sender, int receiver, int mapID);
 
 		std::vector<Event> eventList;
 
