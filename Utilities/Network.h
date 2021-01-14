@@ -8,7 +8,7 @@
 #include <chrono>
 
 #include "Logger.h"
-#include "Client.h"
+#include "Contact.h"
 #include "Parser.h"
 
 
@@ -29,7 +29,7 @@ public:
 	void outputNetwork(Parser::Messenger _output);
 private:
 	//Client clientList[16];
-	std::vector <Client> clientList;
+	std::vector <Contact> clientList;
 	SOCKET mainSocket;
 	std::string ipAddress;
 	std::string port;
@@ -69,14 +69,14 @@ private:
 	void manageClientEvent(int descrIndex);
 
 	void readFromClient(int index);
-	void readFromClient(Client* client);
+	void readFromClient(Contact* client);
 
-	void sendToClient(Client* client);
+	void sendToClient(Contact* client);
 
 	void deleteClient(int index);
-	void deleteClient(Client* client);
+	void deleteClient(Contact* client);
 
 	void increaseTimeout();
-	Client * FindClient(int index, SOCKET sock);
+	Contact * FindClient(int index, SOCKET sock);
 };
 

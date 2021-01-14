@@ -289,7 +289,7 @@ int Network::createClientSocket()
 
 	Logger::log("Creating client.");
 
-	auto client = Client();
+	auto client = Contact();
 
 
 
@@ -367,7 +367,7 @@ void Network::acceptClient()
 {
 	sockaddr_in infoStorage;
 	socklen_t addressSize = sizeof(infoStorage);
-	auto client = Client();
+	auto client = Contact();
 
 
 	auto clientFd = accept(this->mainSocket, (struct sockaddr*)& infoStorage, &addressSize);
@@ -414,7 +414,7 @@ void Network::manageClientEvent(int descrIndex)
 	auto revent = descrList[descrIndex + 1].revents;
 
 	int index = -1;
-	Client * managed = nullptr;
+	Contact * managed = nullptr;
 	//ogolnie descrList  0 to jest serwer
 	int clientIndex = descrIndex;
 	//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach
@@ -458,11 +458,11 @@ void Network::manageClientEvent(int descrIndex)
 
 void Network::readFromClient(int index)
 {
-	Client* currentClient = &clientList[index];
+	Contact* currentClient = &clientList[index];
 	readFromClient(currentClient);
 }
 
-void Network::readFromClient(Client* client)
+void Network::readFromClient(Contact* client)
 {
 	char bufferTemp[Constants::bufferLength];
 	//nie znamy jeszcze dlugosci wiadomosci
@@ -540,7 +540,7 @@ void Network::readFromClient(Client* client)
 	}
 }
 
-void Network::sendToClient(Client * client) {
+void Network::sendToClient(Contact * client) {
 	int result = send(client->clientSocket, &client->bufferOutput[0], client->bufferOutput.size(), 0);
 	if (result == SOCKET_ERROR) 
 	{
@@ -566,7 +566,7 @@ void Network::deleteClient(int index)
 	//Parser wiadomosc o usunieciu playera
 	Logger::log("Client " + std::to_string(playerIndex) + " was deleted");
 }
-void Network::deleteClient(Client * client)
+void Network::deleteClient(Contact * client)
 {
 	for (int i = 0; i < clientList.size(); i++)
 		if (client->clientSocket = clientList[i].clientSocket)
@@ -593,9 +593,9 @@ void Network::increaseTimeout()
 
 }
 
-Client * Network::FindClient(int index, SOCKET sock = -1)
+Contact * Network::FindClient(int index, SOCKET sock = -1)
 {
-	Client * managed = nullptr;
+	Contact * managed = nullptr;
 	//ogolnie descrList  0 to jest serwer
 	int clientIndex = index;
 	//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach

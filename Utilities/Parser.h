@@ -65,7 +65,7 @@ namespace Parser
 
 		void addEventNewPlayer(int sender, int receiver, std::string name);
 
-		void addEventDiscPlayer(int sender, int receiver, std::string name);
+		void addEventDiscPlayer(int sender, int receiver, std::string name = std::string());
 
 		void addEventTimeoutReached(int sender, int receiver);
 

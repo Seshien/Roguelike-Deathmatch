@@ -155,18 +155,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Utilities\Client.cpp" />
+    <ClCompile Include="..\Utilities\Contact.cpp" />
     <ClCompile Include="..\Utilities\Logger.cpp" />
     <ClCompile Include="..\Utilities\Network.cpp" />
     <ClCompile Include="..\Utilities\Parser.cpp" />
     <ClCompile Include="Client RLD.cpp" />
+    <ClCompile Include="Client.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Utilities\Client.h" />
+    <ClInclude Include="..\Utilities\Contact.h" />
     <ClInclude Include="..\Utilities\Constants.h" />
     <ClInclude Include="..\Utilities\Logger.h" />
     <ClInclude Include="..\Utilities\Network.h" />
     <ClInclude Include="..\Utilities\Parser.h" />
+    <ClInclude Include="Client.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,7 +4,7 @@
 #include <ws2tcpip.h>
 
 #include "Constants.h"
-class Client
+class Contact
 {
 public:
 

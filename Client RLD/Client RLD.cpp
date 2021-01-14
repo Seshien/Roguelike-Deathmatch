@@ -2,10 +2,12 @@
 //
 
 #include <iostream>
+#include "Client.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	Client client;
+	client.startClient();
 }
 
 // Uruchomienie programu: Ctrl + F5 lub menu Debugowanie > Uruchom bez debugowania

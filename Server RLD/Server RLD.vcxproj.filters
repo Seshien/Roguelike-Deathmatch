@@ -30,9 +30,6 @@
     <ClCompile Include="src\Server RLD.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="..\Utilities\Client.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="..\Utilities\Logger.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
@@ -40,6 +37,9 @@
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="..\Utilities\Parser.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Utilities\Contact.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,9 +56,6 @@
     <ClInclude Include="src\Server.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utilities\Client.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utilities\Constants.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
@@ -69,6 +66,9 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="..\Utilities\Parser.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utilities\Contact.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>
