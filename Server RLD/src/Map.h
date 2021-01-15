@@ -14,12 +14,12 @@ class Map
 	};
 	
 public:
-	Map(int mapID)
+	Map()
+	{
+	}
+	void init(std::string path, int mapID)
 	{
 		this->mapID = mapID;
-	}
-	void init(std::string path)
-	{
 		loadFromFile(path);
 	}
 	void loadFromFile(std::string path)

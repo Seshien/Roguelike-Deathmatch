@@ -7,10 +7,10 @@
 #include <string>
 #include <chrono>
 
+#include "Event.h"
 #include "Logger.h"
 #include "Contact.h"
 #include "Parser.h"
-
 
 class Network
 {

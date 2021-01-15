@@ -2,52 +2,12 @@
 #include <vector>
 #include <cstring>
 #include <string>
+#include "Event.h"
 #include "Constants.h"
 #include "Logger.h"
 namespace Parser
 {
-	enum Type { SLASH = '/', SERVER, LOBBY, GAME};
-	enum SubType { ERRSUB = '/', NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION, CHANGESTATE, START, ERRORNET, INFODUMP_LOBBY, MAP, GAME_END, GAME};
 
-	Type convertToType(int type);
-	SubType convertToSubType(int type);
-
-	struct Event
-	{
-		std::string size;
-		int sender; // od kogo jest ta wiadomosc
-		int receiver; // dla kogo jest ta wiadomosc, 0 to serwer, reszta to playerId poszczegolnych graczy
-		//serwer, lobby, gra
-		Type type;
-		//gracz sie polaczyl, gracz sie rozlaczyl, gracz wykonal ruch, gracz wykonal akcje, zmiana stanu gracza, gracz zaglosowal, timeout, 
-		SubType subtype; // typ eventu, moze dac jako enumerator 
-		std::string subdata;
-
-		Event(int _sender, int _receiver, Type _type, SubType _subtype, std::string _subdata)
-		{
-			int temp = 4 * sizeof(char) + _subdata.size();
-			size = std::to_string((temp)) + "|";
-			sender = _sender;
-			receiver = _receiver;
-			type = _type;
-			subtype = _subtype;
-			subdata = std::string(_subdata);
-		}
-		Event(int _sender, int _receiver, int _type, int _subtype, std::string _subdata)
-		{
-			int temp = 4 * sizeof(char) + _subdata.size();
-			size = std::to_string((temp)) + "|";
-			sender = _sender;
-			receiver = _receiver;
-			type = convertToType(_type);
-			subtype = convertToSubType(_subtype);
-			subdata = std::string(_subdata);
-		}
-	};
-
-	Event decodeBytes(std::string data);
-
-	std::string encodeBytes(Event ev);
 
 	class Messenger
 	{
@@ -74,13 +34,22 @@ namespace Parser
 
 		void addEventTimeoutAnswer(int sender, int receiver);
 
+		//trzy fazy gry, info dump
+
 		void addEventLobby(int sender, int receiver, int numOfVotes);
 
-		void addEventGame(int sender, int receiver, std::chrono::duration<double>);
+		void addEventMidGame(int sender, int receiver, std::chrono::duration<double>);
 
 		void addEventGameEnd(int sender, int receiver, std::string results);
 
 		void addEventMapID(int sender, int receiver, int mapID);
+
+		//client glosuje, serwer wysyla wiadomosc z liczba glosow
+
+		void addEventVote(int sender, int receiver);
+		void addEventVote(int sender, int receiver, int numOfVotes);
+
+		void addEventResetClient(int sender, int receiver);
 
 		std::vector<Event> eventList;
 

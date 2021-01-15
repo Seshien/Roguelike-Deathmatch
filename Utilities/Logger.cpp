@@ -70,15 +70,15 @@ namespace Logger
 
 	void logNetworkError() {
 		int err = WSAGetLastError();
-		wchar_t* s = NULL;
-		FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL, err,
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPWSTR)&s, 0, NULL);
-		std::cout << "Error: " << err << std::endl;
-		fprintf(stderr, "%S\n", s);
-		file << "Error: "<< err << std::endl;
-		file << s << std::endl << std::flush;
-		LocalFree(s);
+
+	//	LPSTR s = nullptr;
+	//	int size = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+	//		NULL, err,
+	//		0,
+	//		(LPWSTR)&s, 0, NULL);
+
+		std::cout << "Error: " << err << std::endl << std::endl << std::flush;
+		file << "Error: "<< err << std::endl << std::endl << std::flush;
+	//	LocalFree(s);
 	}
 };

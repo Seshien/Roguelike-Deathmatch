@@ -6,15 +6,17 @@
 
 #include "Map.h"
 #include "Player.h"
-#include "../../Utilities/Logger.h"
-#include "../../Utilities/Network.h"
-#include "../../Utilities/Parser.h"
-
+#include "..\..\Utilities\Event.h"
+#include "..\..\Utilities\Parser.h"
+#include "..\..\Utilities\Logger.h"
+#include "..\..\Utilities\Network.h"
+#include "..\..\Utilities\Parser.h"
+#include "..\..\Utilities\Constants.h"
 
 class Server
 {
 	public:
-		enum GameState { LOBBY, GAME, GAME_END };
+		enum GameState { LOBBY, GAME_MID, GAME_END };
 		GameState gameState;
 
 		Server()
@@ -51,6 +53,7 @@ class Server
 		void startLobby()
 		{
 			//poczatek prawdziwej dzialalnosci serwera, nie wiem co tu dac zbytnio
+			this->gameState = LOBBY;
 		}
 		void loopLobby();
 		void startGame()
@@ -74,6 +77,8 @@ class Server
 		void handleDisconnect(int playerID);
 		void InfoDump(int playerId);
 
+		void handleVote(Parser::Event ev);
+
 		void loadConfig();
 
 		void processConfigLine(std::string line);
@@ -84,12 +89,13 @@ class Server
 
 		std::chrono::duration<double> getCurrentGameTime();
 
+		Player * getPlayer(int playerID);
+
 		void setConfigValue(std::string token, std::string value);
 		std::vector<Player> playerList;
 		std::string confName = "./data/config.txt";
 		std::string mapPath = "./data/world0.txt";
 		std::string port = "7777";
-		const int SERVER_ID = 0;
 		Map map;
 		Network network;
 		int time;

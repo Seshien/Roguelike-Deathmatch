@@ -11,6 +11,7 @@ public:
 	}
 	enum State { ACTIVE, ALIVE, DEAD, INACTIVE };
 	bool timeout = false;
+	bool voted = false;
 	int playerID;
 	std::string name;
 	State state;

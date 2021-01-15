@@ -2,17 +2,27 @@
 
 void Client::startClient()
 {
-	int result = 1;
 	this->startLogger();
-	//
 	this->loadConfig();
+	//
+	this->refreshClient();
+
+	mainLoop();
+
+}
+void Client::refreshClient()
+{
+	int result = 1;
+	output = Parser::Messenger();
+	input = Parser::Messenger();
+	playerList.clear();
+	this->ID = -1;
 	//probujemy rozpoczac polaczenie
 	while (true)
 	{
 		result = network.startClient(this->IpAddress, this->port);
 		if (result == 0)
 		{
-
 			break;
 		}
 		Logger::log("Connecting to server failed. Press something to try again");
@@ -21,8 +31,6 @@ void Client::startClient()
 
 	//przygotujemy prosbe o przyjecie i wysylamy nazwe;
 	output.addEventNewPlayer(ID, 0, playerName);
-	mainLoop();
-
 }
 void Client::mainLoop()
 {
@@ -53,7 +61,7 @@ void Client::handleEvents(Parser::Messenger mess)
 			handleServer(ev);
 			break;
 		case Parser::LOBBY:
-			//handleLobby(ev);
+			handleLobby(ev);
 			break;
 		case Parser::GAME:
 			//handleGame(ev);
@@ -91,6 +99,33 @@ void Client::handleServer(Parser::Event ev)
 		//tej wiadomosci nie powinien otrzymac klient nigdy
 		Logger::log("Error: wrong type of event (TIMEOUTANSWER)");
 		break;
+	case Parser::INFODUMP_LOBBY:
+		//wlaczamy widok lobby, z widokiem mapy
+		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
+		output.addEventVote(this->ID, Constants::SERVER_ID);
+		break;
+	case Parser::INFODUMP_GAME_MID:
+		Logger::log("Czas trwania gry:" + ev.subdata);
+		break;
+	case Parser::INFODUMP_GAME_END:
+		Logger::log("Statystyki:" + ev.subdata);
+		break;
+	case Parser::RESET:
+		refreshClient();
+		break;
+	default:
+		Logger::log("Error, event type not found.");
+	}
+}
+
+void Client::handleLobby(Parser::Event ev)
+{
+	switch (ev.subtype)
+	{
+	case Parser::VOTE:
+		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
+		break;
+
 	default:
 		Logger::log("Error, event type not found.");
 	}
@@ -110,6 +145,9 @@ void Client::handleInitPlayer(Parser::Event ev)
 	this->ID = newID;
 	output.addInnerNewPlayer(0, -1, ID);
 	Logger::log("New ID " + std::to_string(this->ID));
+
+	//you are a player too now
+	playerList.push_back(this->playerName);
 }
 
 void Client::handleNewPlayer(Parser::Event ev)

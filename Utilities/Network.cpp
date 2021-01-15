@@ -79,8 +79,9 @@ Parser::Messenger Network::inputNetwork()
 	else
 	{
 		//to znaczy ze klient nie jest podlaczony do serwera, albo cos zlego sie stalo z serwerem. Chyba najlepszym wyjsciem bylby reset aplikacji?
-		Logger::log("Your application is not connected to any contact. Do you want to restart connection?");
+		Logger::log("Your application is not connected to any contact. Do you want to restart connection? (Your only choice is yes)");
 		std::getchar();
+		input.addEventResetClient(this->networkID, this->networkID);
 	}
 	//poczatek cyklu
 	timer = std::chrono::system_clock::now();
@@ -539,7 +540,7 @@ void Network::readFromClient(Contact* client)
 		{
 			Logger::log("Buffer is bigger or same size as message lenght.");
 			Parser::Event ev = Parser::decodeBytes(std::string(client->bufferInput, 0, client->msgExpectedLenght));
-			Logger::log("Message created");
+			Logger::log("Message recreated");
 			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
 			if (ev.receiver != this->networkID)
 			{

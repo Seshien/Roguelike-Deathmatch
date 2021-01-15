@@ -9,7 +9,7 @@ void Server::startLogger()
 
 void Server::startMap()
 {
-	this->map.init(mapPath);
+	this->map.init(mapPath, 0);
 }
 
 void Server::loopLobby()
@@ -82,7 +82,14 @@ void Server::handleServer(Parser::Event ev)
 
 void Server::handleLobby(Parser::Event ev)
 {
-
+	switch (ev.subtype)
+	{
+	case Parser::VOTE:
+		handleVote(ev);
+		break;
+	default:
+		Logger::log("Error, event type not found.");
+	}
 }
 void Server::handleGame(Parser::Event ev)
 {
@@ -91,6 +98,8 @@ void Server::handleGame(Parser::Event ev)
 void Server::handleNewPlayer(Parser::Event ev)
 {
 	std::string playerName = ev.subdata;
+	int playerID;
+	bool old = false;
 	for (Player &player : this->playerList)
 	{
 		if (player.name == playerName)
@@ -99,8 +108,9 @@ void Server::handleNewPlayer(Parser::Event ev)
 			{
 				//przyjmujemy tego gracza i nadajemy mu stare ID
 				player.state = Player::ACTIVE;
-				output.addInnerNewPlayer(ev.sender, 0, player.playerID);
-				return;
+				playerID = player.playerID;
+				old = true;
+				break;
 			}
 			else
 			{
@@ -113,8 +123,12 @@ void Server::handleNewPlayer(Parser::Event ev)
 	}
 	//nie ma gracza o takiej nazwie
 	//czyli tworzymy nowego gracza
-	int playerID = this->playerList.size() + 1;
-	playerList.push_back(Player(playerID, playerName));
+	if (!old)
+	{
+		playerID = this->playerList.size() + 1;
+		playerList.push_back(Player(playerID, playerName));
+	}
+
 	//tworzymy Event wewnetrzny ktory mowi network o tym ze trzeba zmienic id na playerID, network potem przekazuje to dalej
 	output.addInnerNewPlayer(ev.sender, 0, playerID);
 
@@ -125,7 +139,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 	for (Player &player : this->playerList)
 	{
 		if (player.playerID == playerID) continue;
-		output.addEventNewPlayer(0, player.playerID, playerName);
+		output.addEventNewPlayer(Constants::SERVER_ID, player.playerID, playerName);
 	}
 
 	
@@ -179,6 +193,24 @@ void Server::handleTimeoutAnswer(Parser::Event ev)
 	player->timeout = false;
 }
 
+void Server::handleVote(Parser::Event ev)
+{
+	Player * player = this->getPlayer(ev.sender);
+	if (player->voted)
+	{
+		player->voted = false;
+		this->numOfVotes--;
+	}
+	else
+	{
+		player->voted = true;
+		this->numOfVotes++;
+	}
+	Logger::log("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(playerList.size()));
+	for (auto player : playerList)
+		output.addEventVote(Constants::SERVER_ID, player.playerID, numOfVotes);
+
+}
 // TO DO
 std::string Server::getResults() {
 	return std::string();
@@ -193,24 +225,24 @@ void Server::InfoDump(int playerId) {
 	// Wysylamy graczowi nazwy wszystkich pozostalych graczy w przypadku dolaczenia do gry
 	for (auto player : this->playerList) {
 		if (player.playerID != playerId) {
-			output.addEventNewPlayer(SERVER_ID, playerId, player.name);
+			output.addEventNewPlayer(Constants::SERVER_ID, playerId, player.name);
 		}
 	}
 	// Wysylamy ID mapy w kazdym wypadku niezaleznie od stanu gry
-	output.addEventMapID(SERVER_ID, playerId, this->map.getMapID());
+	output.addEventMapID(Constants::SERVER_ID, playerId, this->map.getMapID());
 
 	// Wiadomosci zalezne od stanu gry
 	switch (gameState) {
 	case LOBBY:
-		output.addEventLobby(SERVER_ID, playerId, numOfVotes);
+		output.addEventLobby(Constants::SERVER_ID, playerId, numOfVotes);
 		break;
-	case GAME:
+	case GAME_MID:
 		// Wysylamy fakt, ze jest w grze oraz czas trwania danej gry. (za pomoca subType?)
-		output.addEventGame(SERVER_ID, playerId, getCurrentGameTime());
+		output.addEventMidGame(Constants::SERVER_ID, playerId, getCurrentGameTime());
 		break;
 	case GAME_END:
 		// wysylamy wyniki wszystkich graczy (nazwy juz dostanie)
-		output.addEventGameEnd(SERVER_ID, playerId, getResults());
+		output.addEventGameEnd(Constants::SERVER_ID, playerId, getResults());
 		break;
 	}
 	//output.addEvent(SERVER_ID, playerId, Parser::SERVER, Parser::INFODUMP, subdata);
@@ -264,4 +296,21 @@ void Server::setConfigValue(std::string token, std::string value)
 	else if (token == "special") return;
 	else if (token == "port") this->port = value;
 	else Logger::log("Unknown line in config file");
+}
+
+Player * Server::getPlayer(int playerID)
+{
+	if (playerID == playerList[playerID - 1].playerID) 
+		return &playerList[playerID - 1];
+	else
+	{
+		//czy tak konstrukcja dziala?
+		for (auto& player : playerList)
+		{
+			if (playerID == player.playerID)
+				return &player;
+		}
+	}
+	Logger::log("Player not found");
+	return nullptr;
 }
