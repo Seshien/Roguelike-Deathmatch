@@ -30,6 +30,7 @@ namespace Logger
 	{
 		file.close();
 	}
+
 	void log(std::string text)
 	{
 		if (!_file)
@@ -50,7 +51,7 @@ namespace Logger
 		std::cout << text << " " << value << std::endl << std::flush;
 		file << text << " " << value << std::endl << std::flush;
 	}
-	void log(int sender, int receiver, int type, int subtype, std::string subdata)
+	void log(Parser::Event ev)
 	{
 		if (!_file)
 		{
@@ -58,14 +59,14 @@ namespace Logger
 			return;
 		}
 		std::cout << "Event:" << std::endl << 
-			"sender:receiver - " << sender << " : " << receiver << std::endl <<
-			"type:subtype - " << type << " : " << subtype << std::endl <<
-			"subdata - " << subdata << std::endl << std::flush;
+			"sender:receiver - " << ev.sender << " : " << ev.receiver << std::endl <<
+			"type:subtype - " << Parser::convertToString(ev.type) << " : " << Parser::convertToString(ev.subtype) << std::endl <<
+			"subdata - " << ev.subdata << std::endl << std::flush;
 
 		file << "Event:" << std::endl <<
-			"sender:receiver - " << sender << " : " << receiver << std::endl <<
-			"type:subtype - " << type << " : " << subtype << std::endl <<
-			"subdata - " << subdata << std::endl << std::flush;
+			"sender:receiver - " << ev.sender << " : " << ev.receiver << std::endl <<
+			"type:subtype - " << Parser::convertToString(ev.type) << " : " << Parser::convertToString(ev.subtype) << std::endl <<
+			"subdata - " << ev.subdata << std::endl << std::flush;
 	}
 
 	void logNetworkError() {

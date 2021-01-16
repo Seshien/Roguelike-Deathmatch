@@ -57,13 +57,18 @@ void Client::handleEvents(Parser::Messenger mess)
 	for (auto& ev : mess.eventList) {
 		switch (ev.type)
 		{
-		case Parser::SERVER:
+		case Parser::Type::SERVER:
 			handleServer(ev);
 			break;
-		case Parser::LOBBY:
+		case Parser::Type::LOBBY:
 			handleLobby(ev);
 			break;
-		case Parser::GAME:
+		case Parser::Type::GAME:
+			//handleGame(ev);
+			break;
+		case Parser::Type::ERRORNET:
+			if (ev.subtype == Parser::SubType::RESET)
+				refreshClient();
 			//handleGame(ev);
 			break;
 		default:
@@ -83,35 +88,35 @@ void Client::handleServer(Parser::Event ev)
 {
 	switch (ev.subtype)
 	{
-	case Parser::INITPLAYER:
+	case Parser::SubType::INITPLAYER:
 		handleInitPlayer(ev);
 		break;
-	case Parser::NEWPLAYER:
+	case Parser::SubType::NEWPLAYER:
 		handleNewPlayer(ev);
 		break;
-	case Parser::DISCPLAYER:
+	case Parser::SubType::DISCPLAYER:
 		handleDisconnect(ev);
 		break;
-	case Parser::TIMEOUT:
+	case Parser::SubType::TIMEOUT:
 		handleTimeout(ev);
 		break;
-	case Parser::TIMEOUTANSWER:
+	case Parser::SubType::TIMEOUTANSWER:
 		//tej wiadomosci nie powinien otrzymac klient nigdy
 		Logger::log("Error: wrong type of event (TIMEOUTANSWER)");
 		break;
-	case Parser::INFODUMP_LOBBY:
+	case Parser::SubType::INFODUMP_LOBBY:
 		//wlaczamy widok lobby, z widokiem mapy
 		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
 		output.addEventVote(this->ID, Constants::SERVER_ID);
 		break;
-	case Parser::INFODUMP_GAME_MID:
+	case Parser::SubType::INFODUMP_GAME_MID:
 		Logger::log("Czas trwania gry:" + ev.subdata);
 		break;
-	case Parser::INFODUMP_GAME_END:
+	case Parser::SubType::INFODUMP_GAME_END:
 		Logger::log("Statystyki:" + ev.subdata);
 		break;
-	case Parser::RESET:
-		refreshClient();
+	case Parser::SubType::RESET:
+
 		break;
 	default:
 		Logger::log("Error, event type not found.");
@@ -122,7 +127,7 @@ void Client::handleLobby(Parser::Event ev)
 {
 	switch (ev.subtype)
 	{
-	case Parser::VOTE:
+	case Parser::SubType::VOTE:
 		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
 		break;
 

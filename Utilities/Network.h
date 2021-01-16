@@ -28,13 +28,11 @@ public:
 	//wtedy bysmy zamiast zastepowac outputa, appendowaæ zawartoœæ nowego do starego
 	void outputNetwork(Parser::Messenger _output);
 private:
-	//Client clientList[16];
 	std::vector <Contact> clientList;
 	SOCKET mainSocket;
 	std::string ipAddress;
 	std::string port;
 	std::vector<pollfd> descrList;
-	//pollfd descrList[17];
 
 	//decrease or increase, depending on connected clients, obsoleted
 	//int clientAmount;

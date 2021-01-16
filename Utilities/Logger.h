@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <winsock2.h>
 
+#include "Event.h"
+
 namespace Logger
 {
 	void startLogger();
@@ -12,7 +14,7 @@ namespace Logger
 	void endLogger();
 	void log(std::string text);
 	void log(std::string text, int error_code);
-	void log(int receiver, int sender, int type, int subtype, std::string subdata);
+	void log(Parser::Event ev);
 	void logNetworkError();
 
 };

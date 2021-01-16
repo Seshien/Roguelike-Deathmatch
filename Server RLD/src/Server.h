@@ -83,6 +83,10 @@ class Server
 
 		void processConfigLine(std::string line);
 
+		int calcActivePlayerCount();
+
+		int getPlayerCount();
+		int getPlayerCount(Player::State state);
 
 		// TO DO
 		std::string getResults();
@@ -100,6 +104,7 @@ class Server
 		Network network;
 		int time;
 		int numOfVotes;
+		int activePlayerCount;
 
 		std::chrono::system_clock::time_point gameStartTime;
 };

@@ -137,7 +137,7 @@ void Network::handleOutputEvent(Parser::Event ev)
 void Network::handleInnerEvent(Parser::Event ev)
 {
 	Logger::log("Inner Event handling.");
-	if (ev.type == Parser::SERVER && ev.subtype == Parser::INITPLAYER)
+	if (ev.type == Parser::Type::SERVER && ev.subtype == Parser::SubType::INITPLAYER)
 	{
 		//tu powinno byc zapisane nowe id
 		int newID = ev.subdata[0];
@@ -167,7 +167,7 @@ void Network::handleInnerEvent(Parser::Event ev)
 			Logger::log("Error: Client already have ID");
 		}
 	}
-	else if (ev.type == Parser::SERVER && ev.subtype == Parser::DISCPLAYER)
+	else if (ev.type == Parser::Type::SERVER && ev.subtype == Parser::SubType::DISCPLAYER)
 	{
 		for (auto & client : clientList)
 		{
@@ -394,10 +394,11 @@ void Network::acceptClient()
 
 
 	auto clientFd = accept(this->mainSocket, (struct sockaddr*)& infoStorage, &addressSize);
-	if (clientFd == -1)
+	if (clientFd == INVALID_SOCKET)
 	{
 		Logger::log("Accepting new client failed");
 		Logger::logNetworkError();
+
 		return;
 	}
 
@@ -628,7 +629,6 @@ void Network::increaseTimeout()
 
 Contact * Network::FindClient(int index, SOCKET sock = -1)
 {
-	Contact * managed = nullptr;
 	//ogolnie descrList  0 to jest serwer
 	int clientIndex = index;
 	//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach

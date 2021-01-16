@@ -38,14 +38,17 @@ void Server::handleEvents(Parser::Messenger mess)
 	for (auto& ev : mess.eventList) {
 		switch (ev.type)
 		{
-			case Parser::SERVER:
+			case Parser::Type::SERVER:
 				handleServer(ev);
 				break;
-			case Parser::LOBBY:
+			case Parser::Type::LOBBY:
 				handleLobby(ev);
 				break;
-			case Parser::GAME:
+			case Parser::Type::GAME:
 				handleGame(ev);
+				break;
+			case Parser::Type::ERRORNET:
+				//handleError(ev);
 				break;
 			default:
 				Logger::log("Error, event type not found.");
@@ -63,16 +66,16 @@ void Server::handleServer(Parser::Event ev)
 {
 	switch (ev.subtype)
 	{
-	case Parser::NEWPLAYER:
+	case Parser::SubType::NEWPLAYER:
 		handleNewPlayer(ev);
 		break;
-	case Parser::DISCPLAYER:
+	case Parser::SubType::DISCPLAYER:
 		handleDisconnect(ev);
 		break;
-	case Parser::TIMEOUT:
+	case Parser::SubType::TIMEOUT:
 		handleTimeout(ev);
 		break;
-	case Parser::TIMEOUTANSWER:
+	case Parser::SubType::TIMEOUTANSWER:
 		handleTimeoutAnswer(ev);
 		break;
 	default:
@@ -84,7 +87,7 @@ void Server::handleLobby(Parser::Event ev)
 {
 	switch (ev.subtype)
 	{
-	case Parser::VOTE:
+	case Parser::SubType::VOTE:
 		handleVote(ev);
 		break;
 	default:
@@ -128,7 +131,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 		playerID = this->playerList.size() + 1;
 		playerList.push_back(Player(playerID, playerName));
 	}
-
+	this->activePlayerCount++;
 	//tworzymy Event wewnetrzny ktory mowi network o tym ze trzeba zmienic id na playerID, network potem przekazuje to dalej
 	output.addInnerNewPlayer(ev.sender, 0, playerID);
 
@@ -156,8 +159,9 @@ void Server::handleDisconnect(int playerID)
 	int pIndex = playerID - 1;
 	std::string playerName = playerList[pIndex].name;
 	playerList[pIndex].state = Player::INACTIVE;
-
+	this->activePlayerCount--;
 	//rzeczy zwiazane z wewnetrzna logika gry,
+
 	// TODO
 
 	//powiadomienie networka o usunieciu tego gracza
@@ -206,7 +210,7 @@ void Server::handleVote(Parser::Event ev)
 		player->voted = true;
 		this->numOfVotes++;
 	}
-	Logger::log("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(playerList.size()));
+	Logger::log("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
 	for (auto player : playerList)
 		output.addEventVote(Constants::SERVER_ID, player.playerID, numOfVotes);
 
@@ -313,4 +317,27 @@ Player * Server::getPlayer(int playerID)
 	}
 	Logger::log("Player not found");
 	return nullptr;
+}
+
+int Server::calcActivePlayerCount()
+{
+	int count = 0;
+	for (auto& player : this->playerList)
+		if (player.state != Player::INACTIVE)
+			count++;
+	this->activePlayerCount = count;
+	return count;
+}
+
+int Server::getPlayerCount()
+{
+	return this->playerList.size();
+}
+int Server::getPlayerCount(Player::State state)
+{
+	int count = 0;
+	for (auto& player : this->playerList)
+		if (player.state == state)
+			count++;
+	return count;
 }

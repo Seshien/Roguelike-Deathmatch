@@ -4,16 +4,22 @@
 namespace Parser
 {
 
-	enum Type { SLASH = '/', SERVER, LOBBY, GAME };
+	enum class Type { TYPEERROR, SERVER, LOBBY, GAME, ERRORNET };
 	//sprobujmy tak zrobic zeby ERRSUB i ERRORNET byly na poczatku i koncu
-	enum SubType {
-		ERRSUB = '/', NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION,
+	enum class SubType {
+		SUBERROR, NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION,
 		CHANGESTATE, START, INFODUMP_LOBBY, MAP, INFODUMP_GAME_END, INFODUMP_GAME_MID, RESET, ERRORNET
 	};
+	const static std::string typeNames[] = { "Type Error", "Server", "Lobby", "Game", "Error" };
+
+	const static std::string subTypeNames[] = { "SUBERROR", "NEWPLAYER", "INITPLAYER", "DISCPLAYER", "VOTE", "TIMEOUT", "TIMEOUTANSWER", "MOVE", "ACTION",
+		"CHANGESTATE", "START", "INFODUMP_LOBBY", "MAP", "INFODUMP_GAME_END", "INFODUMP_GAME_MID", "RESET", "ERRORNET" };
 
 	Type convertToType(int type);
 	SubType convertToSubType(int type);
 
+	std::string convertToString(Type type);
+	std::string convertToString(SubType type);
 	struct Event
 	{
 		std::string size;
@@ -35,7 +41,6 @@ namespace Parser
 			subtype = _subtype;
 			subdata = std::string(_subdata);
 		}
-		/*
 		Event(int _sender, int _receiver, int _type, int _subtype, std::string _subdata)
 		{
 			int temp = 4 * sizeof(char) + _subdata.size();
@@ -46,7 +51,6 @@ namespace Parser
 			subtype = convertToSubType(_subtype);
 			subdata = std::string(_subdata);
 		}
-		*/
 	};
 
 	Event decodeBytes(std::string data);
