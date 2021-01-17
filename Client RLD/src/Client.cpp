@@ -6,6 +6,8 @@ void Client::startClient()
 	this->loadConfig();
 	this->startWindow();
 
+	this->gameStage = GameStage::NOTJOINED;
+
 	mainLoop();
 
 }
@@ -54,7 +56,6 @@ void Client::connectClient()
 		this->cState = ConnectionState::FAILED;
 		Logger::log("Connecting to server failed");
 	}
-
 }
 void Client::mainLoop()
 {
@@ -95,12 +96,14 @@ void Client::handleIntEvents()
 		{
 			if (event.key.code == sf::Keyboard::L)
 			{
-				std::cout << "the L key was pressed" << std::endl;
-				std::cout << "control:" << event.key.control << std::endl;
-				std::cout << "alt:" << event.key.alt << std::endl;
-				std::cout << "shift:" << event.key.shift << std::endl;
-				std::cout << "system:" << event.key.system << std::endl;
 				this->connectClient();
+			}
+			else if (event.key.code == sf::Keyboard::V)
+			{
+				if (this->gameStage == GameStage::LOBBY)
+					output.addEventVote(this->ID, Constants::SERVER_ID);
+				else
+					Logger::log("You are not in the lobby");
 			}
 		}
 		else if (event.type == sf::Event::Closed)
@@ -153,6 +156,7 @@ void Client::handleNetEvents(Parser::Messenger mess)
 			if (ev.subtype == Parser::SubType::RESET)
 			{
 				this->cState = ConnectionState::FAILED;
+
 			}
 			//handleGame(ev);
 			break;
@@ -186,7 +190,7 @@ void Client::handleServer(Parser::Event ev)
 	case Parser::SubType::INFODUMP_LOBBY:
 		//wlaczamy widok lobby, z widokiem mapy
 		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
-		output.addEventVote(this->ID, Constants::SERVER_ID);
+		this->gameStage = GameStage::LOBBY;
 		break;
 	case Parser::SubType::INFODUMP_GAME_MID:
 		Logger::log("Czas trwania gry:" + ev.subdata);
@@ -252,9 +256,11 @@ void Client::handleDisconnectPlayer(Parser::Event ev)
 		}
 }
 
-void handleLostConnection(Parser::Event ev)
+void Client::handleLostConnection(Parser::Event ev)
 {
-
+	this->output.addInnerDiscPlayer(Constants::SERVER_ID, this->ID);
+	this->cState = ConnectionState::FAILED;
+	this->gameStage = GameStage::NOTJOINED;
 }
 
 void Client::handleTimeout(Parser::Event ev)

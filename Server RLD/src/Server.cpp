@@ -143,7 +143,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 	//tworzymy Event wewnetrzny ktory mowi network o tym ze trzeba zmienic id na playerID, network potem przekazuje to dalej
 	output.addInnerNewPlayer(ev.sender, 0, playerID);
 
-	output.addEventNewPlayer(playerID, 0, playerID);
+	output.addEventNewPlayer(0, playerID, playerID);
 
 	//teraz powinnismy podac info o tej grze Playerowi
 	this->InfoDump(playerID);

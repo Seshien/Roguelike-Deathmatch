@@ -80,7 +80,11 @@ Parser::Messenger Network::inputNetwork(double time)
 		Logger::log("Poll failed\n");
 		Logger::logNetworkError();
 	}
-	else if (result > 0) this->manageEvents(result);
+	else if (result > 0) 
+	{
+		this->manageEvents(result);
+	}
+
 
 	//Zwroc parser albo liste eventow
 	return input;
@@ -541,13 +545,13 @@ void Network::readFromClient(Contact* client)
 			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
 			if (ev.receiver != this->networkID)
 			{
-				Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev.receiver) + ":0");
-				ev.receiver = this->networkID;
+				Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev.receiver) + ":" + std::to_string(this->networkID));
+				//ev.receiver = this->networkID;
 			}
 			if (ev.sender != client->playerId)
 			{
 				Logger::log("Wrong message sender. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(client->playerId));
-				ev.sender = client->playerId;
+				//ev.sender = client->playerId;
 			}
 			//Parser wiadomosc o dostaniu informacji 
 			input.addEvent(ev);
