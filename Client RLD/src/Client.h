@@ -1,5 +1,7 @@
 #pragma once
+#include <iostream>
 #include <string>
+#include <SFML/Graphics.hpp>
 #include "..\..\Utilities\Event.h"
 #include "..\..\Utilities\Network.h"
 #include "..\..\Utilities\Parser.h"
@@ -13,16 +15,32 @@ public:
 	{
 		//tymczasowe ID
 		ID = -1;
+		cState = ConnectionState::NOTCONNECTED;
 	}
 
 	void startClient();
+
 private:
-	void refreshClient();
+
+	enum class ConnectionState {NOTCONNECTED, CONNECTED, FAILED};
+	void connectClient();
+	void startWindow();
+
+
+	sf::RenderWindow window;
+	sf::RectangleShape rectangle;
 	Parser::Messenger output;
 	Parser::Messenger input;
+	
+	sf::View gameView;
+	sf::View lobbyView;
+	sf::View interfaceView;
+
 
 	int ID;
 	int time;
+	ConnectionState cState;
+
 	std::string confName = "./data/config.txt";
 	std::string playerName = "Player One";
 	std::vector<std::string> playerList;
@@ -31,10 +49,13 @@ private:
 	std::string IpAddress = "127.0.0.1";
 	Network network;
 
+	sf::Clock turnTimer;
+
 	void startLogger();
 
 	void mainLoop();
-	void handleEvents(Parser::Messenger mess);
+	void handleNetEvents(Parser::Messenger mess);
+	void handleIntEvents();
 	void handleServer(Parser::Event ev);
 	void handleLobby(Parser::Event ev);
 

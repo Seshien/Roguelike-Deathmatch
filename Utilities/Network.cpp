@@ -53,28 +53,17 @@ int Network::startClient(std::string ipAdress, std::string port)
 	return 0;
 }
 
-Parser::Messenger Network::inputNetwork()
+Parser::Messenger Network::inputNetwork(double time)
 {
 	//timeout to bedzie kiedy cos ostatnio dzialo sie z klientem
 	// jezeli timeout bedzie duzy to wyslac wiadomosc sprawdzajaca czy klient dziala 
 	this->input = Parser::Messenger();
 	int result = -1;
-	if (isServer)
-		this->increaseTimeout();
-	//czas w sekundach, ile ma trwac jeden cykl
-	double time = 0.1;
-	//koniec cyklu
-	std::chrono::duration<double> diff = std::chrono::system_clock::now() - timer;
-	//czas w sekundach, ile trwal jeden cykl
-	auto t = diff.count();
+
 	//jezeli czas trwania cyklu jest dluzszy od ustalonego, WSAPoll jest natychmiastowy
 	if (descrList.size() > 0)
 	{
-		if (t > time)
-			result = WSAPoll(&this->descrList[0], this->descrList.size(), 0);
-		//inaczej trwa tyle ile 
-		else
-			result = WSAPoll(&this->descrList[0], this->descrList.size(), (time - t) * 1000);
+		result = WSAPoll(&this->descrList[0], this->descrList.size(), time * 1000);
 	}
 	else
 	{
@@ -83,8 +72,10 @@ Parser::Messenger Network::inputNetwork()
 		std::getchar();
 		input.addEventResetClient(this->networkID, this->networkID);
 	}
-	//poczatek cyklu
-	timer = std::chrono::system_clock::now();
+
+	if (isServer)
+		this->increaseTimeout();
+
 	if (result == -1) {
 		Logger::log("Poll failed\n");
 		Logger::logNetworkError();

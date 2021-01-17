@@ -17,7 +17,14 @@ void Server::loopLobby()
 	while (true)
 	{
 		//odbieranie wiadomosci
-		this->input = this->network.inputNetwork();
+		auto temp = std::chrono::system_clock::now() - this->turntimer;
+		double wait = 0;
+		if (temp.count() <= Constants::turnTimer)
+			wait = Constants::turnTimer - temp.count();
+
+		this->input = this->network.inputNetwork(wait);
+
+		this->turntimer = std::chrono::system_clock::now();
 		if (input.eventList.size())	
 			Logger::log("------------ Handling Phase ------------");
 		//przetwarzanie ich

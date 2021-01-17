@@ -85,7 +85,7 @@ void Messenger::addEventVote(int sender, int receiver, int numOfVotes) {
 	Logger::log(ev);
 }
 void Messenger::addEventResetClient(int sender, int receiver) {
-	Event ev = Event(sender, receiver, Type::SERVER, SubType::RESET, std::string());
+	Event ev = Event(sender, receiver, Type::ERRORNET, SubType::RESET, std::string());
 	eventList.push_back(ev);
 	Logger::log(ev);
 }

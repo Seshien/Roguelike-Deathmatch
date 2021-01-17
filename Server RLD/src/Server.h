@@ -107,5 +107,6 @@ class Server
 		int activePlayerCount;
 
 		std::chrono::system_clock::time_point gameStartTime;
+		std::chrono::system_clock::time_point turntimer;
 };
 

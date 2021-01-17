@@ -4,44 +4,78 @@ void Client::startClient()
 {
 	this->startLogger();
 	this->loadConfig();
-	//
-	this->refreshClient();
+	this->startWindow();
 
 	mainLoop();
 
 }
-void Client::refreshClient()
+void Client::startWindow()
 {
-	int result = 1;
+	window.create(sf::VideoMode(1000, 1000), "SFML works!");
+	// Initialize the view to a rectangle located at (100, 100) and with a size of 400x200
+	gameView.reset(sf::FloatRect(100, 100, 400, 200));
+	lobbyView.reset(sf::FloatRect(0, 0, 200, 800));
+	interfaceView.reset(sf::FloatRect(0, 0, 400, 200));
+
+	// Set its target viewport to be half of the window
+	gameView.setViewport(sf::FloatRect(0.f, 0.f, 0.8f, 0.8f));
+	lobbyView.setViewport(sf::FloatRect(0.8f, 0.f, 0.2f, 0.8f));
+	interfaceView.setViewport(sf::FloatRect(0.0f, 0.8f, 1.0f, 0.2f));
+
+
+
+
+
+
+
+	this->turnTimer.restart();
+}
+
+void Client::connectClient()
+{
+	if (this->cState == ConnectionState::CONNECTED)
+	{
+		Logger::log("You are connected already");
+		return;
+	}
 	output = Parser::Messenger();
 	input = Parser::Messenger();
 	playerList.clear();
 	this->ID = -1;
 	//probujemy rozpoczac polaczenie
-	while (true)
+	if (network.startClient(this->IpAddress, this->port) == 0)
 	{
-		result = network.startClient(this->IpAddress, this->port);
-		if (result == 0)
-		{
-			break;
-		}
-		Logger::log("Connecting to server failed. Press something to try again");
-		std::getchar();
+		this->cState = ConnectionState::CONNECTED;
+		Logger::log("Connecting to server succeed");
+		output.addEventNewPlayer(ID, 0, playerName);
+	}
+	else
+	{
+		this->cState = ConnectionState::FAILED;
+		Logger::log("Connecting to server failed");
 	}
 
-	//przygotujemy prosbe o przyjecie i wysylamy nazwe;
-	output.addEventNewPlayer(ID, 0, playerName);
 }
 void Client::mainLoop()
 {
-	while (true)
+	while (window.isOpen())
 	{
 		//odbieranie wiadomosci
-		this->input = this->network.inputNetwork();
+		auto time = this->turnTimer.getElapsedTime().asSeconds();
+		double wait = 0;
+		if (time <= Constants::turnTimer)
+			wait = Constants::turnTimer - time;
+
+		if (cState == ConnectionState::CONNECTED)
+			this->input = this->network.inputNetwork(wait);
+
+		this->turnTimer.restart();
+
 		if (input.eventList.size())
 			Logger::log("------------ Handling Phase ------------");
 		//przetwarzanie ich
-		handleEvents(this->input);
+		handleNetEvents(this->input);
+		handleIntEvents();
 		if (output.eventList.size())
 			Logger::log("------------ Output Phase ------------");
 		//wysylanie ich
@@ -51,10 +85,59 @@ void Client::mainLoop()
 		this->output = Parser::Messenger();
 	}
 }
-
-void Client::handleEvents(Parser::Messenger mess)
+void Client::handleIntEvents()
 {
-	for (auto& ev : mess.eventList) {
+	//handling interface events
+	sf::Event event;
+	while (window.pollEvent(event))
+	{
+		if (event.type == sf::Event::KeyPressed)
+		{
+			if (event.key.code == sf::Keyboard::L)
+			{
+				std::cout << "the L key was pressed" << std::endl;
+				std::cout << "control:" << event.key.control << std::endl;
+				std::cout << "alt:" << event.key.alt << std::endl;
+				std::cout << "shift:" << event.key.shift << std::endl;
+				std::cout << "system:" << event.key.system << std::endl;
+				this->connectClient();
+			}
+		}
+		else if (event.type == sf::Event::Closed)
+			window.close();
+	}
+
+	window.clear();
+	rectangle.setSize(sf::Vector2f(1000, 1000));
+
+	window.setView(gameView);
+	rectangle.setFillColor(sf::Color::Green);
+	window.draw(rectangle);
+
+	window.setView(interfaceView);
+	rectangle.setFillColor(sf::Color::Blue);
+	window.draw(rectangle);
+
+	window.setView(lobbyView);
+
+	sf::Text text;
+	sf::Font font;
+	font.loadFromFile("data/arial2.ttf");
+	text.setFont(font);
+	std::string str;
+	for (auto player : playerList) str.append(player + "\n");
+	text.setString(str);
+
+	window.draw(text);
+
+
+	window.display();
+}
+void Client::handleNetEvents(Parser::Messenger mess)
+{
+	//handling network input events
+	for (auto& ev : mess.eventList) 
+	{
 		switch (ev.type)
 		{
 		case Parser::Type::SERVER:
@@ -67,19 +150,13 @@ void Client::handleEvents(Parser::Messenger mess)
 			//handleGame(ev);
 			break;
 		case Parser::Type::ERRORNET:
-			if (ev.subtype == Parser::SubType::RESET)
-				refreshClient();
+			if (ev.subtype == Parser::SubType::RESET);
+
 			//handleGame(ev);
 			break;
 		default:
 			Logger::log("Error, event type not found.");
 		}
-
-		// Wykonaj logike
-		//sender, receiver, type, subdata
-		//Parser::Event newEv = { 0, ev.sender, ev.type, ev.subtype, ev.subdata };
-		// Wpisz wynik w output parser
-		//this->output.addEvent(newEv);
 	}
 }
 
