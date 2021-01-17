@@ -96,7 +96,7 @@ void Network::outputNetwork(Parser::Messenger _output)
 	for (auto & ev : this->output.eventList) 
 	{
 		//jezeli receiver eventu to nasze wlasne id, to jest to event wewnetrzny
-		if (ev.receiver == networkID)
+		if (ev.type == Parser::Type::INNER)
 			handleInnerEvent(ev);
 		else
 			handleOutputEvent(ev);
@@ -128,7 +128,7 @@ void Network::handleOutputEvent(Parser::Event ev)
 void Network::handleInnerEvent(Parser::Event ev)
 {
 	Logger::log("Inner Event handling.");
-	if (ev.type == Parser::Type::SERVER && ev.subtype == Parser::SubType::INITPLAYER)
+	if (ev.subtype == Parser::SubType::INITPLAYER)
 	{
 		//tu powinno byc zapisane nowe id
 		int newID = ev.subdata[0];
@@ -141,10 +141,11 @@ void Network::handleInnerEvent(Parser::Event ev)
 					client.playerId = newID;
 					Logger::log("New ID was given to client. n:o " + std::to_string(newID) + ":" + std::to_string(ev.sender));
 					//kazdy poczatkowy client ma playerid = -1, mimo ze serwer nadaje jakies swoje id 
-					ev.receiver = newID;
-					ev.sender = 0;
-					std::string data = Parser::encodeBytes(ev);
-					client.bufferOutput.append(data);
+					//ev.receiver = newID;
+					//ev.sender = 0;
+					//ev.type = Parser::Type::SERVER;
+					//std::string data = Parser::encodeBytes(ev);
+					//client.bufferOutput.append(data);
 					return;
 				}
 			}
@@ -158,7 +159,7 @@ void Network::handleInnerEvent(Parser::Event ev)
 			Logger::log("Error: Client already have ID");
 		}
 	}
-	else if (ev.type == Parser::Type::SERVER && ev.subtype == Parser::SubType::DISCPLAYER)
+	else if (ev.subtype == Parser::SubType::DISCPLAYER)
 	{
 		for (auto & client : clientList)
 		{
@@ -373,7 +374,11 @@ void Network::manageConnectionEvent()
 		readFromClient(0);
 	}
 	if (revent & POLLHUP)
-		deleteClient(0);
+	{
+		Logger::log("Contact disconnected: creating disconnect Event");
+		input.addEventLostConnection(clientList[0].playerId, this->networkID);
+	}
+
 
 }
 
@@ -507,7 +512,7 @@ void Network::readFromClient(Contact* client)
 	//przetwarzanie wiadomosci
 	while (true)
 	{
-		if (client->msgExpectedLenght = -1)
+		if (client->msgExpectedLenght == -1)
 		{
 			Logger::log("Trying to get message lenght");
 
@@ -610,6 +615,7 @@ void Network::increaseTimeout()
 		clientList[i].timeoutTimer++;
 		if (clientList[i].timeoutTimer > Constants::timeoutValue)
 		{
+			Logger::log("Network Event: Player " + std::to_string(clientList[i].playerId) + " reached timeout time");
 			this->input.addEventTimeoutReached(clientList[i].playerId, 0);
 			clientList[i].timeoutTimer = 0;
 		}

@@ -4,13 +4,13 @@
 namespace Parser
 {
 
-	enum class Type { TYPEERROR, SERVER, LOBBY, GAME, ERRORNET };
+	enum class Type { TYPEERROR, SERVER, LOBBY, GAME, INNER, ERRORNET };
 	//sprobujmy tak zrobic zeby ERRSUB i ERRORNET byly na poczatku i koncu
 	enum class SubType {
 		SUBERROR, NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION,
 		CHANGESTATE, START, INFODUMP_LOBBY, MAP, INFODUMP_GAME_END, INFODUMP_GAME_MID, RESET, ERRORNET
 	};
-	const static std::string typeNames[] = { "Type Error", "Server", "Lobby", "Game", "Error" };
+	const static std::string typeNames[] = { "Type Error", "Server", "Lobby", "Game", "Inner", "Error" };
 
 	const static std::string subTypeNames[] = { "SUBERROR", "NEWPLAYER", "INITPLAYER", "DISCPLAYER", "VOTE", "TIMEOUT", "TIMEOUTANSWER", "MOVE", "ACTION",
 		"CHANGESTATE", "START", "INFODUMP_LOBBY", "MAP", "INFODUMP_GAME_END", "INFODUMP_GAME_MID", "RESET", "ERRORNET" };

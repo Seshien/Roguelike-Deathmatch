@@ -150,8 +150,10 @@ void Client::handleNetEvents(Parser::Messenger mess)
 			//handleGame(ev);
 			break;
 		case Parser::Type::ERRORNET:
-			if (ev.subtype == Parser::SubType::RESET);
-
+			if (ev.subtype == Parser::SubType::RESET)
+			{
+				this->cState = ConnectionState::FAILED;
+			}
 			//handleGame(ev);
 			break;
 		default:
@@ -172,7 +174,7 @@ void Client::handleServer(Parser::Event ev)
 		handleNewPlayer(ev);
 		break;
 	case Parser::SubType::DISCPLAYER:
-		handleDisconnect(ev);
+		handleDisconnectPlayer(ev);
 		break;
 	case Parser::SubType::TIMEOUT:
 		handleTimeout(ev);
@@ -239,7 +241,7 @@ void Client::handleNewPlayer(Parser::Event ev)
 }
 
 
-void Client::handleDisconnect(Parser::Event ev)
+void Client::handleDisconnectPlayer(Parser::Event ev)
 {
 	std::string playerName = ev.subdata;
 	for (int i=0;i<playerList.size();i++)
@@ -248,6 +250,11 @@ void Client::handleDisconnect(Parser::Event ev)
 			playerList.erase(playerList.begin() + i);
 			return;
 		}
+}
+
+void handleLostConnection(Parser::Event ev)
+{
+
 }
 
 void Client::handleTimeout(Parser::Event ev)

@@ -14,16 +14,23 @@ void Messenger::addEvent(Event ev) {
 }
 
 void Messenger::addInnerNewPlayer(int sender, int receiver, int ID) {
-	Event ev = Event(sender, receiver, Type::SERVER, SubType::INITPLAYER, std::string(1,(char) ID));
+	Event ev = Event(sender, receiver, Type::INNER, SubType::INITPLAYER, std::string(1,(char) ID));
 	eventList.push_back(ev);
 	Logger::log(ev);
 }
 
 void Messenger::addInnerDiscPlayer(int sender, int receiver) {
-	Event ev = Event(sender, receiver, Type::SERVER, SubType::DISCPLAYER, std::string());
+	Event ev = Event(sender, receiver, Type::INNER, SubType::DISCPLAYER, std::string());
 	eventList.push_back(ev);
 	Logger::log(ev);
 }
+
+void Messenger::addEventNewPlayer(int sender, int receiver, int ID) {
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::NEWPLAYER, std::string(1, (char)ID));
+	eventList.push_back(ev);
+	Logger::log(ev);
+}
+
 
 void Messenger::addEventNewPlayer(int sender, int receiver, std::string name) {
 	Event ev = Event(sender, receiver, Type::SERVER, SubType::NEWPLAYER, name);
@@ -89,3 +96,10 @@ void Messenger::addEventResetClient(int sender, int receiver) {
 	eventList.push_back(ev);
 	Logger::log(ev);
 }
+void Messenger::addEventLostConnection(int sender, int receiver)
+{
+	Event ev = Event(sender, receiver, Type::ERRORNET, SubType::DISCPLAYER, std::string());
+	eventList.push_back(ev);
+	Logger::log(ev);
+}
+

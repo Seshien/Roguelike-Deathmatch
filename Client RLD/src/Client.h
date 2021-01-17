@@ -23,6 +23,7 @@ public:
 private:
 
 	enum class ConnectionState {NOTCONNECTED, CONNECTED, FAILED};
+	enum class GameStage {NOTJOINED, LOBBY, DEAD, ALIVE};
 	void connectClient();
 	void startWindow();
 
@@ -40,6 +41,7 @@ private:
 	int ID;
 	int time;
 	ConnectionState cState;
+	GameStage gameStage;
 
 	std::string confName = "./data/config.txt";
 	std::string playerName = "Player One";
@@ -62,8 +64,8 @@ private:
 	void handleInitPlayer(Parser::Event ev);
 	void handleNewPlayer(Parser::Event ev);
 	void handleTimeout(Parser::Event ev);
-	void handleDisconnect(Parser::Event ev);
-
+	void handleDisconnectPlayer(Parser::Event ev);
+	void handleLostConnection(Parser::Event ev);
 	void loadConfig();
 
 	void processConfigLine(std::string line);

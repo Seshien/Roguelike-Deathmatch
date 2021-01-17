@@ -17,7 +17,8 @@ void Server::loopLobby()
 	while (true)
 	{
 		//odbieranie wiadomosci
-		auto temp = std::chrono::system_clock::now() - this->turntimer;
+		auto temp = std::chrono::duration_cast<
+			std::chrono::duration<double>>(std::chrono::system_clock::now() - this->turntimer);
 		double wait = 0;
 		if (temp.count() <= Constants::turnTimer)
 			wait = Constants::turnTimer - temp.count();
@@ -141,6 +142,8 @@ void Server::handleNewPlayer(Parser::Event ev)
 	this->activePlayerCount++;
 	//tworzymy Event wewnetrzny ktory mowi network o tym ze trzeba zmienic id na playerID, network potem przekazuje to dalej
 	output.addInnerNewPlayer(ev.sender, 0, playerID);
+
+	output.addEventNewPlayer(playerID, 0, playerID);
 
 	//teraz powinnismy podac info o tej grze Playerowi
 	this->InfoDump(playerID);

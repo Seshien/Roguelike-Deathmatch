@@ -26,6 +26,8 @@ namespace Parser
 
 		void addInnerDiscPlayer(int sender, int receiver);
 
+		void addEventNewPlayer(int sender, int receiver, int ID);
+
 		void addEventNewPlayer(int sender, int receiver, std::string name);
 
 		void addEventDiscPlayer(int sender, int receiver, std::string name = std::string());
@@ -50,6 +52,7 @@ namespace Parser
 		void addEventVote(int sender, int receiver, int numOfVotes);
 
 		void addEventResetClient(int sender, int receiver);
+		void addEventLostConnection(int sender, int receiver);
 
 		std::vector<Event> eventList;
 
