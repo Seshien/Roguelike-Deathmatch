@@ -13,7 +13,7 @@ void Messenger::addEvent(Event ev) {
 	Logger::log(ev);
 }
 
-void Messenger::addInnerNewPlayer(int sender, int receiver, int ID) {
+void Messenger::addInnerInitPlayer(int sender, int receiver, int ID) {
 	Event ev = Event(sender, receiver, Type::INNER, SubType::INITPLAYER, std::string(1,(char) ID));
 	eventList.push_back(ev);
 	Logger::log(ev);
@@ -21,6 +21,12 @@ void Messenger::addInnerNewPlayer(int sender, int receiver, int ID) {
 
 void Messenger::addInnerDiscPlayer(int sender, int receiver) {
 	Event ev = Event(sender, receiver, Type::INNER, SubType::DISCPLAYER, std::string());
+	eventList.push_back(ev);
+	Logger::log(ev);
+}
+
+void Messenger::addEventInitPlayer(int sender, int receiver, int ID) {
+	Event ev = Event(sender, receiver, Type::SERVER, SubType::INITPLAYER, std::string(1, (char)ID));
 	eventList.push_back(ev);
 	Logger::log(ev);
 }

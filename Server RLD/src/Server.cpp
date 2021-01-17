@@ -36,6 +36,7 @@ void Server::loopLobby()
 		this->network.outputNetwork(this->output);
 		if (output.eventList.size()) 
 			Logger::log("------------ Input Phase ------------");
+		this->input = Parser::Messenger();
 		this->output = Parser::Messenger();
 	}
 
@@ -60,6 +61,7 @@ void Server::handleEvents(Parser::Messenger mess)
 				break;
 			default:
 				Logger::log("Error, event type not found.");
+				Logger::log(ev);
 		}
 
 		// Wykonaj logike
@@ -87,7 +89,8 @@ void Server::handleServer(Parser::Event ev)
 		handleTimeoutAnswer(ev);
 		break;
 	default:
-		Logger::log("Error, event type not found.");
+		Logger::log("Error, event subtype not found.");
+		Logger::log(ev);
 	}
 }
 
@@ -99,7 +102,8 @@ void Server::handleLobby(Parser::Event ev)
 		handleVote(ev);
 		break;
 	default:
-		Logger::log("Error, event type not found.");
+		Logger::log("Error, event subtype not found.");
+		Logger::log(ev);
 	}
 }
 void Server::handleGame(Parser::Event ev)
@@ -126,7 +130,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 			else
 			{
 				//odrzucamy gracza, bo juz taki istnieje
-				output.addInnerNewPlayer(ev.sender, 0, -1);
+				output.addInnerInitPlayer(ev.sender, 0, -1);
 				return;
 			}
 		}
@@ -141,9 +145,9 @@ void Server::handleNewPlayer(Parser::Event ev)
 	}
 	this->activePlayerCount++;
 	//tworzymy Event wewnetrzny ktory mowi network o tym ze trzeba zmienic id na playerID, network potem przekazuje to dalej
-	output.addInnerNewPlayer(ev.sender, 0, playerID);
+	output.addInnerInitPlayer(ev.sender, 0, playerID);
 
-	output.addEventNewPlayer(0, playerID, playerID);
+	output.addEventInitPlayer(0, playerID, playerID);
 
 	//teraz powinnismy podac info o tej grze Playerowi
 	this->InfoDump(playerID);

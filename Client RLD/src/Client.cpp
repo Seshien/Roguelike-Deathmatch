@@ -49,7 +49,7 @@ void Client::connectClient()
 	{
 		this->cState = ConnectionState::CONNECTED;
 		Logger::log("Connecting to server succeed");
-		output.addEventNewPlayer(ID, 0, playerName);
+		output.addEventNewPlayer(ID, Constants::SERVER_ID, playerName);
 	}
 	else
 	{
@@ -83,6 +83,7 @@ void Client::mainLoop()
 		this->network.outputNetwork(this->output);
 		if (output.eventList.size())
 			Logger::log("------------ Input Phase ------------");
+		this->input = Parser::Messenger();
 		this->output = Parser::Messenger();
 	}
 }
@@ -158,10 +159,16 @@ void Client::handleNetEvents(Parser::Messenger mess)
 				this->cState = ConnectionState::FAILED;
 
 			}
+			else if (ev.subtype == Parser::SubType::DISCPLAYER)
+			{
+				this->cState = ConnectionState::FAILED;
+				this->handleLostConnection(ev);
+			}
 			//handleGame(ev);
 			break;
 		default:
 			Logger::log("Error, event type not found.");
+			Logger::log(ev);
 		}
 	}
 }
@@ -187,6 +194,9 @@ void Client::handleServer(Parser::Event ev)
 		//tej wiadomosci nie powinien otrzymac klient nigdy
 		Logger::log("Error: wrong type of event (TIMEOUTANSWER)");
 		break;
+	case Parser::SubType::MAP:
+		this->mapID = ev.subdata[0];
+		break;
 	case Parser::SubType::INFODUMP_LOBBY:
 		//wlaczamy widok lobby, z widokiem mapy
 		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
@@ -198,11 +208,9 @@ void Client::handleServer(Parser::Event ev)
 	case Parser::SubType::INFODUMP_GAME_END:
 		Logger::log("Statystyki:" + ev.subdata);
 		break;
-	case Parser::SubType::RESET:
-
-		break;
 	default:
-		Logger::log("Error, event type not found.");
+		Logger::log("Error, event subtype not found.");
+		Logger::log(ev);
 	}
 }
 
@@ -215,7 +223,8 @@ void Client::handleLobby(Parser::Event ev)
 		break;
 
 	default:
-		Logger::log("Error, event type not found.");
+		Logger::log("Error, event subtype not found.");
+		Logger::log(ev);
 	}
 }
 
@@ -226,16 +235,17 @@ void Client::handleInitPlayer(Parser::Event ev)
 	if (newID == -1)
 	{
 		Logger::log("There was a existing player with that nick.");
-		this->playerName += " Copy";
-		output.addEventNewPlayer(ID, 0, playerName);
+		//this->playerName += " Copy";
+		//output.addEventNewPlayer(ID, 0, playerName);
 		return;
 	}
 	this->ID = newID;
-	output.addInnerNewPlayer(0, -1, ID);
+	output.addInnerInitPlayer(0, -1, ID);
 	Logger::log("New ID " + std::to_string(this->ID));
 
 	//you are a player too now
 	playerList.push_back(this->playerName);
+
 }
 
 void Client::handleNewPlayer(Parser::Event ev)

@@ -22,9 +22,11 @@ namespace Parser
 
 		void addEvent(Event ev);
 
-		void addInnerNewPlayer(int sender, int receiver, int ID);
+		void addInnerInitPlayer(int sender, int receiver, int ID);
 
 		void addInnerDiscPlayer(int sender, int receiver);
+
+		void addEventInitPlayer(int sender, int receiver, int ID);
 
 		void addEventNewPlayer(int sender, int receiver, int ID);
 

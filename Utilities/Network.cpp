@@ -126,7 +126,7 @@ void Network::handleOutputEvent(Parser::Event ev)
 			return;
 		}
 	}
-	Logger::log("Event was not served.");
+	Logger::log("Output Event was not served. Probably cause: Player disconnected");
 }
 
 void Network::handleInnerEvent(Parser::Event ev)

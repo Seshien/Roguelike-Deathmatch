@@ -58,15 +58,16 @@ namespace Logger
 			std::cout << "Logger is not initialized" << std::endl;
 			return;
 		}
-		std::cout << "Event:" << std::endl << 
+		
+		std::cout << "----------" << std::endl << "Event:" << std::endl <<
 			"sender:receiver - " << ev.sender << " : " << ev.receiver << std::endl <<
 			"type:subtype - " << Parser::convertToString(ev.type) << " : " << Parser::convertToString(ev.subtype) << std::endl <<
-			"subdata - " << ev.subdata << std::endl << std::flush;
+			"subdata - " << ev.subdata << std::endl << "----------" << std::endl << std::flush;
 
-		file << "Event:" << std::endl <<
+		file << "----------" << std::endl << "Event:" << std::endl <<
 			"sender:receiver - " << ev.sender << " : " << ev.receiver << std::endl <<
 			"type:subtype - " << Parser::convertToString(ev.type) << " : " << Parser::convertToString(ev.subtype) << std::endl <<
-			"subdata - " << ev.subdata << std::endl << std::flush;
+			"subdata - " << ev.subdata << std::endl << "----------" << std::endl << std::flush;
 	}
 
 	void logNetworkError() {

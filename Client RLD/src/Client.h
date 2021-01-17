@@ -40,6 +40,8 @@ private:
 
 	int ID;
 	int time;
+	int mapID;
+
 	ConnectionState cState;
 	GameStage gameStage;
 
