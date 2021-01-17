@@ -130,7 +130,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 			else
 			{
 				//odrzucamy gracza, bo juz taki istnieje
-				output.addInnerInitPlayer(ev.sender, 0, -1);
+				output.addEventInitPlayer(ev.sender, 0, -1);
 				return;
 			}
 		}
