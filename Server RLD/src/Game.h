@@ -15,7 +15,7 @@ public:
 
 	}
 
-	void startGame(int mapID)
+	void startGame()
 	{
 
 	}
@@ -25,15 +25,10 @@ public:
 		this->map.init(mapPath);
 
 	}
-	
-	void handleGameEvent(Parser::Event ev)
-	{
 
-	}
-
-	Parser::Messenger loopObjectEvents()
+	Parser::Messenger loopObjectEvents(Parser::Messenger input)
 	{
-		Parser::Messenger output;
+		output = Parser::Messenger();
 		for (auto object : gameObjectList)
 		{
 			//something
@@ -86,6 +81,7 @@ public:
 private:
 
 	Map map;
+	Parser::Messenger output;
 	std::vector<std::shared_ptr<SpawnableObject>> gameObjectList;
 	std::vector<std::shared_ptr<PlayerObject>> playerObjectList;
 };

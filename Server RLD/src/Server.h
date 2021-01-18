@@ -17,6 +17,7 @@ class Server
 {
 	public:
 		enum GameState { LOBBY, GAME_MID, GAME_END };
+		enum class StateChange {NONE, VOTE_END, GAME_END};
 		GameState gameState;
 
 		Server()
@@ -73,6 +74,8 @@ class Server
 		void handleTimeoutAnswer(Parser::Event ev);
 		void handleDisconnect(Parser::Event ev);
 		void handleDisconnect(int playerID);
+		void handleStateChange();
+
 		void InfoDump(int playerId);
 
 		void handleVote(Parser::Event ev);
@@ -98,12 +101,15 @@ class Server
 		std::string confName = "./data/config.txt";
 		std::string mapPath = "./data/world0.txt";
 		std::string port = "7777";
+
 		int mapID = 0;
 		Network network;
 		Game game;
+
 		int time;
 		int numOfVotes;
 		int activePlayerCount;
+		StateChange stateChange;
 
 		std::chrono::system_clock::time_point gameStartTime;
 		std::chrono::system_clock::time_point turntimer;

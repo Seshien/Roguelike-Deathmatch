@@ -31,8 +31,12 @@ void Server::mainLoop()
 		//przetwarzanie ich
 		handleEvents(this->input);
 		//
+		if (this->gameState == GameState::GAME_MID)
+			this->game.loopObjectEvents(this->gameInput);
 		if (output.eventList.size()) 
 			Logger::log("------------ Output Phase ------------");
+		//
+		if (this->stateChange != StateChange::NONE) handleStateChange();
 		//wysylanie ich
 		this->network.outputNetwork(this->output);
 		if (output.eventList.size()) 
@@ -134,6 +138,23 @@ void Server::handleError(Parser::Event ev)
 	}
 }
 
+void Server::handleStateChange()
+{
+	if (this->stateChange == StateChange::VOTE_END)
+	{
+		this->gameState = GameState::GAME_MID;
+		this->game.startGame();
+		for (auto player : this->playerList)
+		{
+			if (player.state != Player::INACTIVE)
+			{
+				output.addEventMidGame(Constants::SERVER_ID, player.playerID,this->getCurrentGameTime());
+			}
+		}
+
+	}
+}
+
 void Server::handleNewPlayer(Parser::Event ev)
 {
 	std::string playerName = ev.subdata;
@@ -183,7 +204,6 @@ void Server::handleNewPlayer(Parser::Event ev)
 		output.addEventNewPlayer(Constants::SERVER_ID, player.playerID, playerName);
 	}
 
-	
 }
 
 
@@ -258,7 +278,10 @@ void Server::handleVote(Parser::Event ev)
 	Logger::log("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
 	for (auto player : playerList)
 		output.addEventVote(Constants::SERVER_ID, player.playerID, numOfVotes);
-
+	if (this->activePlayerCount >= 2 && this->numOfVotes > this->activePlayerCount / 2)
+	{
+		this->stateChange = StateChange::VOTE_END;
+	}
 }
 // TO DO
 std::string Server::getResults() {

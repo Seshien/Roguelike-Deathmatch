@@ -9,7 +9,7 @@ public:
 		playerID = ID;
 		this->name = name;
 	}
-	enum State { ACTIVE, ALIVE, DEAD, INACTIVE };
+	enum State { ACTIVE, INACTIVE };
 	bool timeout = false;
 	bool voted = false;
 	int playerID;
