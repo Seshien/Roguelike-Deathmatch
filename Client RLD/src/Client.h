@@ -7,6 +7,8 @@
 #include "..\..\Utilities\Parser.h"
 #include "..\..\Utilities\Logger.h"
 #include "..\..\Utilities\Constants.h"
+#include "UIButton.h";
+
 class Client
 {
 public:
@@ -53,6 +55,12 @@ private:
 	std::string IpAddress = "127.0.0.1";
 	Network network;
 
+	//std::array<sf::Texture, 16> tileTextures;
+
+	sf::Texture buttonTexture;
+
+	UIButton getIn;
+
 	sf::Clock turnTimer;
 
 	void startLogger();
@@ -74,10 +82,9 @@ private:
 
 	void setConfigValue(std::string token, std::string value);
 
-
-
-
-
-
+	void loadTileTextures();
+	void loadObjectTextures();
+	void loadUITextures();
+	void graphicsUpdate();
 };
 
