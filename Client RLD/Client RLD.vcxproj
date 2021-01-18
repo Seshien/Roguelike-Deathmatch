@@ -169,7 +169,9 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\SFML\include;D:\Studia\Roguelike Deathmatch\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Client.cpp" />
+    <ClCompile Include="src\PlayerInfo.cpp" />
     <ClCompile Include="src\Tile.cpp" />
+    <ClCompile Include="src\UIBar.cpp" />
     <ClCompile Include="src\UIButton.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +182,9 @@
     <ClInclude Include="..\Utilities\Network.h" />
     <ClInclude Include="..\Utilities\Parser.h" />
     <ClInclude Include="src\Client.h" />
+    <ClInclude Include="src\PlayerInfo.h" />
     <ClInclude Include="src\Tile.h" />
+    <ClInclude Include="src\UIBar.h" />
     <ClInclude Include="src\UIButton.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

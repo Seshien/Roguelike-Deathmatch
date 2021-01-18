@@ -8,6 +8,7 @@
 #include "..\..\Utilities\Logger.h"
 #include "..\..\Utilities\Constants.h"
 #include "UIButton.h";
+#include "UIBar.h";
 
 class Client
 {
@@ -26,6 +27,8 @@ private:
 
 	enum class ConnectionState {NOTCONNECTED, CONNECTED, FAILED};
 	enum class GameStage {NOTJOINED, LOBBY, DEAD, ALIVE};
+		
+
 	void connectClient();
 	void startWindow();
 
@@ -38,6 +41,8 @@ private:
 	sf::View gameView;
 	sf::View lobbyView;
 	sf::View interfaceView;
+
+
 
 
 	int ID;
@@ -58,8 +63,16 @@ private:
 	//std::array<sf::Texture, 16> tileTextures;
 
 	sf::Texture buttonTexture;
+	sf::Texture barTexture;
+
+	std::vector<std::shared_ptr<sf::Texture>> tileObjectsTextures;
+	std::vector<std::vector<std::shared_ptr<sf::Texture>>> playerTextures;
 
 	UIButton getIn;
+	UIButton vote;
+	UIBar hpBar;
+
+	boolean voted;
 
 	sf::Clock turnTimer;
 
@@ -83,7 +96,7 @@ private:
 	void setConfigValue(std::string token, std::string value);
 
 	void loadTileTextures();
-	void loadObjectTextures();
+	void loadPlayerTextures();
 	void loadUITextures();
 	void graphicsUpdate();
 };
