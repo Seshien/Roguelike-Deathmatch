@@ -8,12 +8,12 @@ namespace Parser
 	//sprobujmy tak zrobic zeby ERRSUB i ERRORNET byly na poczatku i koncu
 	enum class SubType {
 		SUBERROR, NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER, MOVE, ACTION,
-		CHANGESTATE, START, INFODUMP_LOBBY, MAP, INFODUMP_GAME_END, INFODUMP_GAME_MID, RESET, ERRORNET
+		CHANGESTATE, START, INFODUMP_LOBBY, MAP, INFODUMP_GAME_END, INFODUMP_GAME_MID, NOCONTACT, NOACCEPT, ERRORNET
 	};
 	const static std::string typeNames[] = { "Type Error", "Server", "Lobby", "Game", "Inner", "Error" };
 
 	const static std::string subTypeNames[] = { "SUBERROR", "NEWPLAYER", "INITPLAYER", "DISCPLAYER", "VOTE", "TIMEOUT", "TIMEOUTANSWER", "MOVE", "ACTION",
-		"CHANGESTATE", "START", "INFODUMP_LOBBY", "MAP", "INFODUMP_GAME_END", "INFODUMP_GAME_MID", "RESET", "ERRORNET" };
+		"CHANGESTATE", "START", "INFODUMP_LOBBY", "MAP", "INFODUMP_GAME_END", "INFODUMP_GAME_MID", "NOCONTACT", "ERRORNET" };
 
 	Type convertToType(int type);
 	SubType convertToSubType(int type);

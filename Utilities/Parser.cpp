@@ -97,14 +97,21 @@ void Messenger::addEventVote(int sender, int receiver, int numOfVotes) {
 	eventList.push_back(ev);
 	Logger::log(ev);
 }
-void Messenger::addEventResetClient(int sender, int receiver) {
-	Event ev = Event(sender, receiver, Type::ERRORNET, SubType::RESET, std::string());
+void Messenger::addEventNoContact(int sender, int receiver) {
+	Event ev = Event(sender, receiver, Type::ERRORNET, SubType::NOCONTACT, std::string());
 	eventList.push_back(ev);
 	Logger::log(ev);
 }
 void Messenger::addEventLostConnection(int sender, int receiver)
 {
 	Event ev = Event(sender, receiver, Type::ERRORNET, SubType::DISCPLAYER, std::string());
+	eventList.push_back(ev);
+	Logger::log(ev);
+}
+
+void Messenger::addEventNoAccept(int sender, int receiver)
+{
+	Event ev = Event(sender, receiver, Type::ERRORNET, SubType::NOACCEPT, std::string());
 	eventList.push_back(ev);
 	Logger::log(ev);
 }

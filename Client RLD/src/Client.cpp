@@ -154,7 +154,7 @@ void Client::handleNetEvents(Parser::Messenger mess)
 			//handleGame(ev);
 			break;
 		case Parser::Type::ERRORNET:
-			if (ev.subtype == Parser::SubType::RESET)
+			if (ev.subtype == Parser::SubType::NOCONTACT)
 			{
 				this->cState = ConnectionState::FAILED;
 

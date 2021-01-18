@@ -57,10 +57,10 @@ void Server::handleEvents(Parser::Messenger mess)
 				handleGame(ev);
 				break;
 			case Parser::Type::ERRORNET:
-				//handleError(ev);
+				handleError(ev);
 				break;
 			default:
-				Logger::log("Error, event type not found.");
+				Logger::log("Error: Event type not found.");
 				Logger::log(ev);
 		}
 
@@ -89,7 +89,7 @@ void Server::handleServer(Parser::Event ev)
 		handleTimeoutAnswer(ev);
 		break;
 	default:
-		Logger::log("Error, event subtype not found.");
+		Logger::log("Error: Event subtype not found.");
 		Logger::log(ev);
 	}
 }
@@ -102,14 +102,29 @@ void Server::handleLobby(Parser::Event ev)
 		handleVote(ev);
 		break;
 	default:
-		Logger::log("Error, event subtype not found.");
+		Logger::log("Error: Event subtype not found.");
 		Logger::log(ev);
 	}
 }
+
 void Server::handleGame(Parser::Event ev)
 {
 
 }
+
+void Server::handleError(Parser::Event ev)
+{
+	switch (ev.subtype)
+	{
+	case Parser::SubType::NOACCEPT:
+		Logger::log("Error: Problem with accepting contacts");
+		break;
+	default:
+		Logger::log("Error: Event subtype not found.");
+		Logger::log(ev);
+	}
+}
+
 void Server::handleNewPlayer(Parser::Event ev)
 {
 	std::string playerName = ev.subdata;
@@ -130,7 +145,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 			else
 			{
 				//odrzucamy gracza, bo juz taki istnieje
-				output.addEventInitPlayer(ev.sender, 0, -1);
+				output.addEventInitPlayer(0, ev.sender, -1);
 				return;
 			}
 		}
@@ -170,6 +185,13 @@ void Server::handleDisconnect(Parser::Event ev)
 
 void Server::handleDisconnect(int playerID)
 {
+	//to znaczy ze to nie jest zalogowany gracz, tylko ktos kto probowal wejsc i mu sie nie udalo
+	if (playerID < 0)
+	{
+		output.addInnerDiscPlayer(playerID, 0);
+		return;
+	}
+
 	int pIndex = playerID - 1;
 	std::string playerName = playerList[pIndex].name;
 	playerList[pIndex].state = Player::INACTIVE;

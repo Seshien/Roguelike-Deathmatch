@@ -70,7 +70,9 @@ private:
 	void deleteClient(int index);
 	void deleteClient(Contact* client);
 
+	void processMessage(Contact* client);
+	int checkMessage(Contact* client, Parser::Event * ev);
+
 	void increaseTimeout();
 	Contact * FindClient(int index, SOCKET sock);
 };
-

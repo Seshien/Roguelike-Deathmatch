@@ -53,8 +53,10 @@ namespace Parser
 		void addEventVote(int sender, int receiver);
 		void addEventVote(int sender, int receiver, int numOfVotes);
 
-		void addEventResetClient(int sender, int receiver);
+		void addEventNoContact(int sender, int receiver);
 		void addEventLostConnection(int sender, int receiver);
+
+		void addEventNoAccept(int sender, int receiver);
 
 		std::vector<Event> eventList;
 

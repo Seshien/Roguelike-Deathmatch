@@ -69,6 +69,7 @@ class Server
 		void handleServer(Parser::Event ev);
 		void handleLobby(Parser::Event ev);
 		void handleGame(Parser::Event ev);
+		void handleError(Parser::Event ev);
 
 		void handleNewPlayer(Parser::Event ev);
 		void handleTimeout(Parser::Event ev);

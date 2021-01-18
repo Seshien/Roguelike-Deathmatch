@@ -70,7 +70,7 @@ Parser::Messenger Network::inputNetwork(double time)
 		//to znaczy ze klient nie jest podlaczony do serwera, albo cos zlego sie stalo z serwerem. Chyba najlepszym wyjsciem bylby reset aplikacji?
 		Logger::log("Your application is not connected to any contact. Do you want to restart connection? (Your only choice is yes)");
 		std::getchar();
-		input.addEventResetClient(this->networkID, this->networkID);
+		input.addEventNoContact(this->networkID, this->networkID);
 	}
 
 	if (isServer)
@@ -377,7 +377,7 @@ void Network::manageConnectionEvent()
 	{
 		readFromClient(0);
 	}
-	if (revent & POLLHUP)
+	if (revent & ~POLLIN)
 	{
 		Logger::log("Contact disconnected: creating disconnect Event");
 		input.addEventLostConnection(clientList[0].playerId, this->networkID);
@@ -398,7 +398,7 @@ void Network::acceptClient()
 	{
 		Logger::log("Accepting new client failed");
 		Logger::logNetworkError();
-
+		input.addEventNoAccept(networkID, networkID);
 		return;
 	}
 
@@ -432,15 +432,15 @@ void Network::acceptClient()
 	this->clientList.push_back(client);
 }
 
-void Network::manageClientEvent(int descrIndex)
+void Network::manageClientEvent(int cIndex)
 {
-	auto sock = this->descrList[descrIndex + 1].fd;
-	auto revent = descrList[descrIndex + 1].revents;
+	auto sock = this->descrList[cIndex + 1].fd;
+	auto revent = descrList[cIndex + 1].revents;
 
 	int index = -1;
 	Contact * managed = nullptr;
 	//ogolnie descrList  0 to jest serwer
-	int clientIndex = descrIndex;
+	int clientIndex = cIndex;
 	//tutaj szukam klienta dla ktorego jest to wydarzenie, sprawdzajac po socketach
 	//moze byc nie potrzebne, ale wolalem to zrobic dla sanity
 	if (clientList[clientIndex].clientSocket == sock)
@@ -472,7 +472,7 @@ void Network::manageClientEvent(int descrIndex)
 	{
 		readFromClient(index);
 	}
-	if (revent & POLLHUP)
+	if (revent & ~POLLIN)
 	{
 		Logger::log("Contact disconnected: creating disconnect Event");
 		input.addEventDiscPlayer(clientList[index].playerId, 0);
@@ -514,58 +514,8 @@ void Network::readFromClient(Contact* client)
 	Logger::log("Content of buffer:  " + std::string(client->bufferInput));
 
 	//przetwarzanie wiadomosci
-	while (true)
-	{
-		if (client->msgExpectedLenght == -1)
-		{
-			Logger::log("Trying to get message lenght");
+	processMessage(client);
 
-			int pos = client->bufferInput.find('|');
-
-			if (pos != -1)
-			{
-				//bierzemy bez znaku |
-				client->msgExpectedLenght = std::stoi(client->bufferInput.substr(0, pos));
-
-				Logger::log("Message lenght: " + client->bufferInput.substr(0, pos));
-
-				//usuwamy takze znak |
-				client->bufferInput.erase(0, pos + 1);
-
-			}
-			//nie mamy rozmiaru wiadomosci nawet, nic wiecej tu nie zrobimy
-			else
-				return;
-		}
-		if (client->bufferInput.size() >= client->msgExpectedLenght)
-		{
-			Logger::log("Buffer is bigger or same size as message lenght.");
-			Parser::Event ev = Parser::decodeBytes(std::string(client->bufferInput, 0, client->msgExpectedLenght));
-			Logger::log("Message recreated");
-			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
-			if (ev.receiver != this->networkID)
-			{
-				Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev.receiver) + ":" + std::to_string(this->networkID));
-				//ev.receiver = this->networkID;
-			}
-			if (ev.sender != client->playerId)
-			{
-				Logger::log("Wrong message sender. ID:Expected " + std::to_string(ev.sender) + ":" + std::to_string(client->playerId));
-				//ev.sender = client->playerId;
-			}
-			//Parser wiadomosc o dostaniu informacji 
-			input.addEvent(ev);
-			Logger::log("Message added to input");
-
-			client->bufferInput.erase(0, client->msgExpectedLenght);
-			client->msgExpectedLenght = -1;
-
-			Logger::log("Buffer erased.");
-		}
-		//nie mamy wystarczajaco duzo wiadomosci by cos z tym zrobic, nic wiecej nie zrobimy
-		else
-			return;
-	}
 }
 
 void Network::sendToClient(Contact * client) 
@@ -610,6 +560,89 @@ void Network::deleteClient(Contact * client)
 		}
 			
 	Logger::log("Error: Client not found");
+}
+
+void Network::processMessage(Contact * client)
+{
+	Logger::log("Processsing message");
+	while (true)
+	{
+		if (client->msgExpectedLenght == -1)
+		{
+			Logger::log("Trying to get message lenght");
+
+			int pos = client->bufferInput.find('|');
+
+			if (pos != -1)
+			{
+				//bierzemy bez znaku |
+				client->msgExpectedLenght = std::stoi(client->bufferInput.substr(0, pos));
+
+				Logger::log("Message lenght: " + client->bufferInput.substr(0, pos));
+
+				//usuwamy takze znak |
+				client->bufferInput.erase(0, pos + 1);
+
+			}
+			//nie mamy rozmiaru wiadomosci nawet, nic wiecej tu nie zrobimy
+			else
+				return;
+		}
+		if (client->bufferInput.size() >= client->msgExpectedLenght)
+		{
+			Logger::log("Buffer is bigger or same size as message lenght.");
+			Parser::Event ev = Parser::decodeBytes(std::string(client->bufferInput, 0, client->msgExpectedLenght));
+			Logger::log("Message recreated");
+			Logger::log("Checking message integrity");
+			//zrobic funkcje ktora lepiej sprawdza to czy wiadomosc dziala TODO
+			if (checkMessage(client, &ev))
+			{
+				input.addEvent(ev);
+				Logger::log("Message added to input");
+			}
+			else
+			{
+				Logger::log("Message had wrong data and was not accepted");
+			}
+			//Parser wiadomosc o dostaniu informacji 
+
+			client->bufferInput.erase(0, client->msgExpectedLenght);
+			client->msgExpectedLenght = -1;
+
+			Logger::log("Buffer erased.");
+		}
+		//nie mamy wystarczajaco duzo wiadomosci by cos z tym zrobic, nic wiecej nie zrobimy
+		else
+			return;
+	}
+}
+
+int Network::checkMessage(Contact * client, Parser::Event * ev)
+{
+	bool good = true;
+	if (this->networkID == -1)
+	{
+		Logger::log("This network have a temporary ID");
+		//ev->receiver = this->networkID;
+	}
+	else if (ev->receiver != this->networkID)
+	{
+		Logger::log("Wrong message destination. ID:Expected " + std::to_string(ev->receiver) + ":" + std::to_string(this->networkID));
+		return false;
+		//ev.receiver = this->networkID;
+	}
+
+	if (ev->sender < 0 && ev->subtype == Parser::SubType::NEWPLAYER)
+	{
+		Logger::log("Sender have a temporary ID");
+		ev->sender = client->playerId;
+	}
+	else if (ev->sender != client->playerId)
+	{
+		Logger::log("Wrong message sender. ID:Expected " + std::to_string(ev->sender) + ":" + std::to_string(client->playerId));
+		return false;
+	}
+	return good;
 }
 
 void Network::increaseTimeout()
