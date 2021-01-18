@@ -2,13 +2,16 @@
 
 void Client::startClient()
 {
+	this->voted = false;
+
 	this->startLogger();
 	this->loadConfig();
-	this->startWindow();
 
 	this->loadTileTextures();
-	this->loadObjectTextures();
+	this->loadPlayerTextures();
 	this->loadUITextures();
+
+	this->startWindow();
 
 	this->gameStage = GameStage::NOTJOINED;
 
@@ -20,17 +23,21 @@ void Client::startWindow()
 	window.create(sf::VideoMode(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT), "Roguelike Deathmatch");
 	window.setFramerateLimit(60);
 	// Initialize the view to a rectangle located at (100, 100) and with a size of 400x200
-	gameView.reset(sf::FloatRect(100, 100, 400, 200));
-	lobbyView.reset(sf::FloatRect(0, 0, 200, 800));
-	interfaceView.reset(sf::FloatRect(0, 0, 400, 200));
+	gameView.reset(sf::FloatRect(100, 100, 768, 576));
+	lobbyView.reset(sf::FloatRect(0, 0, 192, 576));
+	interfaceView.reset(sf::FloatRect(0, 0, 400, 144));
 
 	// Set its target viewport to be half of the window
 	gameView.setViewport(sf::FloatRect(0.f, 0.f, 0.8f, 0.8f));
 	lobbyView.setViewport(sf::FloatRect(0.8f, 0.f, 0.2f, 0.8f));
 	interfaceView.setViewport(sf::FloatRect(0.0f, 0.8f, 1.0f, 0.2f));
 
-	getIn = UIButton(50, 50, 100, 100, "WejdŸ", buttonTexture);
 
+	// Create UI elements
+	getIn = UIButton(20, 25, 160, 64, "Login", buttonTexture);
+	vote = UIButton(20, 460, 160, 64, "Vote", buttonTexture);
+	getIn.changeVisibility(true);
+	hpBar = UIBar(20, 25, 320, 64, barTexture, 100.0f);
 
 
 
@@ -117,7 +124,12 @@ void Client::graphicsUpdate() {
 	text.setString(str);
 
 	// Rysujemy button
-	getIn.draw(window);
+	if(this->gameStage == Client::GameStage::NOTJOINED)
+		getIn.draw(window);
+	if(this->gameStage == Client::GameStage::LOBBY)
+		vote.draw(window);
+	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD)
+		hpBar.draw(window);
 
 	window.draw(text);
 
@@ -133,11 +145,7 @@ void Client::handleIntEvents()
 	{
 		if (event.type == sf::Event::KeyPressed)
 		{
-			if (event.key.code == sf::Keyboard::L)
-			{
-				this->connectClient();
-			}
-			else if (event.key.code == sf::Keyboard::V)
+			if (event.key.code == sf::Keyboard::V)
 			{
 				if (this->gameStage == GameStage::LOBBY)
 					output.addEventVote(this->ID, Constants::SERVER_ID);
@@ -151,8 +159,20 @@ void Client::handleIntEvents()
 		{
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
-				if (getIn.isClickInBounds(event.mouseButton.x, event.mouseButton.y)) {
+				if (getIn.isClickInBounds(event.mouseButton.x - Constants::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+					this->connectClient();
+					getIn.changeVisibility(false);
+					vote.changeVisibility(true);
 					Logger::log("Get in button clicked!");
+				}
+				else if (vote.isClickInBounds(event.mouseButton.x - Constants::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+					output.addEventVote(this->ID, Constants::SERVER_ID);
+					this->voted = !this->voted;
+					Logger::log("Vote button clicked!");
+					if (this->voted)
+						vote.setText("Cancel");
+					else
+						vote.setText("Vote");
 				}
 				Logger::log(std::to_string(event.mouseButton.x));
 				Logger::log(std::to_string(event.mouseButton.y));
@@ -365,12 +385,33 @@ void Client::loadUITextures() {
 	{
 		Logger::log("Error. File button.png not found.");
 	}
+	if (!barTexture.loadFromFile("data/hpbar.png"))
+	{
+		Logger::log("Error. File hpbar.png not found.");
+	}
 }
 
-void Client::loadObjectTextures() {
-
+void Client::loadPlayerTextures() {
+	for (int i = 0; i < 4; i++) {
+		std::vector<std::shared_ptr<sf::Texture>> texture;
+		texture.push_back(std::make_shared<sf::Texture>());
+		texture.push_back(std::make_shared<sf::Texture>());
+		texture.push_back(std::make_shared<sf::Texture>());
+		texture.push_back(std::make_shared<sf::Texture>());
+		texture[0]->loadFromFile("data/knight" + std::to_string(i) + ".png", sf::IntRect(0, 0, 32, 32));
+		texture[1]->loadFromFile("data/knight" + std::to_string(i) + ".png", sf::IntRect(32, 0, 32, 32));
+		texture[2]->loadFromFile("data/knight" + std::to_string(i) + ".png", sf::IntRect(0, 32, 32, 32));
+		texture[3]->loadFromFile("data/knight" + std::to_string(i) + ".png", sf::IntRect(32, 32, 32, 32));
+		playerTextures.push_back(texture);
+	}
 }
 
 void Client::loadTileTextures() {
-
+	for (int j = 0; j < 4; j++) {
+		for (int i = 0; i < 8; i++) {
+			if (j == 3 && i == 7) break;
+			tileObjectsTextures.push_back(std::make_shared<sf::Texture>());
+			tileObjectsTextures[i + j * 8]->loadFromFile("data/tilesObjects.png", sf::IntRect(i * 32, j * 32, 32, 32));
+		}
+	}
 }

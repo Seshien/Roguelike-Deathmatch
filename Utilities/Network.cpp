@@ -637,6 +637,10 @@ int Network::checkMessage(Contact * client, Parser::Event * ev)
 		Logger::log("Sender have a temporary ID");
 		ev->sender = client->playerId;
 	}
+	else if(ev->sender < 0){
+		Logger::log("Sender has sent wrong message.");
+		return false;
+	}
 	else if (ev->sender != client->playerId)
 	{
 		Logger::log("Wrong message sender. ID:Expected " + std::to_string(ev->sender) + ":" + std::to_string(client->playerId));
