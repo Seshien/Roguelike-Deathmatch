@@ -6,6 +6,10 @@ void Client::startClient()
 	this->loadConfig();
 	this->startWindow();
 
+	this->loadTileTextures();
+	this->loadObjectTextures();
+	this->loadUITextures();
+
 	this->gameStage = GameStage::NOTJOINED;
 
 	mainLoop();
@@ -13,7 +17,8 @@ void Client::startClient()
 }
 void Client::startWindow()
 {
-	window.create(sf::VideoMode(1000, 1000), "SFML works!");
+	window.create(sf::VideoMode(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT), "Roguelike Deathmatch");
+	window.setFramerateLimit(60);
 	// Initialize the view to a rectangle located at (100, 100) and with a size of 400x200
 	gameView.reset(sf::FloatRect(100, 100, 400, 200));
 	lobbyView.reset(sf::FloatRect(0, 0, 200, 800));
@@ -24,7 +29,7 @@ void Client::startWindow()
 	lobbyView.setViewport(sf::FloatRect(0.8f, 0.f, 0.2f, 0.8f));
 	interfaceView.setViewport(sf::FloatRect(0.0f, 0.8f, 1.0f, 0.2f));
 
-
+	getIn = UIButton(50, 50, 100, 100, "WejdŸ", buttonTexture);
 
 
 
@@ -77,6 +82,7 @@ void Client::mainLoop()
 		//przetwarzanie ich
 		handleNetEvents(this->input);
 		handleIntEvents();
+		graphicsUpdate();
 		if (output.eventList.size())
 			Logger::log("------------ Output Phase ------------");
 		//wysylanie ich
@@ -87,6 +93,38 @@ void Client::mainLoop()
 		this->output = Parser::Messenger();
 	}
 }
+
+void Client::graphicsUpdate() {
+	window.clear();
+	rectangle.setSize(sf::Vector2f(1000, 1000));
+
+	window.setView(gameView);
+	rectangle.setFillColor(sf::Color::Green);
+	window.draw(rectangle);
+
+	window.setView(interfaceView);
+	rectangle.setFillColor(sf::Color::Blue);
+	window.draw(rectangle);
+
+	window.setView(lobbyView);
+
+	sf::Text text;
+	sf::Font font;
+	font.loadFromFile("data/arial2.ttf");
+	text.setFont(font);
+	std::string str;
+	for (auto player : playerList) str.append(player + "\n");
+	text.setString(str);
+
+	// Rysujemy button
+	getIn.draw(window);
+
+	window.draw(text);
+
+
+	window.display();
+}
+
 void Client::handleIntEvents()
 {
 	//handling interface events
@@ -109,34 +147,24 @@ void Client::handleIntEvents()
 		}
 		else if (event.type == sf::Event::Closed)
 			window.close();
+		else if (event.type == sf::Event::MouseButtonPressed)
+		{
+			if (event.mouseButton.button == sf::Mouse::Left)
+			{
+				if (getIn.isClickInBounds(event.mouseButton.x, event.mouseButton.y)) {
+					Logger::log("Get in button clicked!");
+				}
+				Logger::log(std::to_string(event.mouseButton.x));
+				Logger::log(std::to_string(event.mouseButton.y));
+				//std::cout << "the right button was pressed" << std::endl;
+				//std::cout << "mouse x: " << event.mouseButton.x << std::endl;
+				//std::cout << "mouse y: " << event.mouseButton.y << std::endl;
+			}
+		}
 	}
 
-	window.clear();
-	rectangle.setSize(sf::Vector2f(1000, 1000));
-
-	window.setView(gameView);
-	rectangle.setFillColor(sf::Color::Green);
-	window.draw(rectangle);
-
-	window.setView(interfaceView);
-	rectangle.setFillColor(sf::Color::Blue);
-	window.draw(rectangle);
-
-	window.setView(lobbyView);
-
-	sf::Text text;
-	sf::Font font;
-	font.loadFromFile("data/arial2.ttf");
-	text.setFont(font);
-	std::string str;
-	for (auto player : playerList) str.append(player + "\n");
-	text.setString(str);
-
-	window.draw(text);
-
-
-	window.display();
 }
+
 void Client::handleNetEvents(Parser::Messenger mess)
 {
 	//handling network input events
@@ -330,4 +358,19 @@ void Client::setConfigValue(std::string token, std::string value)
 	else if (token == "special") return;
 	else if (token == "port") this->port = value;
 	else Logger::log("Unknown line in config file");
+}
+
+void Client::loadUITextures() {
+	if (!buttonTexture.loadFromFile("data/button.png"))
+	{
+		Logger::log("Error. File button.png not found.");
+	}
+}
+
+void Client::loadObjectTextures() {
+
+}
+
+void Client::loadTileTextures() {
+
 }
