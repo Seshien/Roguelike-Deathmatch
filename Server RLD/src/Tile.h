@@ -10,6 +10,11 @@ enum class TileType {
 class Tile
 {
 	TileType type;
+	int itemID;
+	bool isItem;
+	bool isPlayer;
+	bool isSpawnable;
+	int playerID;
 
 public:
 	Tile() {};

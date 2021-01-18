@@ -19,6 +19,9 @@ private:
 public:
 	SpawnableObject(SpawnableObjectType type, int x, int y);
 
+
+	void setAlive(bool state) { isAlive = state; };
+
 	void spawn();
 
 	void decreaseRespawnTime();

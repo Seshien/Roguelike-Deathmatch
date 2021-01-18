@@ -6,11 +6,11 @@
 
 #include "Map.h"
 #include "Player.h"
+#include "Game.h"
 #include "..\..\Utilities\Event.h"
 #include "..\..\Utilities\Parser.h"
 #include "..\..\Utilities\Logger.h"
 #include "..\..\Utilities\Network.h"
-#include "..\..\Utilities\Parser.h"
 #include "..\..\Utilities\Constants.h"
 
 class Server
@@ -35,7 +35,7 @@ class Server
 				return;
 			}
 			startLobby();
-			loopLobby();
+			mainLoop();
 			//startGame();
 			//loopGame();
 			return;
@@ -44,6 +44,7 @@ class Server
 	private:
 		Parser::Messenger output;
 		Parser::Messenger input;
+		Parser::Messenger gameInput;
 
 		void startLogger();
 
@@ -55,14 +56,10 @@ class Server
 			//poczatek prawdziwej dzialalnosci serwera, nie wiem co tu dac zbytnio
 			this->gameState = LOBBY;
 		}
-		void loopLobby();
+		void mainLoop();
 		void startGame()
 		{
 			gameStartTime = std::chrono::system_clock::now();
-		}
-		void loopGame()
-		{
-
 		}
 		void handleEvents(Parser::Messenger parser);
 
@@ -101,8 +98,9 @@ class Server
 		std::string confName = "./data/config.txt";
 		std::string mapPath = "./data/world0.txt";
 		std::string port = "7777";
-		Map map;
+		int mapID = 0;
 		Network network;
+		Game game;
 		int time;
 		int numOfVotes;
 		int activePlayerCount;

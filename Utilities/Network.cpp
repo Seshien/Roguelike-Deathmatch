@@ -550,6 +550,7 @@ void Network::deleteClient(int index)
 	//Parser wiadomosc o usunieciu playera
 	Logger::log("Client " + std::to_string(playerIndex) + " was deleted");
 }
+
 void Network::deleteClient(Contact * client)
 {
 	for (int i = 0; i < clientList.size(); i++)

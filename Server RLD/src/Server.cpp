@@ -9,10 +9,10 @@ void Server::startLogger()
 
 void Server::startMap()
 {
-	this->map.init(mapPath, 0);
+	//this->map.init(mapPath, 0);
 }
 
-void Server::loopLobby()
+void Server::mainLoop()
 {
 	while (true)
 	{
@@ -30,6 +30,7 @@ void Server::loopLobby()
 			Logger::log("------------ Handling Phase ------------");
 		//przetwarzanie ich
 		handleEvents(this->input);
+		//
 		if (output.eventList.size()) 
 			Logger::log("------------ Output Phase ------------");
 		//wysylanie ich
@@ -109,7 +110,15 @@ void Server::handleLobby(Parser::Event ev)
 
 void Server::handleGame(Parser::Event ev)
 {
-
+	for (auto& gEvent : this->gameInput.eventList)
+	{
+		if (ev.sender == gEvent.sender)
+		{
+			gEvent = ev;
+			return;
+		}
+	}
+	this->gameInput.addEvent(ev);
 }
 
 void Server::handleError(Parser::Event ev)
@@ -269,7 +278,7 @@ void Server::InfoDump(int playerId) {
 		}
 	}
 	// Wysylamy ID mapy w kazdym wypadku niezaleznie od stanu gry
-	output.addEventMapID(Constants::SERVER_ID, playerId, this->map.getMapID());
+	output.addEventMapID(Constants::SERVER_ID, playerId, this->mapID);
 
 	// Wiadomosci zalezne od stanu gry
 	switch (gameState) {
