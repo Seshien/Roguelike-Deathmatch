@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "..\..\Utilities\Constants.h"
 class PlayerInfo
 {
 	int playerId;
@@ -16,6 +17,7 @@ class PlayerInfo
 	bool isAlive;
 
 	std::vector<std::shared_ptr<sf::Texture>> textureSet;
+	sf::Sprite sprite;
 
 public:
 	PlayerInfo(int playerId, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount);

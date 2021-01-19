@@ -41,23 +41,18 @@ std::string PlayerInfo::getFacing() {
 void PlayerInfo::draw(sf::RenderWindow& window) {
 	if (this->isAlive) {
 		std::string facing = this->getFacing();
+		this->sprite.setPosition(this->realXPos * Constants::SPRITE_WIDTH, this->realYPos * Constants::SPRITE_HEIGHT);
 		if (facing == "down") {
-			
+			this->sprite.setTexture(*(this->textureSet[0]));
 		}
 		else if (facing == "up") {
-
+			this->sprite.setTexture(*(this->textureSet[1]));
 		}
 		else if (facing == "right") {
-
+			this->sprite.setTexture(*(this->textureSet[2]));
 		}
 		else {
-
+			this->sprite.setTexture(*(this->textureSet[3]));
 		}
-		/*sf::RectangleShape rectangle(sf::Vector2f(304.0f * this->fillPercent / 100.0f, 48));
-		rectangle.setPosition(this->xPos + 8, this->xPos + 8);
-		rectangle.setFillColor(sf::Color(255, 0, 0));
-		window.draw(rectangle);
-		this->sprite.setPosition(sf::Vector2f(this->xPos, this->yPos));
-		window.draw(this->sprite);*/
 	}
 }

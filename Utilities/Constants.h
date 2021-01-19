@@ -5,7 +5,7 @@ namespace Constants
 	const static int msgLengthLimit = 50;
 	//to mozna dac w configu potem
 	const static int sightValue = 5;
-	const static int timeoutValue = 100;
+	const static int timeoutValue = 10000;
 	const static int spikeDmg = 2;
 	const static int defaultHealth = 10;
 	const static int defaultDmg = 3;
@@ -18,8 +18,8 @@ namespace Constants
 	// Opcje grafiki klienta
 	const static int SCREEN_WIDTH = 960;
 	const static int SCREEN_HEIGHT = 720;
-	const static int SPRITE_WIDTH = 16;
-	const static int SPRITE_HEIGHT = 16;
+	const static int SPRITE_WIDTH = 32;
+	const static int SPRITE_HEIGHT = 32;
 
 	const static int ITEM_RESPAWN_TIME = 30;
 	const static int PLAYER_RESPAWN_TIME = 60;

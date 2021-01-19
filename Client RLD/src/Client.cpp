@@ -7,6 +7,8 @@ void Client::startClient()
 	this->startLogger();
 	this->loadConfig();
 
+	this->font.loadFromFile("data/arial2.ttf");
+
 	this->loadTileTextures();
 	this->loadPlayerTextures();
 	this->loadUITextures();
@@ -116,9 +118,8 @@ void Client::graphicsUpdate() {
 	window.setView(lobbyView);
 
 	sf::Text text;
-	sf::Font font;
-	font.loadFromFile("data/arial2.ttf");
-	text.setFont(font);
+
+	text.setFont(this->font);
 	std::string str;
 	for (auto player : playerList) str.append(player + "\n");
 	text.setString(str);
@@ -349,16 +350,13 @@ void Client::loadConfig()
 	else
 	{
 		Logger::log("Config file not found");
-		Logger::log("Creating default config file TODO");
-		//something something
-
 	}
 	file.close();
 }
 
 void Client::processConfigLine(std::string line)
 {
-	std::string delimiter = ":";
+	std::string delimiter = "=";
 	int pos = line.find(delimiter);
 	if (pos == -1)
 	{
@@ -374,8 +372,8 @@ void Client::processConfigLine(std::string line)
 
 void Client::setConfigValue(std::string token, std::string value)
 {
-	if (token == "time") this->time = std::stoi(value);
-	else if (token == "special") return;
+	if (token == "player_name") this->playerName = value;
+	else if (token == "IP") this->IpAddress = value;
 	else if (token == "port") this->port = value;
 	else Logger::log("Unknown line in config file");
 }
@@ -407,9 +405,9 @@ void Client::loadPlayerTextures() {
 }
 
 void Client::loadTileTextures() {
-	for (int j = 0; j < 4; j++) {
+	for (int j = 0; j < 3; j++) {
 		for (int i = 0; i < 8; i++) {
-			if (j == 3 && i == 7) break;
+			if (j == 2 && i == 7) break;
 			tileObjectsTextures.push_back(std::make_shared<sf::Texture>());
 			tileObjectsTextures[i + j * 8]->loadFromFile("data/tilesObjects.png", sf::IntRect(i * 32, j * 32, 32, 32));
 		}

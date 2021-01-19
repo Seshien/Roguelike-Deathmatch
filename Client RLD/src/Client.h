@@ -43,7 +43,7 @@ private:
 	sf::View lobbyView;
 	sf::View interfaceView;
 
-
+	sf::Font font;
 
 
 	int ID;
