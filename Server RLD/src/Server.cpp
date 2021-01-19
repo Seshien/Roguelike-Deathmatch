@@ -32,7 +32,7 @@ void Server::mainLoop()
 		handleEvents(this->input);
 		//
 		if (this->gameState == GameState::GAME_MID)
-			this->game.loopObjectEvents(this->gameInput);
+			this->game.loopGame(this->gameInput);
 		if (output.eventList.size()) 
 			Logger::log("------------ Output Phase ------------");
 		//
@@ -114,13 +114,15 @@ void Server::handleLobby(Parser::Event ev)
 
 void Server::handleGame(Parser::Event ev)
 {
-	for (auto& gEvent : this->gameInput.eventList)
-	{
-		if (ev.sender == gEvent.sender)
+	for (auto it = begin(this->gameInput.eventList); it != end(this->gameInput.eventList);) {
+		if (it->sender == ev.sender)
 		{
-			gEvent = ev;
-			return;
+			it = gameInput.eventList.erase(it);
+			break;
 		}
+
+		else
+			++it;
 	}
 	this->gameInput.addEvent(ev);
 }
@@ -201,7 +203,8 @@ void Server::handleNewPlayer(Parser::Event ev)
 	for (Player &player : this->playerList)
 	{
 		if (player.playerID == playerID) continue;
-		output.addEventNewPlayer(Constants::SERVER_ID, player.playerID, playerName);
+		if (player.state == Player::ACTIVE);
+			output.addEventNewPlayer(Constants::SERVER_ID, player.playerID, playerName);
 	}
 
 }
@@ -296,7 +299,7 @@ void Server::InfoDump(int playerId) {
 	std::string subdata;
 	// Wysylamy graczowi nazwy wszystkich pozostalych graczy w przypadku dolaczenia do gry
 	for (auto player : this->playerList) {
-		if (player.playerID != playerId) {
+		if (player.playerID != playerId && player.state == Player::ACTIVE) {
 			output.addEventNewPlayer(Constants::SERVER_ID, playerId, player.name);
 		}
 	}

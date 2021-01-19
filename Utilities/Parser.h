@@ -37,6 +37,18 @@ namespace Parser
 		void addEventTimeoutReached(int sender, int receiver);
 
 		void addEventTimeoutAnswer(int sender, int receiver);
+		
+		//game events
+
+		void addEventMovement();
+
+		void addEventSpawn();
+
+		void addEventDespawn();
+
+		void addEventAttack();
+		void addEventHit();
+		void addEventPickUp();
 
 		//trzy fazy gry, info dump
 
@@ -46,12 +58,16 @@ namespace Parser
 
 		void addEventGameEnd(int sender, int receiver, std::string results);
 
+		//id mapy
+
 		void addEventMapID(int sender, int receiver, int mapID);
 
 		//client glosuje, serwer wysyla wiadomosc z liczba glosow
 
 		void addEventVote(int sender, int receiver);
 		void addEventVote(int sender, int receiver, int numOfVotes);
+
+		//rozne bledy
 
 		void addEventNoContact(int sender, int receiver);
 		void addEventLostConnection(int sender, int receiver);

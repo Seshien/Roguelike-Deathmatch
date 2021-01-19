@@ -4,10 +4,17 @@ namespace Constants
 	const static int bufferLength = 200;
 	const static int msgLengthLimit = 50;
 	//to mozna dac w configu potem
-	const static int timeoutValue = 10000;
+	const static int sightValue = 5;
+	const static int timeoutValue = 100;
+	const static int spikeDmg = 2;
+	const static int defaultHealth = 10;
+	const static int defaultDmg = 3;
+	const static int bodyHeal = 2;
+	const static int attackRange = 3;
 	//zmiana tego zepsuje program
 	const static int SERVER_ID = 0;
 	const static float turnTimer = 0.05f;
+	const static int gameTickRate = 10;
 	// Opcje grafiki klienta
 	const static int SCREEN_WIDTH = 960;
 	const static int SCREEN_HEIGHT = 720;

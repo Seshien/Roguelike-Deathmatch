@@ -343,7 +343,7 @@ void Network::manageEvents(int events)
 				events--;
 			}
 			//klient cos robi
-			for (int i = 1; i < this->descrList.size() && events > 0; i++) {
+			for (size_t i = 1; i < this->descrList.size() && events > 0; i++) {
 				if (this->descrList[i].revents) {
 					manageClientEvent(i - 1);
 					events--;
@@ -450,7 +450,7 @@ void Network::manageClientEvent(int cIndex)
 	}
 	else
 	{
-		for (int i = 0; i<clientList.size(); i++)
+		for (size_t i = 0; i<clientList.size(); i++)
 			if (clientList[i].clientSocket = sock)
 			{
 				managed = &clientList[i];
@@ -553,7 +553,7 @@ void Network::deleteClient(int index)
 
 void Network::deleteClient(Contact * client)
 {
-	for (int i = 0; i < clientList.size(); i++)
+	for (size_t i = 0; i < clientList.size(); i++)
 		if (client->clientSocket == clientList[i].clientSocket)
 		{
 			this->deleteClient(i);
@@ -652,7 +652,7 @@ int Network::checkMessage(Contact * client, Parser::Event * ev)
 
 void Network::increaseTimeout()
 {
-	for (int i = 0; i < this->clientList.size(); i++)
+	for (size_t i = 0; i < this->clientList.size(); i++)
 	{
 		clientList[i].timeoutTimer++;
 		if (clientList[i].timeoutTimer > Constants::timeoutValue)
@@ -681,7 +681,7 @@ Contact * Network::FindClient(int index, SOCKET sock = -1)
 		}
 		else
 		{
-			for (int i = 0; i < clientList.size(); i++)
+			for (size_t i = 0; i < clientList.size(); i++)
 				if (clientList[i].clientSocket = sock)
 				{
 					return &clientList[i];
