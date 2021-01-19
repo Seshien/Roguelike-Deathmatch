@@ -48,14 +48,10 @@
     <ClCompile Include="src\PlayerInfo.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-<<<<<<< Updated upstream
-    <ClCompile Include="OurPlayerInfo.cpp">
-=======
     <ClCompile Include="src\Item.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\OurPlayerInfo.cpp">
->>>>>>> Stashed changes
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\Map.cpp">
@@ -99,20 +95,16 @@
     <ClInclude Include="src\PlayerInfo.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-<<<<<<< Updated upstream
     <ClInclude Include="OurPlayerInfo.h">
-=======
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Item.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
     <ClInclude Include="src\Item.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\Map.h">
->>>>>>> Stashed changes
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="src\OurPlayerInfo.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Item.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

@@ -164,22 +164,14 @@
     <ClCompile Include="..\Utilities\Logger.cpp" />
     <ClCompile Include="..\Utilities\Network.cpp" />
     <ClCompile Include="..\Utilities\Parser.cpp" />
-<<<<<<< Updated upstream
-    <ClCompile Include="Map.cpp" />
-    <ClCompile Include="OurPlayerInfo.cpp" />
-=======
->>>>>>> Stashed changes
     <ClCompile Include="src\Client RLD.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">D:\Studia\Roguelike Deathmatch\SFML\include;C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\SFML\include;D:\Studia\Roguelike Deathmatch\SFML\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Client.cpp" />
     <ClCompile Include="src\Item.cpp" />
-<<<<<<< Updated upstream
-=======
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\OurPlayerInfo.cpp" />
->>>>>>> Stashed changes
     <ClCompile Include="src\PlayerInfo.cpp" />
     <ClCompile Include="src\Tile.cpp" />
     <ClCompile Include="src\UIBar.cpp" />
@@ -192,17 +184,10 @@
     <ClInclude Include="..\Utilities\Logger.h" />
     <ClInclude Include="..\Utilities\Network.h" />
     <ClInclude Include="..\Utilities\Parser.h" />
-<<<<<<< Updated upstream
-    <ClInclude Include="Map.h" />
     <ClInclude Include="OurPlayerInfo.h" />
     <ClInclude Include="src\Client.h" />
     <ClInclude Include="src\Item.h" />
-=======
-    <ClInclude Include="src\Client.h" />
-    <ClInclude Include="src\Item.h" />
     <ClInclude Include="src\Map.h" />
-    <ClInclude Include="src\OurPlayerInfo.h" />
->>>>>>> Stashed changes
     <ClInclude Include="src\PlayerInfo.h" />
     <ClInclude Include="src\Tile.h" />
     <ClInclude Include="src\UIBar.h" />

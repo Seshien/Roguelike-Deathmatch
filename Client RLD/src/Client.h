@@ -7,8 +7,9 @@
 #include "..\..\Utilities\Parser.h"
 #include "..\..\Utilities\Logger.h"
 #include "..\..\Utilities\Constants.h"
-#include "UIButton.h";
-#include "UIBar.h";
+
+#include "UIButton.h"
+#include "UIBar.h"
 
 class Client
 {
