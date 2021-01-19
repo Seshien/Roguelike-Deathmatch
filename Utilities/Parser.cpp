@@ -78,6 +78,14 @@ void Messenger::addEventSpawn(int sender, int receiver, int objectType, int x, i
 	Logger::log(ev);
 }
 
+void Messenger::addEventRespawn(int sender, int receiver,  int x, int y)
+{
+	auto subdata = std::string(1, (char)x) + std::string(1, (char)y);
+	Event ev = Event(sender, receiver, Type::GAME, SubType::RESPAWN, subdata);
+	eventList.push_back(ev);
+	Logger::log(ev);
+}
+
 void Messenger::addEventDespawn(int sender, int receiver, int objectType, int x, int y)
 {
 	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + std::string(1, (char)objectType);

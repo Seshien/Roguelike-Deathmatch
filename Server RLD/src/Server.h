@@ -96,8 +96,9 @@ class Server
 		std::string getResults();
 
 		std::chrono::duration<double> getCurrentGameTime();
-
+		std::vector<Player *> getActivePlayerList();
 		Player * getPlayer(int playerID);
+
 
 		void setConfigValue(std::string token, std::string value);
 		std::vector<Player> playerList;

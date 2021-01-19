@@ -43,6 +43,7 @@ namespace Parser
 		void addEventMovement(int sender, int receiver, std::string playerName, int x, int y);
 
 		void addEventSpawn(int sender, int receiver, int objectType, int x, int y);
+		void addEventRespawn(int sender, int receiver, int x, int y);
 
 		void addEventDespawn(int sender, int receiver, int objectType, int x, int y);
 

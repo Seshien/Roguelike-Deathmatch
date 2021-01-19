@@ -16,13 +16,14 @@ void Server::mainLoop()
 {
 	while (true)
 	{
-		//odbieranie wiadomosci
+
 		auto temp = std::chrono::duration_cast<
 			std::chrono::duration<double>>(std::chrono::system_clock::now() - this->turntimer);
 		double wait = 0;
 		if (temp.count() <= Constants::turnTimer)
 			wait = Constants::turnTimer - temp.count();
 
+		//odbieranie wiadomosci
 		this->input = this->network.inputNetwork(wait);
 
 		this->turntimer = std::chrono::system_clock::now();
@@ -150,10 +151,10 @@ void Server::handleStateChange()
 		this->gameState = GameState::GAME_MID;
 		std::vector<int> playerIDs;
 		std::vector<std::string> playerNames;
-		for (auto player : this->playerList)
+		for (auto player : this->getActivePlayerList())
 		{
-			playerIDs.push_back(player.playerID);
-			playerNames.push_back(player.name);
+			playerIDs.push_back(player->playerID);
+			playerNames.push_back(player->name);
 		}
 		this->game.startGame(playerIDs, playerNames);
 		for (auto player : this->playerList)
@@ -423,11 +424,19 @@ int Server::calcActivePlayerCount()
 	this->activePlayerCount = count;
 	return count;
 }
+std::vector<Player *> Server::getActivePlayerList()
+{
+	std::vector<Player *> res;
+	for (auto& player : this->playerList)
+		if (player.state == Player::ACTIVE) res.push_back(&player);
+	return res;
+}
 
 int Server::getPlayerCount()
 {
 	return this->playerList.size();
 }
+
 int Server::getPlayerCount(Player::State state)
 {
 	int count = 0;

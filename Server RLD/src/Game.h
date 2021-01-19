@@ -98,6 +98,7 @@ public:
 			if (result == tickResult::SPAWNED)
 			{
 				object->get()->spawn();
+				this->respawnEvent(*object);
 				this->spawnEvent(*object);
 				object = tickPlayList.erase(object);
 
@@ -141,6 +142,7 @@ public:
 
 		if (tile->isRuchAble)
 		{
+
 			player->move(tile);
 			this->moveEvent(player);
 			this->checkVisionTiles(player, movement, player->getTile());
@@ -390,6 +392,10 @@ public:
 			if (checkRange(object, player))
 				output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
+	}
+	void respawnEvent(std::shared_ptr<PlayerObject> object)
+	{
+		output.addEventRespawn(Constants::SERVER_ID, object->getplayerID(), object->getX(), object->getY());
 	}
 	void despawnEvent(std::shared_ptr<SpawnableObject> object)
 	{
