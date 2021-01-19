@@ -1,6 +1,8 @@
 #pragma once
+#include <string>
 #include "SpawnableObject.h"
 #include "PlayerObject.h"
+#include "ItemObject.h"
 #include "Map.h"
 #include "..\..\Utilities\Event.h"
 #include "..\..\Utilities\Logger.h"
@@ -15,10 +17,10 @@ public:
 
 	}
 
-	void startGame()
+	void startGame(std::vector<int> playerID, std::vector<std::string> playerName)
 	{
 		spawnObjects();
-		spawnPlayers();
+		spawnPlayers(playerID, playerName);
 	}
 
 	void startMap(std::string mapPath)
@@ -32,8 +34,31 @@ public:
 
 	}
 
-	void spawnPlayers()
+	void spawnPlayers(std::vector<int> playerID, std::vector<std::string> playerName)
 	{
+		int i = 0, j = 0;
+		bool spawned;
+		for (int x = 0; x < playerID.size();)
+		{
+			spawned = false;
+			for (i = 0; i < map.MAP_HEIGHT; i++)
+			{
+				for (j = 0; j < map.MAP_WIDTH; i++)
+				{
+					auto tile = this->map.tileArray[i][j];
+					if (tile->isSpawnable)
+					{
+						spawned = true;
+						this->addPlayer(playerID[x], playerName[x], tile);
+						x++;
+					}
+					if (spawned) break;
+
+				}
+
+				if (spawned) break;
+			}
+		}
 
 	}
 
@@ -80,9 +105,22 @@ public:
 		}
 		for (auto ev : input.eventList)
 		{
-
+			switch (ev.subtype)
+			{
+			case Parser::SubType::MOVE:
+				handleMovement(ev);
+				break;
+			case Parser::SubType::ATTACK:
+				handleAttack(ev);
+				break;
+			case Parser::SubType::ACTION:
+				//do something
+				break;
+			default:
+				Logger::log("Error: Unknown Game Subtype");
+			}
 		}
-
+		return output;
 	}
 	//wasd
 	void handleMovement(Parser::Event ev)
@@ -114,7 +152,7 @@ public:
 				{
 					player->move(tile);
 					this->moveEvent(player);
-					this->checkVisionTiles(player, ev.subdata[0], player->getTile());
+					this->checkVisionTiles(player, movement, player->getTile());
 				}
 				break;
 			case TileType::EMPTY:
@@ -132,7 +170,6 @@ public:
 			}
 			player->lastMove = movement;
 		}
-
 	}
 	void handleAttack(Parser::Event ev)
 	{
@@ -142,14 +179,39 @@ public:
 			Logger::log("Error: Attack Player failure, player not found");
 			return;
 		}
-		auto player = this->gamePlayerList[playerIndex];
+		handleAttack(this->gamePlayerList[playerIndex]);
+	}
+	void handleAttack(std::shared_ptr<PlayerObject> player)
+	{
 		int movement = player->lastMove;
-		this->checkVisionTiles(player, movement, player->getTile());
-		for (int i = 1; i < player->getRange(); i++)
+		bool moved = false;
+		this->attackEvent(player);
+		for (int i = 0; i < player->getRange(); i++)
 		{
-			this->checkVisionTiles(player, movement, this->getMovementTile();
-
+			auto tile = player->getTile();
+			auto moveTile = getMovementTile(movement, tile);
+			if (moveTile->isPlayer)
+			{
+				auto hitPlayerIndex = findPlayerIndex(moveTile->playerID);
+				if (hitPlayerIndex == -1)
+				{
+					Logger::log("Error: Attack Player failure, atacked player not found");
+					return;
+				}
+				auto hitPlayer = this->gamePlayerList[hitPlayerIndex];
+				damagePlayer(hitPlayer, player->getDamage());
+			}
+			else if (i < player->getRange() - 1 && moveTile->isRuchAble)
+			{
+				this->checkVisionTiles(player, movement, tile);
+				player->move(moveTile);
+				moved = true;
+			}
+			else
+				break;
 		}
+
+		handleMovement(player, movement);
 	}
 
 	std::shared_ptr<Tile> getMovementTile(int movement, std::shared_ptr<Tile> tile, int range=1)
@@ -172,6 +234,7 @@ public:
 			break;
 		}
 	}
+	//nieuzywane
 	std::shared_ptr<Tile> getAttackTile(int movement, std::shared_ptr<Tile> tile, int range = 1)
 	{
 		int x = tile->x;
@@ -251,15 +314,16 @@ public:
 			player->setHealth(newHealth);
 
 		this->hitEvent(player, dmgValue);
+		this->damageEvent(player, dmgValue);
 
 		if (newHealth <= 0)
 			killPlayer(player);
 	}
 
-	void addPlayer(int playerID)
+	void addPlayer(int playerID, std::string playerName, std::shared_ptr<Tile> tile)
 	{
 		// znalezc jakies miejsce gdzie moze sie zespawnic
-		auto player = std::make_shared<PlayerObject>(playerID, SpawnableObjectType::PLAYER, this->getTile(playerID, playerID));
+		auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
 		gamePlayerList.push_back(player);
 		tickPlayList.push_back(player);
 
@@ -268,18 +332,21 @@ public:
 	void killPlayer(std::shared_ptr<PlayerObject> player)
 	{
 		// usuwamy gracza z mapy
+		this->despawnEvent(player);
 		player->despawn();
 		player->startSpawnTimer();
 		// tworzyc nowy obiekt z trupem
-		std::shared_ptr<SpawnableObject> body = std::make_shared<SpawnableObject>(SpawnableObjectType::BODY, player->getTile());
+		std::shared_ptr<ItemObject> body = std::make_shared<ItemObject>(this->gameObjectList.size(),SpawnableObjectType::BODY, player->getTile());
+
 		body->spawn();
 		body->startSpawnTimer();
-		//dodajemy do tickow
 		this->gameObjectList.push_back(body);
+		//dodajemy do tickow
+
+
 		this->tickObjList.push_back(body);
 		this->tickPlayList.push_back(player);
 		//eventy
-		this->despawnEvent(player);
 		this->spawnEvent(body);
 		// 
 	}
@@ -303,34 +370,24 @@ public:
 		this->despawnEvent(item);
 	}
 
-	void createObject(std::shared_ptr<SpawnableObject> object)
-	{
-		
-	}
-
-	void createPlayer(std::shared_ptr<PlayerObject> object)
-	{
-
-	}
-
-	void moveEvent(std::shared_ptr<PlayerObject> player)
+	void moveEvent(std::shared_ptr<PlayerObject> obj)
 	{
 		for (auto player : gamePlayerList)
 		{
-			if (checkRange(player, player))
-				output.addEventMovement();
+			if (checkRange(obj, player))
+				output.addEventMovement(Constants::SERVER_ID, player->getplayerID(), obj->getName(), obj->getX(), obj->getY());
 		}
 	}
 	void spawnEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<SpawnableObject> object)
 	{
-		output.addEventSpawn();
+		output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
 	}
 	void spawnEvent(std::shared_ptr<SpawnableObject> object)
 	{
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(object, player))
-				output.addEventSpawn();
+				output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
 	}
 	void despawnEvent(std::shared_ptr<SpawnableObject> object)
@@ -338,28 +395,33 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(object, player))
-				output.addEventDespawn();
+				output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
 	}
-	void attackEvent(std::shared_ptr<PlayerObject> player)
+	void attackEvent(std::shared_ptr<PlayerObject> obj)
 	{
 		for (auto player : gamePlayerList)
 		{
-			if (checkRange(player, player))
-				output.addEventAttack();
+			if (checkRange(obj, player))
+				output.addEventAttack(Constants::SERVER_ID, player->getplayerID(), obj->getName());
 		}
 	}
-	void hitEvent(std::shared_ptr<PlayerObject> player, int dmg)
+	void hitEvent(std::shared_ptr<PlayerObject> obj, int dmg)
 	{
 		for (auto player : gamePlayerList)
 		{
-			if (checkRange(player, player))
-				output.addEventHit();
+			if (checkRange(obj, player))
+				output.addEventHit(Constants::SERVER_ID, player->getplayerID(), obj->getName(), dmg);
 		}
 	}
+	void damageEvent(std::shared_ptr<PlayerObject> player, int newHealth)
+	{
+		output.addEventDamaged(Constants::SERVER_ID, player->getplayerID(), newHealth);
+	}
+
 	void pickupEvent(std::shared_ptr<PlayerObject> player, std::shared_ptr<SpawnableObject> object)
 	{
-		output.addEventPickUp();
+		output.addEventPickUp(Constants::SERVER_ID, player->getplayerID(), (int) object->getType());
 	}
 
 	int checkRange(std::shared_ptr<SpawnableObject> objectF, std::shared_ptr<SpawnableObject> objectS, int range = Constants::sightValue)
@@ -369,7 +431,7 @@ public:
 		int x1 = objectS->getX() - Constants::sightValue;
 		int y1 = objectS->getY() - Constants::sightValue;
 		int x2 = x1 + Constants::sightValue * 2;
-		int y2 = y2 + Constants::sightValue * 2;
+		int y2 = y1 + Constants::sightValue * 2;
 		return objX > x1 && objX < x2 && objY > y1 && objY < y2;
 
 	}
@@ -433,8 +495,8 @@ private:
 	int tickTimer;
 	Map map;
 	Parser::Messenger output;
-	std::vector<std::shared_ptr<SpawnableObject>> gameObjectList;
-	std::vector<std::shared_ptr<SpawnableObject>> tickObjList;
+	std::vector<std::shared_ptr<ItemObject>> gameObjectList;
+	std::vector<std::shared_ptr<ItemObject>> tickObjList;
 	std::vector<std::shared_ptr<PlayerObject>> gamePlayerList;
 	std::vector<std::shared_ptr<PlayerObject>> tickPlayList;
 };

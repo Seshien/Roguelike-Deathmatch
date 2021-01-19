@@ -46,6 +46,7 @@ class Server
 		Parser::Messenger output;
 		Parser::Messenger input;
 		Parser::Messenger gameInput;
+		Parser::Messenger gameOutput;
 
 		void startLogger();
 
@@ -75,6 +76,8 @@ class Server
 		void handleDisconnect(Parser::Event ev);
 		void handleDisconnect(int playerID);
 		void handleStateChange();
+
+		void handleGameOutput(Parser::Messenger gameOutput);
 
 		void InfoDump(int playerId);
 

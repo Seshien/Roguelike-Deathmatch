@@ -20,7 +20,21 @@ public:
 	int x;
 	int y;
 public:
-	Tile() {};
-	Tile(TileType type);
+	Tile(TileType tileType, int x, int y) 
+	{
+		isItem = false;
+		isPlayer = false;
+		int itemID = -1;
+		int playerID = -1;
+		this->type = tileType;
+		if ((int)tileType >= 12 && (int)tileType <= 16)
+		{
+			isSpawnable = true;
+			isRuchAble = true;
+		}
+
+
+	}
+	//Tile(TileType type);
 };
 

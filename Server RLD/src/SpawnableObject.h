@@ -11,14 +11,13 @@ enum class tickResult {NOTHING, SPAWNED, DESPAWNED};
 
 class SpawnableObject
 {
-private:
+
+protected:
 	int x;
 	int y;
-protected:
 	int timetoRespawn;
 	int timetoDespawn;
 	bool isExist;
-	int itemID;
 	SpawnableObjectType type;
 	std::shared_ptr<Tile> occupiedTile;
 
@@ -29,13 +28,9 @@ public:
 	void setExist(bool state) { isExist = state; };
 	int getX() { return this->x; };
 	int getY() { return this->y; };
-	int getItemID() { return this->itemID; };
 	SpawnableObjectType getType() { return this->type; };
 	std::shared_ptr<Tile> getTile() { return occupiedTile; };
 
-	void spawn();
-
-	void despawn();
 
 	tickResult tick();
 

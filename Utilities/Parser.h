@@ -40,15 +40,17 @@ namespace Parser
 		
 		//game events
 
-		void addEventMovement();
+		void addEventMovement(int sender, int receiver, std::string playerName, int x, int y);
 
-		void addEventSpawn();
+		void addEventSpawn(int sender, int receiver, int objectType, int x, int y);
 
-		void addEventDespawn();
+		void addEventDespawn(int sender, int receiver, int objectType, int x, int y);
 
-		void addEventAttack();
-		void addEventHit();
-		void addEventPickUp();
+		void addEventAttack(int sender, int receiver, std::string playerName);
+		void addEventHit(int sender, int receiver, std::string playerName, int damage);
+		void addEventDamaged(int sender, int receiver, int newHealth);
+
+		void addEventPickUp(int sender, int receiver, int itemType);
 
 		//trzy fazy gry, info dump
 

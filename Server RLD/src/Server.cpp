@@ -9,7 +9,7 @@ void Server::startLogger()
 
 void Server::startMap()
 {
-	//this->map.init(mapPath, 0);
+	this->game.startMap("data/map/map" + std::to_string(this->mapID) + ".txt");
 }
 
 void Server::mainLoop()
@@ -32,7 +32,10 @@ void Server::mainLoop()
 		handleEvents(this->input);
 		//
 		if (this->gameState == GameState::GAME_MID)
-			this->game.loopGame(this->gameInput);
+		{
+			handleGameOutput(this->game.loopGame(this->gameInput));
+		}
+
 		if (output.eventList.size()) 
 			Logger::log("------------ Output Phase ------------");
 		//
@@ -145,7 +148,14 @@ void Server::handleStateChange()
 	if (this->stateChange == StateChange::VOTE_END)
 	{
 		this->gameState = GameState::GAME_MID;
-		this->game.startGame();
+		std::vector<int> playerIDs;
+		std::vector<std::string> playerNames;
+		for (auto player : this->playerList)
+		{
+			playerIDs.push_back(player.playerID);
+			playerNames.push_back(player.name);
+		}
+		this->game.startGame(playerIDs, playerNames);
 		for (auto player : this->playerList)
 		{
 			if (player.state != Player::INACTIVE)
@@ -154,6 +164,20 @@ void Server::handleStateChange()
 			}
 		}
 
+	}
+}
+
+void Server::handleGameOutput(Parser::Messenger gOutput)
+{
+	for (auto ev : gOutput.eventList)
+	{
+		auto player = this->getPlayer(ev.sender);
+		if (player == nullptr || player->state == Player::INACTIVE)
+		{
+			continue;
+		}
+		else
+			this->output.addEvent(ev);
 	}
 }
 
@@ -203,7 +227,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 	for (Player &player : this->playerList)
 	{
 		if (player.playerID == playerID) continue;
-		if (player.state == Player::ACTIVE);
+		if (player.state == Player::ACTIVE)
 			output.addEventNewPlayer(Constants::SERVER_ID, player.playerID, playerName);
 	}
 

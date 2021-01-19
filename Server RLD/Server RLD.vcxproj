@@ -162,6 +162,7 @@
     <ClCompile Include="..\Utilities\Network.cpp" />
     <ClCompile Include="..\Utilities\Parser.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\ItemObject.cpp" />
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\PlayerObject.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="..\Utilities\Parser.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\Item.h" />
+    <ClInclude Include="src\ItemObject.h" />
     <ClInclude Include="src\Map.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\PlayerObject.h" />
