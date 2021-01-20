@@ -342,7 +342,7 @@ void Server::InfoDump(int playerId) {
 		break;
 	case GameState::GAME_END:
 		// wysylamy wyniki wszystkich graczy (nazwy juz dostanie)
-		//output.addEventGameEnd(Constants::SERVER_ID, playerId, getResults());
+		output.addEventGameEnd(Constants::SERVER_ID, playerId, getResults());
 		break;
 	}
 	//output.addEvent(SERVER_ID, playerId, Parser::SERVER, Parser::INFODUMP, subdata);

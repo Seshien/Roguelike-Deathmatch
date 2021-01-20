@@ -27,7 +27,7 @@ void Client::startWindow()
 	// Initialize the view to a rectangle located at (100, 100) and with a size of 400x200
 	gameView.reset(sf::FloatRect(100, 100, 768, 576));
 	lobbyView.reset(sf::FloatRect(0, 0, 192, 576));
-	interfaceView.reset(sf::FloatRect(0, 0, 400, 144));
+	interfaceView.reset(sf::FloatRect(0, 0, 960, 144));
 
 	// Set its target viewport to be half of the window
 	gameView.setViewport(sf::FloatRect(0.f, 0.f, 0.8f, 0.8f));
@@ -39,7 +39,7 @@ void Client::startWindow()
 	getIn = UIButton(20, 25, 160, 64, "Login", buttonTexture);
 	vote = UIButton(20, 460, 160, 64, "Vote", buttonTexture);
 	getIn.changeVisibility(true);
-	hpBar = UIBar(20, 25, 320, 64, barTexture, 100.0f);
+	hpBar = UIBar(5, 5, 320, 64, barTexture, 100.0f);
 
 
 
@@ -115,6 +115,11 @@ void Client::graphicsUpdate() {
 	rectangle.setFillColor(sf::Color::Blue);
 	window.draw(rectangle);
 
+	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD) {
+		hpBar.changeVisibility(true);
+		hpBar.draw(window);
+	}
+
 	window.setView(lobbyView);
 
 	sf::Text text;
@@ -136,8 +141,6 @@ void Client::graphicsUpdate() {
 		getIn.draw(window);
 	if(this->gameStage == Client::GameStage::LOBBY)
 		vote.draw(window);
-	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD)
-		hpBar.draw(window);
 
 	window.draw(text);
 
@@ -282,6 +285,7 @@ void Client::handleServer(Parser::Event ev)
 	case Parser::SubType::INFODUMP_LOBBY:
 		//wlaczamy widok lobby, z widokiem mapy
 		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
+		this->numVotes = ev.subdata[0] - '0';
 		this->gameStage = GameStage::LOBBY;
 		break;
 	case Parser::SubType::INFODUMP_GAME_MID:
