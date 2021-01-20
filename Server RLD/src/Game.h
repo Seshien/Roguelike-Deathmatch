@@ -303,12 +303,14 @@ public:
 		if (tile->isItem)
 		{
 			auto item = this->gameObjectList[this->findItemIndex(tile->itemID)];
-			this->spawnEvent(player, item);
+			if (item->setExist)
+				this->spawnEvent(player, item);
 		}
 		if (tile->isPlayer)
 		{
 			auto player = this->gamePlayerList[this->findPlayerIndex(tile->playerID)];
-			this->spawnPlayerEvent(player, player);
+			if (player->setExist)
+				this->spawnPlayerEvent(player, player);
 		}
 
 	}
@@ -412,30 +414,6 @@ public:
 		}
 	}
 
-	void handleRespawn(Parser::Event ev)
-	{
-		int playerIndex = this->findPlayerIndex(ev.sender);
-
-		if (playerIndex == -1)
-		{
-			Logger::log("Error: Respawn event failed");
-			return;
-		}
-		handleRespawn(this->gamePlayerList[playerIndex]);
-
-	}
-
-	void handleRespawn(std::shared_ptr<PlayerObject> object)
-	{
-		if (object->readyToRespawn)
-		{
-			object->spawn();
-			this->spawnPlayerEvent(object);
-			this->respawnEvent(object);
-		}
-
-	}
-
 	void respawnEvent(std::shared_ptr<PlayerObject> object)
 	{
 		output.addEventRespawn(Constants::SERVER_ID, object->getplayerID(), object->getX(), object->getY());
@@ -479,6 +457,42 @@ public:
 	void pickupEvent(std::shared_ptr<PlayerObject> player, std::shared_ptr<SpawnableObject> object)
 	{
 		output.addEventPickUp(Constants::SERVER_ID, player->getplayerID(), (int) object->getType());
+	}
+
+	void handleRespawn(Parser::Event ev)
+	{
+		int playerIndex = this->findPlayerIndex(ev.sender);
+
+		if (playerIndex == -1)
+		{
+			Logger::log("Error: Respawn event failed");
+			return;
+		}
+		handleRespawn(this->gamePlayerList[playerIndex]);
+
+	}
+
+	void handleRespawn(std::shared_ptr<PlayerObject> object)
+	{
+		if (object->readyToRespawn)
+		{
+			object->spawn();
+			this->spawnPlayerEvent(object);
+			this->respawnEvent(object);
+			this->getFullVision(object);
+		}
+	}
+
+	void getFullVision(std::shared_ptr<PlayerObject> player)
+	{
+		int x1 = player->getX() - Constants::sightValue;
+		int y1 = player->getY() - Constants::sightValue;
+		int x2 = player->getX() + Constants::sightValue;
+		int y2 = player->getY() + Constants::sightValue;
+		for (int i = x1; i <= x2; i++)
+			for (int j = y1; j <= y2; j++)
+				this->getVision(player, this->getTile(i, j));
+
 	}
 
 	int checkRange(std::shared_ptr<SpawnableObject> objectF, std::shared_ptr<SpawnableObject> objectS, int range = Constants::sightValue)

@@ -25,11 +25,13 @@ public:
 	SpawnableObject() {};
 	SpawnableObject(int itemID, SpawnableObjectType type, std::shared_ptr<Tile> tile);
 
-	void setExist(bool state) { isExist = state; };
+	void setExist(bool state) { isExist = state; }
+	bool getExist() { return isExist; }
 	int getX() { return this->x; };
 	int getY() { return this->y; };
-	SpawnableObjectType getType() { return this->type; };
-	std::shared_ptr<Tile> getTile() { return occupiedTile; };
+
+	SpawnableObjectType getType() { return this->type; }
+	std::shared_ptr<Tile> getTile() { return occupiedTile; }
 
 
 	tickResult tick();
