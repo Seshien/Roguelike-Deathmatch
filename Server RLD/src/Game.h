@@ -71,6 +71,7 @@ public:
 
 	Parser::Messenger loopGame(Parser::Messenger input)
 	{
+		Logger::log("Loop game.");
 		output = Parser::Messenger();
 		for (auto object = tickObjList.begin(); object != tickObjList.end();)
 		{
@@ -93,9 +94,11 @@ public:
 		}
 		for (auto object = tickPlayList.begin(); object != tickPlayList.end();)
 		{
+			Logger::log("Tick!");
 			auto result = object->get()->tick();
 			if (result == tickResult::SPAWNED)
 			{
+				object->get()->readyToRespawn = true;
 				this->respawnAskEvent(*object);
 				object = tickPlayList.erase(object);
 
@@ -329,14 +332,14 @@ public:
 		if (tile->isItem)
 		{
 			auto item = this->gameObjectList[this->findItemIndex(tile->itemID)];
-			if (item->setExist)
+			if (item->getExist())
 				this->spawnEvent(player, item);
 		}
 		if (tile->isPlayer)
 		{
-			auto player = this->gamePlayerList[this->findPlayerIndex(tile->playerID)];
-			if (player->setExist)
-				this->spawnPlayerEvent(player, player);
+			auto _player = this->gamePlayerList[this->findPlayerIndex(tile->playerID)];
+			if (_player->getExist())
+				this->spawnPlayerEvent(player, _player);
 		}
 
 	}
@@ -357,6 +360,7 @@ public:
 
 	void addPlayerSpawnToTick(std::shared_ptr<PlayerObject> player)
 	{
+		player->startSpawnTimer();
 
 		tickPlayList.push_back(player);
 
@@ -561,7 +565,7 @@ public:
 	}
 	int findPlayerIndex(int playerID)
 	{
-		if (gamePlayerList[playerID - 1]->getplayerID() == playerID) return playerID - 1;
+		//if (gamePlayerList[playerID - 1]->getplayerID() == playerID) return playerID - 1;
 		for (int i = 0; i < gamePlayerList.size(); i++)
 			if (gamePlayerList[i]->getplayerID() == playerID)
 				return i;

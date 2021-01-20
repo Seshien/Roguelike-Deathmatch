@@ -173,8 +173,10 @@ void Server::handleStateChange()
 			output.addEventMidGame(Constants::SERVER_ID, player->playerID, this->getCurrentGameTime());
 		}
 		this->game.startGame(playerIDs, playerNames);
-
+		this->stateChange = StateChange::NONE;
+	
 	}
+	
 }
 
 void Server::handleGameOutput(Parser::Messenger gOutput)
@@ -333,7 +335,7 @@ void Server::handleVote(Parser::Event ev)
 	Logger::log("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
 	for (auto player : this->activePlayerList)
 		output.addEventVote(Constants::SERVER_ID, player->playerID, numOfVotes);
-	if (this->activePlayerCount >= 2 && this->numOfVotes > this->activePlayerCount / 2)
+	if (this->activePlayerCount >= 1 && this->numOfVotes >= this->activePlayerCount / 2)
 	{
 		this->stateChange = StateChange::VOTE_END;
 	}

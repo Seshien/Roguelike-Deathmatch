@@ -88,7 +88,7 @@ void Messenger::addEventSpawn(int sender, int receiver, int objectType, int x, i
 void Messenger::addEventPlayerSpawn(int sender, int receiver, std::string playerName, int x, int y)
 {
 	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
-	Event ev = Event(sender, receiver, Type::GAME, SubType::SPAWN, subdata);
+	Event ev = Event(sender, receiver, Type::GAME, SubType::PSPAWN, subdata);
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }
@@ -154,8 +154,8 @@ void Messenger::addEventPickUp(int sender, int receiver, int itemType)
 	Logger::debug(ev);
 }
 
-void Messenger::addEventKeyInput(int sender, int receiver, std::string key) {
-	Event ev = Event(sender, receiver, Type::GAME, SubType::KEY, key);
+void Messenger::addEventKeyInput(int sender, int receiver, char key) {
+	Event ev = Event(sender, receiver, Type::GAME, SubType::KEY, std::string(1, key));
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }

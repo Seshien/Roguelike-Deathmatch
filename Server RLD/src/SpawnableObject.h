@@ -25,8 +25,8 @@ public:
 	SpawnableObject() {};
 	SpawnableObject(int itemID, SpawnableObjectType type, std::shared_ptr<Tile> tile);
 
-	void setExist(bool state) { isExist = state; }
-	bool getExist() { return isExist; }
+	void setExist(bool state) { isExist = state; };
+	bool getExist() { return isExist; };
 	int getX() { return this->x; };
 	int getY() { return this->y; };
 

@@ -2,6 +2,8 @@
 
 PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType type, std::shared_ptr<Tile> tile)
 {
+	this->x = tile->x;
+	this->y = tile->y;
 	this->playerID = id;
 	this->playerName = playerName;
 	this->type = type;
@@ -17,6 +19,8 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 
 void PlayerObject::move(std::shared_ptr<Tile> newTile)
 {
+	this->x = newTile->x;
+	this->y = newTile->y;
 	this->occupiedTile->isPlayer = false;
 	this->occupiedTile->playerID = -1;
 	this->occupiedTile = newTile;

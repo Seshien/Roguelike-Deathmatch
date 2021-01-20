@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "..\..\Utilities\Constants.h"
+#include "..\..\Utilities\Logger.h"
 class PlayerInfo
 {
 	std::string playerName;
