@@ -20,6 +20,8 @@ namespace Parser
 
 		void addEvent(int sender, int receiver, int type, int subtype, std::string);
 
+		void addEvent(int sender, int receiver, Parser::Type type, Parser::SubType subtype, std::string);
+
 		void addEvent(Event ev);
 
 		void addInnerInitPlayer(int sender, int receiver, int ID);
@@ -43,6 +45,9 @@ namespace Parser
 		void addEventMovement(int sender, int receiver, std::string playerName, int x, int y);
 
 		void addEventSpawn(int sender, int receiver, int objectType, int x, int y);
+		void addEventPlayerSpawn(int sender, int receiver, std::string, int x, int y);
+
+		void addEventAskRespawn(int sender, int receiver, int x, int y);
 		void addEventRespawn(int sender, int receiver, int x, int y);
 
 		void addEventDespawn(int sender, int receiver, int objectType, int x, int y);

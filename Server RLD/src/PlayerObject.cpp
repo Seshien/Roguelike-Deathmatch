@@ -12,6 +12,7 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 	this->maxHealth = Constants::defaultHealth;
 	this->dmg = Constants::defaultDmg;
 	this->attackRange = Constants::attackRange;
+	this->readyToRespawn = false;
 }
 
 void PlayerObject::move(std::shared_ptr<Tile> newTile)

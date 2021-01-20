@@ -21,7 +21,7 @@ public:
 	void startGame(std::vector<int> playerID, std::vector<std::string> playerName)
 	{
 		spawnObjects();
-		spawnPlayers(playerID, playerName);
+		addPlayers(playerID, playerName);
 	}
 
 	void startMap(std::string mapPath)
@@ -35,32 +35,38 @@ public:
 
 	}
 
-	void spawnPlayers(std::vector<int> playerID, std::vector<std::string> playerName)
+	void addPlayers(std::vector<int> playerID, std::vector<std::string> playerName)
 	{
-		int i = 0, j = 0;
-		bool spawned;
-		for (int x = 0; x < playerID.size();)
+		for (int x = 0; x < playerID.size();x++)
 		{
-			spawned = false;
-			for (i = 0; i < map.MAP_HEIGHT; i++)
+			if (addPlayer(playerID[x], playerName[x]))
 			{
-				for (j = 0; j < map.MAP_WIDTH; i++)
-				{
-					auto tile = this->map.tileArray[i][j];
-					if (tile->isSpawnable)
-					{
-						spawned = true;
-						this->addPlayer(playerID[x], playerName[x], tile);
-						x++;
-					}
-					if (spawned) break;
-
-				}
-
-				if (spawned) break;
+				Logger::log("Spawn was unsuccesfull");
 			}
 		}
 
+	}
+
+	int addPlayer(int playerID, std::string playerName)
+	{
+		int i = 0, j = 0;
+		for (i = 0; i < map.MAP_HEIGHT; i++)
+		{
+			for (j = 0; j < map.MAP_WIDTH; i++)
+			{
+				auto tile = this->map.tileArray[i][j];
+				if (tile->isSpawnable && !tile->isItem && !tile->isPlayer)
+				{
+					auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
+					gamePlayerList.push_back(player);
+					this->addPlayerSpawnToTick(player);
+					return 0;
+				}
+
+			}
+
+		}
+		return 1;
 	}
 
 	Parser::Messenger loopGame(Parser::Messenger input)
@@ -97,9 +103,7 @@ public:
 			auto result = object->get()->tick();
 			if (result == tickResult::SPAWNED)
 			{
-				object->get()->spawn();
-				this->respawnEvent(*object);
-				this->spawnEvent(*object);
+				this->respawnAskEvent(*object);
 				object = tickPlayList.erase(object);
 
 			}
@@ -117,6 +121,9 @@ public:
 				break;
 			case Parser::SubType::ACTION:
 				//do something
+				break;
+			case Parser::SubType::NEWPLAYER:
+				addPlayer(ev.receiver, ev.subdata);
 				break;
 			default:
 				Logger::log("Error: Unknown Game Subtype");
@@ -323,11 +330,9 @@ public:
 			killPlayer(player);
 	}
 
-	void addPlayer(int playerID, std::string playerName, std::shared_ptr<Tile> tile)
+	void addPlayerSpawnToTick(std::shared_ptr<PlayerObject> player)
 	{
-		// znalezc jakies miejsce gdzie moze sie zespawnic
-		auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
-		gamePlayerList.push_back(player);
+
 		tickPlayList.push_back(player);
 
 	}
@@ -385,7 +390,16 @@ public:
 	{
 		output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
 	}
-	void spawnEvent(std::shared_ptr<SpawnableObject> object)
+
+	void spawnPlayerEvent(std::shared_ptr<PlayerObject> object)
+	{
+		for (auto player : gamePlayerList)
+		{
+			if (checkRange(object, player))
+				output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), player->getName(), object->getX(), object->getY());
+		}
+	}
+	void spawnEvent(std::shared_ptr<ItemObject> object)
 	{
 		for (auto player : gamePlayerList)
 		{
@@ -393,10 +407,28 @@ public:
 				output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
 	}
+
+	void handleRespawn(std::shared_ptr<PlayerObject> object)
+	{
+		if (object->readyToRespawn)
+		{
+			object->spawn();
+			this->spawnPlayerEvent(object);
+			this->respawnEvent(object);
+		}
+
+	}
+
 	void respawnEvent(std::shared_ptr<PlayerObject> object)
 	{
 		output.addEventRespawn(Constants::SERVER_ID, object->getplayerID(), object->getX(), object->getY());
 	}
+
+	void respawnAskEvent(std::shared_ptr<PlayerObject> object)
+	{
+		output.addEventAskRespawn(Constants::SERVER_ID, object->getplayerID(), object->getX(), object->getY());
+	}
+
 	void despawnEvent(std::shared_ptr<SpawnableObject> object)
 	{
 		for (auto player : gamePlayerList)

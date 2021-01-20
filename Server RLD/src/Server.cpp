@@ -320,13 +320,19 @@ std::chrono::duration<double> Server::getCurrentGameTime() {
 	return std::chrono::system_clock::now() - this->gameStartTime;
 }
 
-void Server::InfoDump(int playerId) {
+void Server::InfoDump(int playerId) 
+{
 	std::string subdata;
 	// Wysylamy graczowi nazwy wszystkich pozostalych graczy w przypadku dolaczenia do gry
 	for (auto player : this->playerList) {
 		if (player.playerID != playerId && player.state == Player::ACTIVE) {
 			output.addEventNewPlayer(Constants::SERVER_ID, playerId, player.name);
 		}
+	}
+	auto newPlayer = this->getPlayer(playerId);
+	if (newPlayer == nullptr)
+	{
+		Logger::log("Error: New player was not found");
 	}
 	// Wysylamy ID mapy w kazdym wypadku niezaleznie od stanu gry
 	output.addEventMapID(Constants::SERVER_ID, playerId, this->mapID);
@@ -339,6 +345,7 @@ void Server::InfoDump(int playerId) {
 	case GameState::GAME_MID:
 		// Wysylamy fakt, ze jest w grze oraz czas trwania danej gry. (za pomoca subType?)
 		output.addEventMidGame(Constants::SERVER_ID, playerId, getCurrentGameTime());
+		gameInput.addEvent(Constants::SERVER_ID, playerId, Parser::Type::GAME, Parser::SubType::NEWPLAYER, newPlayer->name);
 		break;
 	case GameState::GAME_END:
 		// wysylamy wyniki wszystkich graczy (nazwy juz dostanie)

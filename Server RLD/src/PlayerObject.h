@@ -27,7 +27,9 @@ public:
 	int getDamage() { return this->dmg; };
 
 	std::string getName() { return this->playerName; };
+
 	int lastMove;
+	bool readyToRespawn;
 
 	void move(std::shared_ptr<Tile> newTile);
 
