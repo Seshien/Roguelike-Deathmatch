@@ -418,15 +418,17 @@ public:
 
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<PlayerObject> object)
 	{
-		output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), object->getName(), object->getX(), object->getY());
+		if (player->getplayerID() != object->getplayerID()) 
+			output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), object->getName(), object->getX(), object->getY());
 	}
 
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject> object)
 	{
 		for (auto player : gamePlayerList)
 		{
-			if (checkRange(object, player))
-				output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), object->getName(), object->getX(), object->getY());
+			if (player->getplayerID() != object->getplayerID())
+				if (checkRange(object, player))
+					output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), object->getName(), object->getX(), object->getY());
 		}
 	}
 
