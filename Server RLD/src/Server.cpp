@@ -16,7 +16,7 @@ void Server::mainLoop()
 {
 	while (true)
 	{
-
+		Logger::log("Start cyklu serwera.");
 		auto temp = std::chrono::duration_cast<
 			std::chrono::duration<double>>(std::chrono::system_clock::now() - this->turntimer);
 		double wait = 0;
@@ -35,6 +35,7 @@ void Server::mainLoop()
 		if (this->gameState == GameState::GAME_MID)
 		{
 			handleGameOutput(this->game.loopGame(this->gameInput));
+			this->gameInput = Parser::Messenger();
 		}
 
 		if (output.eventList.size()) 

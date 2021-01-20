@@ -52,7 +52,7 @@ public:
 		int i = 0, j = 0;
 		for (i = 0; i < map.MAP_HEIGHT; i++)
 		{
-			for (j = 0; j < map.MAP_WIDTH; i++)
+			for (j = 0; j < map.MAP_WIDTH; j++)
 			{
 				auto tile = this->map.tileArray[i][j];
 				if (tile->isSpawnable && !tile->isItem && !tile->isPlayer)
@@ -451,6 +451,7 @@ public:
 	void respawnAskEvent(std::shared_ptr<PlayerObject> object)
 	{
 		output.addEventAskRespawn(Constants::SERVER_ID, object->getplayerID(), object->getX(), object->getY());
+		Logger::log("Respawn ask event added");
 	}
 
 	void despawnEvent(std::shared_ptr<SpawnableObject> object)

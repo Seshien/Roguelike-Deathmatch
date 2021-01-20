@@ -294,6 +294,7 @@ void Client::handleServer(Parser::Event ev)
 	case Parser::SubType::MAP:
 		this->mapID = ev.subdata[0];
 		this->map.init(std::string("tmp"), this->tileObjectsTextures);
+		Logger::log("Map id received.");
 		break;
 	case Parser::SubType::INFODUMP_LOBBY:
 		//wlaczamy widok lobby, z widokiem mapy

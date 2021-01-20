@@ -34,6 +34,10 @@ public:
 			isSpawnable = true;
 			isMovable = true;
 		}
+		else {
+			isSpawnable = false;
+			isMovable = false;
+		}
 
 	}
 	//Tile(TileType type);

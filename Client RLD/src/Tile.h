@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "../../Utilities/Logger.h"
 
 enum class TileType {
 	WALL_CONNECTOR_NE, WALL_UP, WALL_DIAGONAL_NE, WALL_DIAGONAL_SE, WALL_DIAGONAL_SW, WALL_DIAGONAL_NW, WALL_CONNECTOR_SW,
@@ -12,7 +13,7 @@ class Tile
 	sf::Sprite sprite;
 
 public:
-	Tile(TileType type, sf::Texture* tex);
+	Tile(TileType type, sf::Texture& tex);
 
 	void draw(sf::RenderWindow& window, int x, int y);
 };
