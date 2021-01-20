@@ -27,12 +27,13 @@ public:
 		int itemID = -1;
 		int playerID = -1;
 		this->type = tileType;
+		this->x = x;
+		this->y = y;
 		if ((int)tileType >= 12 && (int)tileType <= 16)
 		{
 			isSpawnable = true;
 			isMovable = true;
 		}
-
 
 	}
 	//Tile(TileType type);
