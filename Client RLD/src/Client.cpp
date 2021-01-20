@@ -174,35 +174,35 @@ void Client::handleIntEvents()
 			if (event.key.code == sf::Keyboard::Left)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, 'A');
+					output.addEventKeyInput(this->ID, Constants::SERVER_ID, 'A');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Right)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, 'D');
+					output.addEventKeyInput(this->ID, Constants::SERVER_ID, 'D');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Up)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, 'W');
+					output.addEventKeyInput(this->ID, Constants::SERVER_ID, 'W');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Down)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, 'S');
+					output.addEventKeyInput(this->ID, Constants::SERVER_ID, 'S');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Space)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, ' ');
+					output.addEventKeyInput(this->ID, Constants::SERVER_ID, ' ');
 				else
 					Logger::log("You are not alive");
 			}
@@ -347,8 +347,8 @@ void Client::handleGame(Parser::Event ev)
 	case Parser::SubType::MOVE:
 		// To jest madry sposob na wybieranie czesci char arraya do sstringa
 		evString = std::string(ev.subdata);
-		evString = evString.substr(3, ev.subdata.size() - 2);
-		Logger::log("Ruch:" + evString + "x: " + std::string(1, ev.subdata[0]) + "y: " + std::string(1, ev.subdata[1]));
+		evString = evString.substr(2, ev.subdata.size() - 2);
+		Logger::log("Ruch:" + evString + "x: " + std::to_string(ev.subdata[0]) + "y: " + std::to_string(ev.subdata[1]));
 		break;
 	case Parser::SubType::ASKRESPAWN:
 		this->respawn.changeVisibility(true);

@@ -50,9 +50,9 @@ public:
 	int addPlayer(int playerID, std::string playerName)
 	{
 		int i = 0, j = 0;
-		for (i = 0; i < map.MAP_HEIGHT; i++)
+		for (i = 1; i < map.MAP_HEIGHT; i++)
 		{
-			for (j = 0; j < map.MAP_WIDTH; j++)
+			for (j = 1; j < map.MAP_WIDTH; j++)
 			{
 				auto tile = this->map.tileArray[i][j];
 				if (tile->isSpawnable && !tile->isItem && !tile->isPlayer)
@@ -257,10 +257,10 @@ public:
 		switch (movement)
 		{
 		case 'W':
-			return this->getTile(x, y + range);
+			return this->getTile(x, y - range);
 			break;
 		case 'S':
-			return this->getTile(x, y - range);
+			return this->getTile(x, y + range);
 			break;
 		case 'A':
 			return this->getTile(x - range, y);
@@ -586,7 +586,7 @@ public:
 	std::shared_ptr<Tile> getTile(int x, int y)
 	{
 		if (x >= 0 && x <= 99 && y >= 0 && y <= 99)
-			return this->map.tileArray[y][x];
+			return this->map.tileArray[x][y];
 		else
 			return this->map.tileArray[0][0];
 	}
