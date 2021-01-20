@@ -314,7 +314,7 @@ public:
 		if (tile->isPlayer)
 		{
 			auto player = this->gamePlayerList[this->findPlayerIndex(tile->playerID)];
-			this->spawnEvent(player, player);
+			this->spawnPlayerEvent(player, player);
 		}
 
 	}
@@ -389,9 +389,10 @@ public:
 				output.addEventMovement(Constants::SERVER_ID, player->getplayerID(), obj->getName(), obj->getX(), obj->getY());
 		}
 	}
-	void spawnEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<SpawnableObject> object)
+
+	void spawnPlayerEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<PlayerObject> object)
 	{
-		output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
+		output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), object->getName(), object->getX(), object->getY());
 	}
 
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject> object)
@@ -399,9 +400,15 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(object, player))
-				output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), player->getName(), object->getX(), object->getY());
+				output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), object->getName(), object->getX(), object->getY());
 		}
 	}
+
+	void spawnEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<SpawnableObject> object)
+	{
+		output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
+	}
+
 	void spawnEvent(std::shared_ptr<ItemObject> object)
 	{
 		for (auto player : gamePlayerList)
