@@ -14,7 +14,8 @@ namespace Constants
 	const static int attackRange = 3;
 	//zmiana tego zepsuje program
 	const static int SERVER_ID = 0;
-	const static float turnTimer = 0.05f;
+	const static float serverTurnTimer = 0.05f;
+	const static float clientTurnTimer = 0.01f;
 	const static int gameTickRate = 10;
 	// Opcje grafiki klienta
 	const static int SCREEN_WIDTH = 960;

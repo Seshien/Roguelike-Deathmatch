@@ -80,8 +80,8 @@ void Client::mainLoop()
 		//odbieranie wiadomosci
 		auto time = this->turnTimer.getElapsedTime().asSeconds();
 		double wait = 0;
-		if (time <= Constants::turnTimer)
-			wait = Constants::turnTimer - time;
+		if (time <= Constants::clientTurnTimer)
+			wait = Constants::clientTurnTimer - time;
 
 		if (cState == ConnectionState::CONNECTED)
 			this->input = this->network.inputNetwork(wait);
@@ -117,6 +117,7 @@ void Client::graphicsUpdate() {
 	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD) {
 		this->map.drawMap(window);
 		for (int i = 0; i < this->playerInfos.size(); i++) {
+			this->playerInfos[i]->interpolate(1.0f, 1.0f);
 			this->playerInfos[i]->draw(window);
 		}
 		for (int i = 0; i < this->items.size(); i++) {
@@ -349,6 +350,11 @@ void Client::handleGame(Parser::Event ev)
 		evString = std::string(ev.subdata);
 		evString = evString.substr(2, ev.subdata.size() - 2);
 		Logger::log("Ruch:" + evString + "x: " + std::to_string(ev.subdata[0]) + "y: " + std::to_string(ev.subdata[1]));
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (this->playerInfos[i]->getPlayerName() == evString) {
+				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
+			}
+		}
 		break;
 	case Parser::SubType::ASKRESPAWN:
 		this->respawn.changeVisibility(true);
@@ -360,6 +366,13 @@ void Client::handleGame(Parser::Event ev)
 		this->playerInfos.push_back(std::make_shared<OurPlayerInfo>(this->playerName, (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
 		this->currentTextureSet++;
 		this->gameStage = GameStage::ALIVE;
+		break;
+	case Parser::SubType::PSPAWN:
+		evString = std::string(ev.subdata);
+		Logger::log("PSpawn:" + evString.substr(2, evString.size() - 2) + "x: " + evString.substr(0, 1) + "y: " + evString.substr(1, 1));
+		Logger::log("Other player spawn info received.");
+		this->playerInfos.push_back(std::make_shared<PlayerInfo>(evString.substr(2, evString.size() - 2), (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
+		this->currentTextureSet++;
 		break;
 	default:
 		Logger::log("Error, event subtype not found.");
