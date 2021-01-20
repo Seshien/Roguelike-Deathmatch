@@ -1,6 +1,6 @@
 #include "Tile.h";
 
-Tile::Tile(TileType type, sf::Texture tex) {
+Tile::Tile(TileType type, sf::Texture& tex) {
 	this->type;
 	this->sprite.setTexture(tex);
 }

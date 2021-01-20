@@ -1,6 +1,6 @@
 #include "OurPlayerInfo.h"
 
-OurPlayerInfo::OurPlayerInfo(int playerId, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount):PlayerInfo(playerId, x, y, textureSet, killCount) {
+OurPlayerInfo::OurPlayerInfo(std::string playerName , int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount):PlayerInfo(playerName, x, y, textureSet, killCount) {
 	this->pocket = pocket;
 	this->health = health;
 	this->maxHealth = maxHealth;

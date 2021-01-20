@@ -1,8 +1,8 @@
 #include "PlayerInfo.h"
 
-PlayerInfo::PlayerInfo(int playerId, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount) {
+PlayerInfo::PlayerInfo(std::string playerName, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount) {
 	this->isAlive = true;
-	this->playerId = playerId;
+	this->playerName = playerName;
 	this->xPos = x;
 	this->yPos = y;
 	this->realXPos = x;

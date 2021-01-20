@@ -173,6 +173,7 @@ public:
 				break;
 			case TileType::SPIKES:
 				damagePlayer(player, Constants::spikeDmg);
+				break;
 			case TileType::LAVA:
 				killPlayer(player);
 				break;

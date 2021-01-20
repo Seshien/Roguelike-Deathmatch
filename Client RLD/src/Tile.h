@@ -12,7 +12,7 @@ class Tile
 	sf::Sprite sprite;
 
 public:
-	Tile(TileType type, sf::Texture tex);
+	Tile(TileType type, sf::Texture* tex);
 
 	void draw(sf::RenderWindow& window, int x, int y);
 };

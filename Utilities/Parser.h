@@ -48,6 +48,7 @@ namespace Parser
 		void addEventPlayerSpawn(int sender, int receiver, std::string, int x, int y);
 
 		void addEventAskRespawn(int sender, int receiver, int x, int y);
+		void addEventWillToRespawn(int sender, int receiver);
 		void addEventRespawn(int sender, int receiver, int x, int y);
 
 		void addEventDespawn(int sender, int receiver, int objectType, int x, int y);

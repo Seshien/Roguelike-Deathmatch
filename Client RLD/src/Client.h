@@ -8,6 +8,9 @@
 #include "..\..\Utilities\Logger.h"
 #include "..\..\Utilities\Constants.h"
 #include "Map.h"
+#include "Item.h"
+#include "PlayerInfo.h"
+#include "OurPlayerInfo.h"
 
 #include "UIButton.h"
 #include "UIBar.h"
@@ -76,6 +79,13 @@ private:
 	UIBar hpBar;
 
 	Map map;
+
+	std::vector<std::shared_ptr<Item>> items;
+	std::vector<std::shared_ptr<PlayerInfo>> playerInfos;
+
+
+	// Information about which player textureSet has to be used now to create new player in PlayerInfo object
+	int currentTextureSet;
 
 	boolean voted;
 

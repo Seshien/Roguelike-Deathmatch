@@ -3,7 +3,7 @@
 #include "..\..\Utilities\Constants.h"
 class PlayerInfo
 {
-	int playerId;
+	std::string playerName;
 	int prevxPos;
 	int prevyPos;
 	int xPos;
@@ -20,7 +20,7 @@ class PlayerInfo
 	sf::Sprite sprite;
 
 public:
-	PlayerInfo(int playerId, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount);
+	PlayerInfo(std::string playerName, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount);
 	// Sets realXPos and realYPos for given frame 
 	void interpolate(double time, double maxTime);
 	void setNewPosition(int x, int y);

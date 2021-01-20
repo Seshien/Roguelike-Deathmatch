@@ -12,7 +12,7 @@ public:
 	std::vector<std::shared_ptr<Item>> pocket;
 
 	// Funkcja, ktora rysuje posiadane przez gracza przedmioty w UI
-	OurPlayerInfo(int playerId, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount);
+	OurPlayerInfo(std::string playerName, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount);
 	void drawPocket(sf::RenderWindow& window, int posX, int posY);
 };
 

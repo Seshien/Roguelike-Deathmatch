@@ -3,6 +3,7 @@
 void Client::startClient()
 {
 	this->voted = false;
+	this->currentTextureSet = 0;
 
 	this->startLogger();
 	this->loadConfig();
@@ -110,6 +111,17 @@ void Client::graphicsUpdate() {
 	window.setView(gameView);
 	rectangle.setFillColor(sf::Color::Green);
 	window.draw(rectangle);
+
+	// Rysuje wszystko w grze (co jest jeszcze potrzebne to interpolacja pomiedzy ruchem gracza TO DO)
+	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD) {
+		this->map.drawMap(window);
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			this->playerInfos[i]->draw(window);
+		}
+		for (int i = 0; i < this->items.size(); i++) {
+			this->items[i]->draw(window);
+		}
+	}
 
 	window.setView(interfaceView);
 	rectangle.setFillColor(sf::Color::Blue);
@@ -281,6 +293,7 @@ void Client::handleServer(Parser::Event ev)
 		break;
 	case Parser::SubType::MAP:
 		this->mapID = ev.subdata[0];
+		this->map.init(std::string("tmp"), this->tileObjectsTextures);
 		break;
 	case Parser::SubType::INFODUMP_LOBBY:
 		//wlaczamy widok lobby, z widokiem mapy
