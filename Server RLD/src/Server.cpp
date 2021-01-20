@@ -375,6 +375,7 @@ void Server::InfoDump(int playerId)
 		// Wysylamy fakt, ze jest w grze oraz czas trwania danej gry. (za pomoca subType?)
 		output.addEventMidGame(Constants::SERVER_ID, playerId, getCurrentGameTime());
 		gameInput.addEvent(Constants::SERVER_ID, playerId, Parser::Type::GAME, Parser::SubType::NEWPLAYER, newPlayer->name);
+
 		break;
 	case GameState::GAME_END:
 		// wysylamy wyniki wszystkich graczy (nazwy juz dostanie)
