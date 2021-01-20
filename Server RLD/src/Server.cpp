@@ -70,10 +70,12 @@ void Server::handleEvents(Parser::Messenger mess)
 				handleServer(ev);
 				break;
 			case Parser::Type::LOBBY:
-				handleLobby(ev);
+				if (this->gameState==GameState::LOBBY)
+					handleLobby(ev);
 				break;
 			case Parser::Type::GAME:
-				handleGame(ev);
+				if (this->gameState == GameState::GAME_MID)
+					handleGame(ev);
 				break;
 			case Parser::Type::ERRORNET:
 				handleError(ev);
