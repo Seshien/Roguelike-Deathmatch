@@ -4,6 +4,7 @@ void Client::startClient()
 {
 	this->voted = false;
 	this->currentTextureSet = 0;
+	this->health = Constants::defaultHealth;
 
 	this->startLogger();
 	this->loadConfig();
@@ -130,6 +131,7 @@ void Client::graphicsUpdate() {
 	window.draw(rectangle);
 
 	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD) {
+		hpBar.changeFillPercent((double)this->health / (double)this->maxHealth);
 		hpBar.changeVisibility(true);
 		hpBar.draw(window);
 	}
@@ -343,6 +345,7 @@ void Client::handleLobby(Parser::Event ev)
 void Client::handleGame(Parser::Event ev)
 {
 	std::string evString;
+	bool newPlayer;
 	switch (ev.subtype)
 	{
 	case Parser::SubType::MOVE:
@@ -368,11 +371,41 @@ void Client::handleGame(Parser::Event ev)
 		this->gameStage = GameStage::ALIVE;
 		break;
 	case Parser::SubType::PSPAWN:
+		newPlayer = true;
 		evString = std::string(ev.subdata);
 		Logger::log("PSpawn:" + evString.substr(2, evString.size() - 2) + "x: " + evString.substr(0, 1) + "y: " + evString.substr(1, 1));
-		Logger::log("Other player spawn info received.");
-		this->playerInfos.push_back(std::make_shared<PlayerInfo>(evString.substr(2, evString.size() - 2), (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
-		this->currentTextureSet++;
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (this->playerInfos[i]->getPlayerName = evString.substr(2, evString.size() - 2)) {
+				Logger::log("Other player spawn existing info received");
+				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
+				newPlayer = false;
+			}
+		}
+		if (newPlayer == true) {
+			Logger::log("Other player spawn new info received.");
+			this->playerInfos.push_back(std::make_shared<PlayerInfo>(evString.substr(2, evString.size() - 2), (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
+			this->currentTextureSet++;
+		}
+		break;
+	case Parser::SubType::DAMAGE:
+		Logger::log("Player new hp: " + ev.subdata);
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
+				OurPlayerInfo *ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
+				ourPlayer->health = std::stoi(ev.subdata);
+				this->maxHealth = ourPlayer->maxHealth;
+				this->health = ourPlayer->health;
+			}
+		}
+		break;
+	case Parser::SubType::PICKUP:
+		Logger::log("Picked item: " + ev.subdata[0]);
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
+				OurPlayerInfo* ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
+				ourPlayer->pocket.push_back(std::make_shared<Item>((ItemType)(int)ev.subdata[0], -1, -1, tileObjectsTextures[(int)ev.subdata[0]], false, true));
+			}
+		}
 		break;
 	default:
 		Logger::log("Error, event subtype not found.");

@@ -55,6 +55,9 @@ private:
 	int time;
 	int mapID;
 
+	int health;
+	int maxHealth;
+
 	ConnectionState cState;
 	GameStage gameStage;
 
