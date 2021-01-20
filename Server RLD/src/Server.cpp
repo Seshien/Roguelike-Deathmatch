@@ -333,16 +333,16 @@ void Server::InfoDump(int playerId) {
 
 	// Wiadomosci zalezne od stanu gry
 	switch (gameState) {
-	case LOBBY:
+	case GameState::LOBBY:
 		output.addEventLobby(Constants::SERVER_ID, playerId, numOfVotes);
 		break;
-	case GAME_MID:
+	case GameState::GAME_MID:
 		// Wysylamy fakt, ze jest w grze oraz czas trwania danej gry. (za pomoca subType?)
 		output.addEventMidGame(Constants::SERVER_ID, playerId, getCurrentGameTime());
 		break;
-	case GAME_END:
+	case GameState::GAME_END:
 		// wysylamy wyniki wszystkich graczy (nazwy juz dostanie)
-		output.addEventGameEnd(Constants::SERVER_ID, playerId, getResults());
+		//output.addEventGameEnd(Constants::SERVER_ID, playerId, getResults());
 		break;
 	}
 	//output.addEvent(SERVER_ID, playerId, Parser::SERVER, Parser::INFODUMP, subdata);

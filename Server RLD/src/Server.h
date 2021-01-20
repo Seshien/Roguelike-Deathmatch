@@ -13,11 +13,15 @@
 #include "..\..\Utilities\Network.h"
 #include "..\..\Utilities\Constants.h"
 
+enum class GameState { LOBBY, GAME_MID, GAME_END };
+enum class StateChange { NONE, VOTE_END, GAME_END };
+
+
 class Server
 {
+		
 	public:
-		enum GameState { LOBBY, GAME_MID, GAME_END };
-		enum class StateChange {NONE, VOTE_END, GAME_END};
+		
 		GameState gameState;
 
 		Server()
@@ -56,7 +60,7 @@ class Server
 		void startLobby()
 		{
 			//poczatek prawdziwej dzialalnosci serwera, nie wiem co tu dac zbytnio
-			this->gameState = LOBBY;
+			this->gameState = GameState::LOBBY;
 		}
 		void mainLoop();
 		void startGame()
