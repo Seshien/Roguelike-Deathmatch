@@ -119,7 +119,7 @@ void Server::handleLobby(Parser::Event ev)
 void Server::handleGame(Parser::Event ev)
 {
 	for (auto it = begin(this->gameInput.eventList); it != end(this->gameInput.eventList);) {
-		if (it->sender == ev.sender)
+		if (it->sender == ev.sender && ev.sender != Constants::SERVER_ID)
 		{
 			it = gameInput.eventList.erase(it);
 			break;
@@ -151,19 +151,16 @@ void Server::handleStateChange()
 		this->gameState = GameState::GAME_MID;
 		std::vector<int> playerIDs;
 		std::vector<std::string> playerNames;
-		for (auto player : this->getActivePlayerList())
+		for (auto player : this->activePlayerList)
 		{
 			playerIDs.push_back(player->playerID);
 			playerNames.push_back(player->name);
 		}
-		this->game.startGame(playerIDs, playerNames);
-		for (auto player : this->playerList)
+		for (auto player : this->activePlayerList)
 		{
-			if (player.state != Player::INACTIVE)
-			{
-				output.addEventMidGame(Constants::SERVER_ID, player.playerID,this->getCurrentGameTime());
-			}
+			output.addEventMidGame(Constants::SERVER_ID, player->playerID, this->getCurrentGameTime());
 		}
+		this->game.startGame(playerIDs, playerNames);
 
 	}
 }
@@ -172,13 +169,15 @@ void Server::handleGameOutput(Parser::Messenger gOutput)
 {
 	for (auto ev : gOutput.eventList)
 	{
-		auto player = this->getPlayer(ev.sender);
-		if (player == nullptr || player->state == Player::INACTIVE)
+		for (auto player : this->activePlayerList)
 		{
-			continue;
+			if (ev.receiver == player->playerID)
+			{
+				this->output.addEvent(ev);
+				break;
+			}
 		}
-		else
-			this->output.addEvent(ev);
+
 	}
 }
 
@@ -187,26 +186,25 @@ void Server::handleNewPlayer(Parser::Event ev)
 	std::string playerName = ev.subdata;
 	int playerID;
 	bool old = false;
-	for (Player &player : this->playerList)
+	for (Player &player_ : this->playerList)
 	{
-		if (player.name == playerName)
+		if (player_.name == playerName)
 		{
-			if (player.state == Player::INACTIVE)
+			if (player_.state == Player::INACTIVE)
 			{
 				//przyjmujemy tego gracza i nadajemy mu stare ID
-				player.state = Player::ACTIVE;
-				playerID = player.playerID;
+				player_.state = Player::ACTIVE;
+				playerID = player_.playerID;
 				old = true;
 				break;
 			}
 			else
 			{
 				//odrzucamy gracza, bo juz taki istnieje
-				output.addEventInitPlayer(0, ev.sender, -1);
+				output.addEventInitPlayer(Constants::SERVER_ID, ev.sender, -1);
 				return;
 			}
 		}
-
 	}
 	//nie ma gracza o takiej nazwie
 	//czyli tworzymy nowego gracza
@@ -215,21 +213,20 @@ void Server::handleNewPlayer(Parser::Event ev)
 		playerID = this->playerList.size() + 1;
 		playerList.push_back(Player(playerID, playerName));
 	}
-	this->activePlayerCount++;
+	this->refreshActivePlayerList();
 	//tworzymy Event wewnetrzny ktory mowi network o tym ze trzeba zmienic id na playerID, network potem przekazuje to dalej
-	output.addInnerInitPlayer(ev.sender, 0, playerID);
+	output.addInnerInitPlayer(ev.sender, Constants::SERVER_ID, playerID);
 
-	output.addEventInitPlayer(0, playerID, playerID);
+	output.addEventInitPlayer(Constants::SERVER_ID, playerID, playerID);
 
 	//teraz powinnismy podac info o tej grze Playerowi
 	this->InfoDump(playerID);
 
 	//Podanie kazdemu graczowi informacje ze nowy gracz dolaczyc
-	for (Player &player : this->playerList)
+	for (auto player_ : this->activePlayerList)
 	{
-		if (player.playerID == playerID) continue;
-		if (player.state == Player::ACTIVE)
-			output.addEventNewPlayer(Constants::SERVER_ID, player.playerID, playerName);
+		if (player_->playerID == playerID) continue;
+		output.addEventNewPlayer(Constants::SERVER_ID, player_->playerID, playerName);
 	}
 
 }
@@ -245,54 +242,72 @@ void Server::handleDisconnect(int playerID)
 	//to znaczy ze to nie jest zalogowany gracz, tylko ktos kto probowal wejsc i mu sie nie udalo
 	if (playerID < 0)
 	{
-		output.addInnerDiscPlayer(playerID, 0);
+		output.addInnerDiscPlayer(playerID, Constants::SERVER_ID);
 		return;
 	}
 
-	int pIndex = playerID - 1;
-	std::string playerName = playerList[pIndex].name;
-	playerList[pIndex].state = Player::INACTIVE;
-	this->activePlayerCount--;
+	auto player = this->getPlayer(playerID);
+	if (player == nullptr)
+	{
+		Logger::log("Error: Failure in deleting player");
+		return;
+	}
+	player->state = Player::INACTIVE;
+	this->refreshActivePlayerList();
 	//rzeczy zwiazane z wewnetrzna logika gry,
 
 	// TODO
 
 	//powiadomienie networka o usunieciu tego gracza
-	output.addInnerDiscPlayer(playerID, 0);
+	output.addInnerDiscPlayer(playerID, Constants::SERVER_ID);
 
 	//powiadomienie innych graczy o zniknieciu tego gracza
-	for (Player &player : this->playerList)
+	for (auto player_ : this->activePlayerList)
 	{
-		if (player.playerID == playerID) continue;
-		output.addEventDiscPlayer(0, player.playerID, playerName);
+		output.addEventDiscPlayer(0, player_->playerID, player->name);
 	}
 }
 
 void Server::handleTimeout(Parser::Event ev)
 {
-	Player * player = &playerList[ev.sender];
+	auto player = this->getPlayer(ev.sender);
+	if (player == nullptr)
+	{
+		Logger::log("Error: Failure in handling timeout, player not found");
+		return;
+	}
 	//sprawdzamy czy jest zagrozony
 	if (player->timeout)
 	{
-		handleDisconnect(ev.sender);
+		handleDisconnect(player->playerID);
 	}
 	else
 	{
-		output.addEventTimeoutReached(0, ev.sender);
+		output.addEventTimeoutReached(Constants::SERVER_ID, player->playerID);
 	}
 
 }
 
 void Server::handleTimeoutAnswer(Parser::Event ev)
 {
-	Player * player = &playerList[ev.sender - 1];
+	auto player = this->getPlayer(ev.sender);
+	if (player == nullptr)
+	{
+		Logger::log("Error: Failure in handling timeout answer, player not found");
+		return;
+	}
 	//wylaczamy timeout bo odpowiedzial
 	player->timeout = false;
 }
 
 void Server::handleVote(Parser::Event ev)
 {
-	Player * player = this->getPlayer(ev.sender);
+	auto player = this->getPlayer(ev.sender);
+	if (player == nullptr)
+	{
+		Logger::log("Error: Failure in handling vote, player not found");
+		return;
+	}
 	if (player->voted)
 	{
 		player->voted = false;
@@ -304,8 +319,8 @@ void Server::handleVote(Parser::Event ev)
 		this->numOfVotes++;
 	}
 	Logger::log("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
-	for (auto player : playerList)
-		output.addEventVote(Constants::SERVER_ID, player.playerID, numOfVotes);
+	for (auto player : this->activePlayerList)
+		output.addEventVote(Constants::SERVER_ID, player->playerID, numOfVotes);
 	if (this->activePlayerCount >= 2 && this->numOfVotes > this->activePlayerCount / 2)
 	{
 		this->stateChange = StateChange::VOTE_END;
@@ -324,9 +339,9 @@ void Server::InfoDump(int playerId)
 {
 	std::string subdata;
 	// Wysylamy graczowi nazwy wszystkich pozostalych graczy w przypadku dolaczenia do gry
-	for (auto player : this->playerList) {
-		if (player.playerID != playerId && player.state == Player::ACTIVE) {
-			output.addEventNewPlayer(Constants::SERVER_ID, playerId, player.name);
+	for (auto player : this->activePlayerList) {
+		if (player->playerID != playerId) {
+			output.addEventNewPlayer(Constants::SERVER_ID, playerId, player->name);
 		}
 	}
 	auto newPlayer = this->getPlayer(playerId);
@@ -422,20 +437,13 @@ Player * Server::getPlayer(int playerID)
 	return nullptr;
 }
 
-int Server::calcActivePlayerCount()
-{
-	int count = 0;
-	for (auto& player : this->playerList)
-		if (player.state != Player::INACTIVE)
-			count++;
-	this->activePlayerCount = count;
-	return count;
-}
-std::vector<Player *> Server::getActivePlayerList()
+std::vector<Player *> Server::refreshActivePlayerList()
 {
 	std::vector<Player *> res;
 	for (auto& player : this->playerList)
 		if (player.state == Player::ACTIVE) res.push_back(&player);
+	this->activePlayerList = res;
+	this->activePlayerCount = res.size();
 	return res;
 }
 

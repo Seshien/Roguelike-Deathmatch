@@ -1,6 +1,7 @@
 #pragma once
 namespace Constants
 {
+	const static bool debug = false;
 	const static int bufferLength = 200;
 	const static int msgLengthLimit = 50;
 	//to mozna dac w configu potem

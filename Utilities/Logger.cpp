@@ -6,10 +6,12 @@ namespace Logger
 {
 	std::ofstream file;
 	bool _file = false;
+	bool debug_mode = false;
 
-	void startLogger(std::string name = "logger")
+	void startLogger(std::string name, bool mode)
 	{
 		int number = 0;
+		debug_mode = mode;
 		while (true)
 		{
 			if (!std::filesystem::is_directory("log")) 
@@ -34,6 +36,39 @@ namespace Logger
 		file.close();
 	}
 
+	void error(std::string text)
+	{
+		log(text);
+	}
+
+	void error(std::string text, int value)
+	{
+		log(text, value);
+	}
+
+	void error(Parser::Event ev)
+	{
+		log(ev);
+	}
+
+	void debug(std::string text)
+	{
+		if (debug_mode) 
+			log(text);
+	}
+
+	void debug(std::string text, int value)
+	{
+		if (debug_mode)
+			log(text, value);
+	}
+
+	void debug(Parser::Event ev)
+	{
+		if (debug_mode)
+			log(ev);
+	}
+
 	void log(std::string text)
 	{
 		if (!_file)
@@ -44,6 +79,7 @@ namespace Logger
 		std::cout << text << std::endl << std::flush;
 		file << text << std::endl << std::flush;
 	}
+
 	void log(std::string text, int value)
 	{
 		if (!_file)
@@ -54,6 +90,7 @@ namespace Logger
 		std::cout << text << " " << value << std::endl << std::flush;
 		file << text << " " << value << std::endl << std::flush;
 	}
+
 	void log(Parser::Event ev)
 	{
 		if (!_file)

@@ -91,8 +91,6 @@ class Server
 
 		void processConfigLine(std::string line);
 
-		int calcActivePlayerCount();
-
 		int getPlayerCount();
 		int getPlayerCount(Player::State state);
 
@@ -100,12 +98,14 @@ class Server
 		std::string getResults();
 
 		std::chrono::duration<double> getCurrentGameTime();
-		std::vector<Player *> getActivePlayerList();
+
+		std::vector<Player> playerList;
+		std::vector<Player *> activePlayerList;
+		std::vector<Player *> refreshActivePlayerList();
 		Player * getPlayer(int playerID);
 
 
 		void setConfigValue(std::string token, std::string value);
-		std::vector<Player> playerList;
 		std::string confName = "./data/config.txt";
 		std::string mapPath = "./data/world0.txt";
 		std::string port = "7777";
