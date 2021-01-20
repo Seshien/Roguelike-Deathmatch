@@ -77,6 +77,14 @@ void Messenger::addEventMovement(int sender, int receiver, std::string playerNam
 	Logger::debug(ev);
 }
 
+void Messenger::addEventMovedOut(int sender, int receiver, std::string playerName, int x, int y)
+{
+	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
+	Event ev = Event(sender, receiver, Type::GAME, SubType::MOVEOUT, subdata);
+	eventList.push_back(ev);
+	Logger::debug(ev);
+}
+
 void Messenger::addEventSpawn(int sender, int receiver, int objectType, int x, int y)
 {
 	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + std::string(1, (char)objectType);
