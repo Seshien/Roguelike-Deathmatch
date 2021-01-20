@@ -10,7 +10,7 @@
 
 namespace Logger
 {
-	void startLogger(std::string name, bool mode = Constants::debug);
+	void startLogger(std::string name, int logLevel = Constants::debug);
 
 	void endLogger();
 
@@ -18,13 +18,22 @@ namespace Logger
 	void error(std::string text, int value);
 	void error(Parser::Event ev);
 
+	void info(std::string text);
+
+	void info(std::string text, int value);
+
+	void info(Parser::Event ev);
+
 	void debug(std::string text);
 	void debug(std::string text, int value);
 	void debug(Parser::Event ev);
 
+
+
 	void log(std::string text);
 	void log(std::string text, int error_code);
 	void log(Parser::Event ev);
+
 	void logNetworkError();
 
 };

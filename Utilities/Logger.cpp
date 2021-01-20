@@ -6,12 +6,12 @@ namespace Logger
 {
 	std::ofstream file;
 	bool _file = false;
-	bool debug_mode = false;
+	int debug_mode = 0;
 
-	void startLogger(std::string name, bool mode)
+	void startLogger(std::string name, int logLevel)
 	{
 		int number = 0;
-		debug_mode = mode;
+		debug_mode = logLevel;
 		while (true)
 		{
 			if (!std::filesystem::is_directory("log")) 
@@ -66,6 +66,24 @@ namespace Logger
 	void debug(Parser::Event ev)
 	{
 		if (debug_mode)
+			log(ev);
+	}
+
+	void info(std::string text)
+	{
+		if (debug_mode >= 0)
+			log(text);
+	}
+
+	void info(std::string text, int value)
+	{
+		if (debug_mode >= 0)
+			log(text, value);
+	}
+
+	void info(Parser::Event ev)
+	{
+		if (debug_mode >= 0)
 			log(ev);
 	}
 
