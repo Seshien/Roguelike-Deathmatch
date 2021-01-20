@@ -121,11 +121,37 @@ public:
 			case Parser::SubType::RESPAWN:
 				handleRespawn(ev);
 				break;
+			case Parser::SubType::KEY:
+				handleKey(ev);
+				break;
 			default:
 				Logger::log("Error: Unknown Game Subtype");
 			}
 		}
 		return output;
+	}
+	void handleKey(Parser::Event ev)
+	{
+		switch (ev.subdata[0])
+		{
+		case ('W'):
+			handleMovement(ev);
+			break;
+		case ('S'):
+			handleMovement(ev);
+			break;
+		case ('A'):
+			handleMovement(ev);
+			break;
+		case ('D'):
+			handleMovement(ev);
+			break;
+		case ' ':
+			handleAttack(ev);
+			break;
+		default:
+			Logger::error("Error: Not handled key");
+		}
 	}
 	//wasd
 	void handleMovement(Parser::Event ev)

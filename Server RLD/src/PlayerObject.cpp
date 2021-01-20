@@ -7,7 +7,7 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 	this->type = type;
 	this->isExist = false;
 	this->occupiedTile = tile;
-	tile->isPlayer = true;
+	tile->isSpawnable = false;
 	this->health = Constants::defaultHealth;
 	this->maxHealth = Constants::defaultHealth;
 	this->dmg = Constants::defaultDmg;
