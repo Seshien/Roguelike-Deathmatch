@@ -24,3 +24,7 @@ void UIBar::draw(sf::RenderWindow& window) {
 		window.draw(this->sprite);
 	}
 }
+
+void UIBar::changeFillPercent(double fillPercent) {
+	this->fillPercent = fillPercent;
+}

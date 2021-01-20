@@ -18,5 +18,7 @@ public:
 	void draw(sf::RenderWindow& window);
 
 	void changeVisibility(bool visibility);
+
+	void changeFillPercent(double fillPercent);
 };
 

@@ -22,3 +22,11 @@ void Item::drawInPocket(sf::RenderWindow& window, int posX, int posY) {
 		window.draw(this->sprite);
 	}
 }
+
+int Item::getX() {
+	return this->x;
+}
+
+int Item::getY() {
+	return this->y;
+}

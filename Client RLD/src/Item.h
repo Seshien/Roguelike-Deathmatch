@@ -19,5 +19,8 @@ public:
 	void draw(sf::RenderWindow& window);
 
 	void drawInPocket(sf::RenderWindow& window, int posX, int posY);
+
+	int getX();
+	int getY();
 };
 
