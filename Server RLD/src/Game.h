@@ -125,6 +125,9 @@ public:
 			case Parser::SubType::NEWPLAYER:
 				addPlayer(ev.receiver, ev.subdata);
 				break;
+			case Parser::SubType::RESPAWN:
+				handleRespawn(ev);
+				break;
 			default:
 				Logger::log("Error: Unknown Game Subtype");
 			}
@@ -406,6 +409,19 @@ public:
 			if (checkRange(object, player))
 				output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
+	}
+
+	void handleRespawn(Parser::Event ev)
+	{
+		int playerIndex = this->findPlayerIndex(ev.sender);
+
+		if (playerIndex == -1)
+		{
+			Logger::log("Error: Respawn event failed");
+			return;
+		}
+		handleRespawn(this->gamePlayerList[playerIndex]);
+
 	}
 
 	void handleRespawn(std::shared_ptr<PlayerObject> object)
