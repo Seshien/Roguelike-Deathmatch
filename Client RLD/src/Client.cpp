@@ -39,6 +39,7 @@ void Client::startWindow()
 	// Create UI elements
 	getIn = UIButton(20, 25, 160, 64, "Login", buttonTexture);
 	vote = UIButton(20, 460, 160, 64, "Vote", buttonTexture);
+	respawn = UIButton(20, 160, 160, 64, "Respawn", buttonTexture);
 	getIn.changeVisibility(true);
 	hpBar = UIBar(5, 5, 320, 64, barTexture, 100.0f);
 
@@ -149,10 +150,12 @@ void Client::graphicsUpdate() {
 	text.setString(str);
 
 	// Rysujemy button
-	if(this->gameStage == Client::GameStage::NOTJOINED)
+	if (this->gameStage == Client::GameStage::NOTJOINED)
 		getIn.draw(window);
-	if(this->gameStage == Client::GameStage::LOBBY)
+	if (this->gameStage == Client::GameStage::LOBBY)
 		vote.draw(window);
+	if (this->gameStage == Client::GameStage::DEAD || this->gameStage == Client::GameStage::ALIVE)
+		respawn.draw(window);
 
 	window.draw(text);
 
@@ -224,6 +227,11 @@ void Client::handleIntEvents()
 						vote.setText("Cancel");
 					else
 						vote.setText("Vote");
+				}
+				else if (respawn.isClickInBounds(event.mouseButton.x - Constants::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+					Logger::log("Respawn button clicked!");
+					respawn.changeVisibility(false);
+					this->output.addEventWillToRespawn(this->ID, Constants::SERVER_ID);
 				}
 				//std::cout << "the right button was pressed" << std::endl;
 				//std::cout << "mouse x: " << event.mouseButton.x << std::endl;
@@ -305,6 +313,7 @@ void Client::handleServer(Parser::Event ev)
 	case Parser::SubType::INFODUMP_GAME_MID:
 		Logger::log("Czas trwania gry:" + ev.subdata);
 		this->gameStage = GameStage::DEAD;
+		this->vote.changeVisibility(false);
 		break;
 	case Parser::SubType::INFODUMP_GAME_END:
 		Logger::log("Statystyki:" + ev.subdata);
@@ -341,7 +350,13 @@ void Client::handleGame(Parser::Event ev)
 		evString = evString.substr(3, ev.subdata.size() - 2);
 		Logger::log("Ruch:" + evString + "x: " + std::string(1, ev.subdata[0]) + "y: " + std::string(1, ev.subdata[1]));
 		break;
-
+	case Parser::SubType::ASKRESPAWN:
+		this->respawn.changeVisibility(true);
+		Logger::log("Server asked player to respawn");
+		break;
+	case Parser::SubType::RESPAWN:
+		Logger::log("Our player respawn info received.");
+		break;
 	default:
 		Logger::log("Error, event subtype not found.");
 		Logger::log(ev);

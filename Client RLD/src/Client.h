@@ -75,6 +75,7 @@ private:
 	std::vector<std::vector<std::shared_ptr<sf::Texture>>> playerTextures;
 
 	UIButton getIn;
+	UIButton respawn;
 	UIButton vote;
 	UIBar hpBar;
 

@@ -71,6 +71,7 @@ public:
 
 	Parser::Messenger loopGame(Parser::Messenger input)
 	{
+		Logger::log("Loop game.");
 		output = Parser::Messenger();
 		for (auto object = tickObjList.begin(); object != tickObjList.end();)
 		{
@@ -93,6 +94,7 @@ public:
 		}
 		for (auto object = tickPlayList.begin(); object != tickPlayList.end();)
 		{
+			Logger::log("Tick!");
 			auto result = object->get()->tick();
 			if (result == tickResult::SPAWNED)
 			{
@@ -329,6 +331,7 @@ public:
 
 	void addPlayerSpawnToTick(std::shared_ptr<PlayerObject> player)
 	{
+		player->startSpawnTimer();
 
 		tickPlayList.push_back(player);
 

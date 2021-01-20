@@ -171,8 +171,10 @@ void Server::handleStateChange()
 			output.addEventMidGame(Constants::SERVER_ID, player->playerID, this->getCurrentGameTime());
 		}
 		this->game.startGame(playerIDs, playerNames);
-
+		this->stateChange = StateChange::NONE;
+	
 	}
+	
 }
 
 void Server::handleGameOutput(Parser::Messenger gOutput)

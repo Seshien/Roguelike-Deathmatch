@@ -23,6 +23,6 @@ namespace Constants
 	const static int SPRITE_HEIGHT = 32;
 
 	const static int ITEM_RESPAWN_TIME = 30;
-	const static int PLAYER_RESPAWN_TIME = 60;
+	const static int PLAYER_RESPAWN_TIME = 5;
 };
 
