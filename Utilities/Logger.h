@@ -9,7 +9,7 @@
 
 namespace Logger
 {
-	void startLogger();
+	void startLogger(std::string name);
 
 	void endLogger();
 	void log(std::string text);

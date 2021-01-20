@@ -7,12 +7,14 @@ namespace Logger
 	std::ofstream file;
 	bool _file = false;
 
-	void startLogger()
+	void startLogger(std::string name = "logger")
 	{
 		int number = 0;
 		while (true)
 		{
-			std::string filename = "data/logger" + std::to_string(number) + ".txt";
+			if (!std::filesystem::is_directory("log")) 
+				std::filesystem::create_directory("log");
+			std::string filename = "log/" + name + std::to_string(number) + ".txt";
 			if (std::filesystem::exists(filename))
 			{
 				number++;
@@ -20,6 +22,7 @@ namespace Logger
 			else
 			{
 				file.open(filename);
+				file << "This is " << name << " log file" << std::endl << std::flush;
 				break;
 			}
 		}

@@ -2,7 +2,7 @@
 
 void Server::startLogger()
 {
-	Logger::startLogger();
+	Logger::startLogger("Server");
 }
 
 // void GenerateMap();

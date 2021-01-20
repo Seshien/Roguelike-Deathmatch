@@ -387,7 +387,7 @@ void Client::handleTimeout(Parser::Event ev)
 
 void Client::startLogger()
 {
-	Logger::startLogger();
+	Logger::startLogger("Client");
 }
 
 void Client::loadConfig()
