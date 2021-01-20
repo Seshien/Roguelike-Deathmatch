@@ -12,6 +12,7 @@ class PlayerObject : public SpawnableObject
 	int maxHealth;
 	int dmg;
 	int attackRange;
+	int killCount;
 	std::vector<ItemType> items;
 	std::string playerName;
 
@@ -22,9 +23,11 @@ public:
 	void setHealth(int h) { this->health = h; }
 	int getMaxHealth() { return this->maxHealth; };
 	void setMaxHealth(int h) { this->maxHealth = h; }
-	int getplayerID() { return this->playerID; };
+	int getPlayerID() { return this->playerID; };
 	int getRange() { return this->attackRange; };
 	int getDamage() { return this->dmg; };
+	int getkillCount() { return this->killCount; };
+	int setkillCount(int newKillCount) { this->killCount = newKillCount; };
 	std::vector<ItemType> getItems() { return this->items; };
 
 	std::string getName() { return this->playerName; };
