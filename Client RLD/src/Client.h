@@ -7,6 +7,7 @@
 #include "..\..\Utilities\Parser.h"
 #include "..\..\Utilities\Logger.h"
 #include "..\..\Utilities\Constants.h"
+#include "Map.h"
 
 #include "UIButton.h"
 #include "UIBar.h"
@@ -73,6 +74,8 @@ private:
 	UIButton getIn;
 	UIButton vote;
 	UIBar hpBar;
+
+	Map map;
 
 	boolean voted;
 
