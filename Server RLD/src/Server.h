@@ -50,7 +50,6 @@ class Server
 		Parser::Messenger output;
 		Parser::Messenger input;
 		Parser::Messenger gameInput;
-		Parser::Messenger gameOutput;
 
 		void startLogger();
 
@@ -111,6 +110,7 @@ class Server
 		std::string port = "7777";
 
 		int mapID = 0;
+		int gameTickTimer = 0;
 		Network network;
 		Game game;
 

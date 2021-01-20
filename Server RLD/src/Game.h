@@ -72,13 +72,6 @@ public:
 	Parser::Messenger loopGame(Parser::Messenger input)
 	{
 		output = Parser::Messenger();
-		if (this->tickTimer > Constants::gameTickRate)
-		{
-			tickTimer++;
-			return output;
-		}
-
-		tickTimer = 0;
 		for (auto object = tickObjList.begin(); object != tickObjList.end();)
 		{
 			auto result = object->get()->tick();
@@ -556,7 +549,6 @@ public:
 
 private:
 
-	int tickTimer;
 	Map map;
 	Parser::Messenger output;
 	std::vector<std::shared_ptr<ItemObject>> gameObjectList;

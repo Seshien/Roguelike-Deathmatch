@@ -34,8 +34,17 @@ void Server::mainLoop()
 		//
 		if (this->gameState == GameState::GAME_MID)
 		{
-			handleGameOutput(this->game.loopGame(this->gameInput));
-			this->gameInput = Parser::Messenger();
+			if (this->gameTickTimer < Constants::gameTickRate)
+			{
+				gameTickTimer++;
+			}
+			else
+			{
+				gameTickTimer = 0;
+				handleGameOutput(this->game.loopGame(this->gameInput));
+				this->gameInput = Parser::Messenger();
+			}
+
 		}
 
 		if (output.eventList.size()) 
