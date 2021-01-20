@@ -8,6 +8,7 @@ public:
 	{
 		playerID = ID;
 		this->name = name;
+		this->state = ACTIVE;
 	}
 	enum State { ACTIVE, INACTIVE };
 	bool timeout = false;

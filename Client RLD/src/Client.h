@@ -45,6 +45,7 @@ private:
 
 	sf::Font font;
 
+	int numVotes;
 
 	int ID;
 	int time;
@@ -54,7 +55,7 @@ private:
 	GameStage gameStage;
 
 	std::string confName = "./data/config.txt";
-	std::string playerName = "Player One";
+	std::string playerName = "Player";
 	std::vector<std::string> playerList;
 
 	std::string port = "7777";
@@ -84,6 +85,7 @@ private:
 	void handleIntEvents();
 	void handleServer(Parser::Event ev);
 	void handleLobby(Parser::Event ev);
+	void handleGame(Parser::Event ev);
 
 	void handleInitPlayer(Parser::Event ev);
 	void handleNewPlayer(Parser::Event ev);

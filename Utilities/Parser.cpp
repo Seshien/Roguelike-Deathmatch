@@ -62,7 +62,7 @@ void Messenger::addEventTimeoutReached(int sender, int receiver) {
 	Logger::log(ev);
 }
 
-void Messenger::addEventMovement(int sender, int receiver,std::string playerName, int x, int y)
+void Messenger::addEventMovement(int sender, int receiver, std::string playerName, int x, int y)
 {
 	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
 	Event ev = Event(sender, receiver, Type::GAME, SubType::MOVE, subdata);
@@ -119,6 +119,12 @@ void Messenger::addEventDamaged(int sender, int receiver, int newHealth)
 void Messenger::addEventPickUp(int sender, int receiver, int itemType)
 {
 	Event ev = Event(sender, receiver, Type::GAME, SubType::PICKUP, std::to_string(itemType));
+	eventList.push_back(ev);
+	Logger::log(ev);
+}
+
+void Messenger::addEventKeyInput(int sender, int receiver, std::string key) {
+	Event ev = Event(sender, receiver, Type::GAME, SubType::KEY, key);
 	eventList.push_back(ev);
 	Logger::log(ev);
 }

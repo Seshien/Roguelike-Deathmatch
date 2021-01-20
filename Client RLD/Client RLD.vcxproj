@@ -184,10 +184,10 @@
     <ClInclude Include="..\Utilities\Logger.h" />
     <ClInclude Include="..\Utilities\Network.h" />
     <ClInclude Include="..\Utilities\Parser.h" />
-    <ClInclude Include="OurPlayerInfo.h" />
     <ClInclude Include="src\Client.h" />
     <ClInclude Include="src\Item.h" />
     <ClInclude Include="src\Map.h" />
+    <ClInclude Include="src\OurPlayerInfo.h" />
     <ClInclude Include="src\PlayerInfo.h" />
     <ClInclude Include="src\Tile.h" />
     <ClInclude Include="src\UIBar.h" />

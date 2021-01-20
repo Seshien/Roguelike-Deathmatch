@@ -121,6 +121,13 @@ void Client::graphicsUpdate() {
 
 	text.setFont(this->font);
 	std::string str;
+	if (this->gameStage == Client::GameStage::LOBBY) {
+		str.append("Votes: ");
+		str.append(std::to_string(this->numVotes));
+		str.append("/");
+		str.append(std::to_string(this->playerList.size()));
+		str.append("\n");
+	}
 	for (auto player : playerList) str.append(player + "\n");
 	text.setString(str);
 
@@ -146,12 +153,40 @@ void Client::handleIntEvents()
 	{
 		if (event.type == sf::Event::KeyPressed)
 		{
-			if (event.key.code == sf::Keyboard::V)
+			if (event.key.code == sf::Keyboard::Left)
 			{
-				if (this->gameStage == GameStage::LOBBY)
-					output.addEventVote(this->ID, Constants::SERVER_ID);
+				if (this->gameStage == GameStage::ALIVE)
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "LEFT");
 				else
-					Logger::log("You are not in the lobby");
+					Logger::log("You are not alive");
+			}
+			if (event.key.code == sf::Keyboard::Right)
+			{
+				if (this->gameStage == GameStage::ALIVE)
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "RIGHT");
+				else
+					Logger::log("You are not alive");
+			}
+			if (event.key.code == sf::Keyboard::Up)
+			{
+				if (this->gameStage == GameStage::ALIVE)
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "UP");
+				else
+					Logger::log("You are not alive");
+			}
+			if (event.key.code == sf::Keyboard::Down)
+			{
+				if (this->gameStage == GameStage::ALIVE)
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "DOWN");
+				else
+					Logger::log("You are not alive");
+			}
+			if (event.key.code == sf::Keyboard::Space)
+			{
+				if (this->gameStage == GameStage::ALIVE)
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "SPACE");
+				else
+					Logger::log("You are not alive");
 			}
 		}
 		else if (event.type == sf::Event::Closed)
@@ -175,8 +210,6 @@ void Client::handleIntEvents()
 					else
 						vote.setText("Vote");
 				}
-				Logger::log(std::to_string(event.mouseButton.x));
-				Logger::log(std::to_string(event.mouseButton.y));
 				//std::cout << "the right button was pressed" << std::endl;
 				//std::cout << "mouse x: " << event.mouseButton.x << std::endl;
 				//std::cout << "mouse y: " << event.mouseButton.y << std::endl;
@@ -200,7 +233,7 @@ void Client::handleNetEvents(Parser::Messenger mess)
 			handleLobby(ev);
 			break;
 		case Parser::Type::GAME:
-			//handleGame(ev);
+			handleGame(ev);
 			break;
 		case Parser::Type::ERRORNET:
 			if (ev.subtype == Parser::SubType::NOCONTACT)
@@ -253,6 +286,7 @@ void Client::handleServer(Parser::Event ev)
 		break;
 	case Parser::SubType::INFODUMP_GAME_MID:
 		Logger::log("Czas trwania gry:" + ev.subdata);
+		this->gameStage = GameStage::DEAD;
 		break;
 	case Parser::SubType::INFODUMP_GAME_END:
 		Logger::log("Statystyki:" + ev.subdata);
@@ -269,6 +303,25 @@ void Client::handleLobby(Parser::Event ev)
 	{
 	case Parser::SubType::VOTE:
 		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
+		this->numVotes = ev.subdata[0] - '0';
+		break;
+
+	default:
+		Logger::log("Error, event subtype not found.");
+		Logger::log(ev);
+	}
+}
+
+void Client::handleGame(Parser::Event ev)
+{
+	std::string evString;
+	switch (ev.subtype)
+	{
+	case Parser::SubType::MOVE:
+		// To jest madry sposob na wybieranie czesci char arraya do sstringa
+		evString = std::string(ev.subdata);
+		evString = evString.substr(3, ev.subdata.size() - 2);
+		Logger::log("Ruch:" + evString + "x: " + std::string(1, ev.subdata[0]) + "y: " + std::string(1, ev.subdata[1]));
 		break;
 
 	default:
@@ -300,6 +353,7 @@ void Client::handleInitPlayer(Parser::Event ev)
 void Client::handleNewPlayer(Parser::Event ev)
 {
 	std::string playerName = ev.subdata;
+	Logger::log("New player: " + playerName);
 	this->playerList.push_back(playerName);
 }
 

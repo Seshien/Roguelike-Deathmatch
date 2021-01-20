@@ -140,7 +140,7 @@ public:
 	{
 		std::shared_ptr<Tile> tile = getMovementTile(movement, player->getTile());
 
-		if (tile->isRuchAble)
+		if (tile->isMovable)
 		{
 
 			player->move(tile);
@@ -204,7 +204,7 @@ public:
 				auto hitPlayer = this->gamePlayerList[hitPlayerIndex];
 				damagePlayer(hitPlayer, player->getDamage());
 			}
-			else if (i < player->getRange() - 1 && moveTile->isRuchAble)
+			else if (i < player->getRange() - 1 && moveTile->isMovable)
 			{
 				this->checkVisionTiles(player, movement, tile);
 				player->move(moveTile);
@@ -245,19 +245,19 @@ public:
 		switch (movement)
 		{
 		case 'W':
-			for (int i = range; i > 1; i--) if (this->getTile(x, y + range)->isRuchAble) return this->getTile(x, y + range);
+			for (int i = range; i > 1; i--) if (this->getTile(x, y + range)->isMovable) return this->getTile(x, y + range);
 			return this->getTile(x, y + 1);
 			break;
 		case 'S':
-			for (int i = range; i > 1; i--) if (this->getTile(x, y - range)->isRuchAble) return this->getTile(x, y - range);
+			for (int i = range; i > 1; i--) if (this->getTile(x, y - range)->isMovable) return this->getTile(x, y - range);
 			return this->getTile(x, y - 1);
 			break;
 		case 'A':
-			for (int i = range; i > 1; i--) if (this->getTile(x - range, y)->isRuchAble) return this->getTile(x - range, y);
+			for (int i = range; i > 1; i--) if (this->getTile(x - range, y)->isMovable) return this->getTile(x - range, y);
 			return this->getTile(x - 1, y);
 			break;
 		case 'D':
-			for (int i = range; i > 1; i--) if (this->getTile(x + range, y)->isRuchAble) return this->getTile(x + range, y);
+			for (int i = range; i > 1; i--) if (this->getTile(x + range, y)->isMovable) return this->getTile(x + range, y);
 			return this->getTile(x + 1, y);
 			break;
 		}

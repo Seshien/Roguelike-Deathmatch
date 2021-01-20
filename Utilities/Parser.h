@@ -52,6 +52,9 @@ namespace Parser
 		void addEventDamaged(int sender, int receiver, int newHealth);
 
 		void addEventPickUp(int sender, int receiver, int itemType);
+		
+		// client events
+		void addEventKeyInput(int sender, int receiver, std::string key);
 
 		//trzy fazy gry, info dump
 

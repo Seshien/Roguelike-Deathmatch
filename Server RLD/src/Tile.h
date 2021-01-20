@@ -15,7 +15,7 @@ public:
 	bool isItem;
 	bool isPlayer;
 	bool isSpawnable;
-	bool isRuchAble;
+	bool isMovable;
 	int playerID;
 	int x;
 	int y;
@@ -30,7 +30,7 @@ public:
 		if ((int)tileType >= 12 && (int)tileType <= 16)
 		{
 			isSpawnable = true;
-			isRuchAble = true;
+			isMovable = true;
 		}
 
 
