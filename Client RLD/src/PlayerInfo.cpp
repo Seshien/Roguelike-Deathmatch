@@ -11,6 +11,10 @@ PlayerInfo::PlayerInfo(std::string playerName, int x, int y, std::vector<std::sh
 	this->killCount = killCount;
 }
 
+std::string PlayerInfo::getPlayerName() {
+	return this->playerName;
+}
+
 void PlayerInfo::interpolate(double time, double maxTime) {
 	this->realXPos = (double)this->prevxPos + ((double)this->xPos - (double)this->prevxPos) * (time / maxTime);
 	this->realYPos = (double)this->prevyPos + ((double)this->yPos - (double)this->prevyPos) * (time / maxTime);
@@ -30,7 +34,7 @@ std::string PlayerInfo::getFacing() {
 	else if (prevxPos > xPos) {
 		return std::string("left");
 	}
-	else if (prevyPos < yPos) {
+	else if (prevyPos > yPos) {
 		return std::string("up");
 	}
 	else {

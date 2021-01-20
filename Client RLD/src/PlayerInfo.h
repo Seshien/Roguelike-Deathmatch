@@ -23,6 +23,7 @@ class PlayerInfo
 public:
 	PlayerInfo(std::string playerName, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount);
 	// Sets realXPos and realYPos for given frame 
+	std::string getPlayerName();
 	void interpolate(double time, double maxTime);
 	void setNewPosition(int x, int y);
 	void draw(sf::RenderWindow& window);

@@ -20,8 +20,8 @@ void Server::mainLoop()
 		auto temp = std::chrono::duration_cast<
 			std::chrono::duration<double>>(std::chrono::system_clock::now() - this->turntimer);
 		double wait = 0;
-		if (temp.count() <= Constants::turnTimer)
-			wait = Constants::turnTimer - temp.count();
+		if (temp.count() <= Constants::serverTurnTimer)
+			wait = Constants::serverTurnTimer - temp.count();
 
 		//odbieranie wiadomosci
 		this->input = this->network.inputNetwork(wait);
