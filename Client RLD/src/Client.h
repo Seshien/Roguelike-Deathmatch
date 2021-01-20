@@ -11,6 +11,7 @@
 #include "Item.h"
 #include "PlayerInfo.h"
 #include "OurPlayerInfo.h"
+#include <stdlib.h>
 
 #include "UIButton.h"
 #include "UIBar.h"

@@ -28,5 +28,8 @@ public:
 	void setNewPosition(int x, int y);
 	void draw(sf::RenderWindow& window);
 	std::string getFacing();
+	void setIsAlive(bool isAlive);
+	int getX();
+	int getY();
 };
 

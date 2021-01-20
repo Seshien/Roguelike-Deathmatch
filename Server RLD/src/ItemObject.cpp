@@ -7,8 +7,8 @@ ItemObject::ItemObject(int itemID, SpawnableObjectType type, std::shared_ptr<Til
 	this->occupiedTile->isItem = false;
 	this->occupiedTile->itemID = itemID;
 	this->itemID = itemID;
-	this->x = tile->x;
-	this->y = tile->y;
+	this->x = tile->getX();
+	this->y = tile->getY();
 };
 
 void ItemObject::spawn()

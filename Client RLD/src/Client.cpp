@@ -356,6 +356,13 @@ void Client::handleGame(Parser::Event ev)
 		for (int i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerInfos[i]->getPlayerName() == evString) {
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
+			if (this->playerInfos[i]->getPlayerName() == this->playerName) {
+					for (int j = 0; j < this->playerInfos.size(); j++) {
+						if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) > Constants::sightValue&& abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) > Constants::sightValue) {
+							this->playerInfos[j]->setIsAlive(false);
+						}
+					}
+				}
 			}
 		}
 		break;
@@ -375,9 +382,10 @@ void Client::handleGame(Parser::Event ev)
 		evString = std::string(ev.subdata);
 		Logger::log("PSpawn:" + evString.substr(2, evString.size() - 2) + "x: " + evString.substr(0, 1) + "y: " + evString.substr(1, 1));
 		for (int i = 0; i < this->playerInfos.size(); i++) {
-			if (this->playerInfos[i]->getPlayerName = evString.substr(2, evString.size() - 2)) {
+			if (this->playerInfos[i]->getPlayerName() == evString.substr(2, evString.size() - 2)) {
 				Logger::log("Other player spawn existing info received");
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
+				this->playerInfos[i]->setIsAlive(true);
 				newPlayer = false;
 			}
 		}
@@ -403,10 +411,18 @@ void Client::handleGame(Parser::Event ev)
 		for (int i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
 				OurPlayerInfo* ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
-				ourPlayer->pocket.push_back(std::make_shared<Item>((ItemType)(int)ev.subdata[0], -1, -1, tileObjectsTextures[(int)ev.subdata[0]], false, true));
+				ourPlayer->pocket.push_back(std::make_shared<Item>((ItemType)(int)ev.subdata[0], -1, -1, *(tileObjectsTextures[(int)ev.subdata[0]]), false, true));
 			}
 		}
 		break;
+	case Parser::SubType::MOVEOUT:
+		Logger::log("Moveout: " + ev.subdata.substr(2, ev.subdata.size() - 2));
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (ev.subdata.substr(2, ev.subdata.size() - 2) == this->playerInfos[i]->getPlayerName()) {
+				this->playerInfos[i]->setIsAlive(false);
+				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
+			}
+		}
 	default:
 		Logger::log("Error, event subtype not found.");
 		Logger::log(ev);

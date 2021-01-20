@@ -42,8 +42,8 @@ public:
 
 	}
 
-	int getX() { return x; };
-	int getY() { return y; };
+	int getX() { return this->x; };
+	int getY() { return this->y; };
 	//Tile(TileType type);
 };
 

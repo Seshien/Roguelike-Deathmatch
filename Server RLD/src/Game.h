@@ -171,7 +171,7 @@ public:
 
 	void handleMovement(std::shared_ptr<PlayerObject> player, int movement)
 	{
-		std::shared_ptr<Tile> oldTile;
+		std::shared_ptr<Tile> oldTile = player->getTile();
 		std::shared_ptr<Tile> tile = getMovementTile(movement, player->getTile());
 
 		if (tile->isMovable)

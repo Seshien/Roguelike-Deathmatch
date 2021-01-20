@@ -62,3 +62,15 @@ void PlayerInfo::draw(sf::RenderWindow& window) {
 		window.draw(this->sprite);
 	}
 }
+
+void PlayerInfo::setIsAlive(bool isAlive) {
+	this->isAlive = isAlive;
+}
+
+int PlayerInfo::getX() {
+	return this->xPos;
+}
+
+int PlayerInfo::getY() {
+	return this->yPos;
+}
