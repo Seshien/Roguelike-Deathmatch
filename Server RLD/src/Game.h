@@ -253,16 +253,16 @@ public:
 		int y = tile->y;
 		switch (movement)
 		{
-		case 'w':
+		case 'W':
 			return this->getTile(x, y + range);
 			break;
-		case 's':
+		case 'S':
 			return this->getTile(x, y - range);
 			break;
-		case 'a':
+		case 'A':
 			return this->getTile(x - range, y);
 			break;
-		case 'd':
+		case 'D':
 			return this->getTile(x + range, y);
 			break;
 		}
