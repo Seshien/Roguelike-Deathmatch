@@ -154,8 +154,8 @@ void Messenger::addEventPickUp(int sender, int receiver, int itemType)
 	Logger::debug(ev);
 }
 
-void Messenger::addEventKeyInput(int sender, int receiver, std::string key) {
-	Event ev = Event(sender, receiver, Type::GAME, SubType::KEY, key);
+void Messenger::addEventKeyInput(int sender, int receiver, char key) {
+	Event ev = Event(sender, receiver, Type::GAME, SubType::KEY, std::string(1, key));
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }

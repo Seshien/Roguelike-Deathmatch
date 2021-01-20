@@ -174,35 +174,35 @@ void Client::handleIntEvents()
 			if (event.key.code == sf::Keyboard::Left)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "LEFT");
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, 'A');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Right)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "RIGHT");
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, 'D');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Up)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "UP");
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, 'W');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Down)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "DOWN");
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, 'S');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Space)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(Constants::SERVER_ID, this->ID, "SPACE");
+					output.addEventKeyInput(Constants::SERVER_ID, this->ID, ' ');
 				else
 					Logger::log("You are not alive");
 			}
