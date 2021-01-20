@@ -98,6 +98,7 @@ public:
 			auto result = object->get()->tick();
 			if (result == tickResult::SPAWNED)
 			{
+				object->get()->readyToRespawn = true;
 				this->respawnAskEvent(*object);
 				object = tickPlayList.erase(object);
 
@@ -305,14 +306,14 @@ public:
 		if (tile->isItem)
 		{
 			auto item = this->gameObjectList[this->findItemIndex(tile->itemID)];
-			if (item->setExist)
+			if (item->getExist())
 				this->spawnEvent(player, item);
 		}
 		if (tile->isPlayer)
 		{
-			auto player = this->gamePlayerList[this->findPlayerIndex(tile->playerID)];
-			if (player->setExist)
-				this->spawnPlayerEvent(player, player);
+			auto _player = this->gamePlayerList[this->findPlayerIndex(tile->playerID)];
+			if (_player->getExist())
+				this->spawnPlayerEvent(player, _player);
 		}
 
 	}
@@ -538,7 +539,7 @@ public:
 	}
 	int findPlayerIndex(int playerID)
 	{
-		if (gamePlayerList[playerID - 1]->getplayerID() == playerID) return playerID - 1;
+		//if (gamePlayerList[playerID - 1]->getplayerID() == playerID) return playerID - 1;
 		for (int i = 0; i < gamePlayerList.size(); i++)
 			if (gamePlayerList[i]->getplayerID() == playerID)
 				return i;

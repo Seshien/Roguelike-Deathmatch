@@ -26,7 +26,7 @@ void Client::startWindow()
 	window.create(sf::VideoMode(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT), "Roguelike Deathmatch");
 	window.setFramerateLimit(60);
 	// Initialize the view to a rectangle located at (100, 100) and with a size of 400x200
-	gameView.reset(sf::FloatRect(100, 100, 768, 576));
+	gameView.reset(sf::FloatRect(0, 0, 768, 576));
 	lobbyView.reset(sf::FloatRect(0, 0, 192, 576));
 	interfaceView.reset(sf::FloatRect(0, 0, 960, 144));
 
@@ -356,6 +356,10 @@ void Client::handleGame(Parser::Event ev)
 		break;
 	case Parser::SubType::RESPAWN:
 		Logger::log("Our player respawn info received.");
+		Logger::log(std::to_string(ev.subdata[0]) + std::to_string(ev.subdata[1]));
+		this->playerInfos.push_back(std::make_shared<OurPlayerInfo>(this->playerName, (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
+		this->currentTextureSet++;
+		this->gameStage = GameStage::ALIVE;
 		break;
 	default:
 		Logger::log("Error, event subtype not found.");
