@@ -17,6 +17,7 @@ public:
 	bool isSpawnable;
 	bool isMovable;
 	int playerID;
+private:
 	int x;
 	int y;
 public:
@@ -40,6 +41,9 @@ public:
 		}
 
 	}
+
+	int getX() { return x; };
+	int getY() { return y; };
 	//Tile(TileType type);
 };
 

@@ -133,6 +133,7 @@ public:
 		}
 		return output;
 	}
+
 	void handleKey(Parser::Event ev)
 	{
 		switch (ev.subdata[0])
@@ -170,13 +171,14 @@ public:
 
 	void handleMovement(std::shared_ptr<PlayerObject> player, int movement)
 	{
+		std::shared_ptr<Tile> oldTile;
 		std::shared_ptr<Tile> tile = getMovementTile(movement, player->getTile());
 
 		if (tile->isMovable)
 		{
-
 			player->move(tile);
 			this->moveEvent(player);
+			this->moveOutEvent(oldTile, player);
 			this->checkVisionTiles(player, movement, player->getTile());
 			switch (tile->type)
 			{
@@ -187,6 +189,7 @@ public:
 				{
 					player->move(tile);
 					this->moveEvent(player);
+					this->moveOutEvent(tile, player);
 					this->checkVisionTiles(player, movement, player->getTile());
 				}
 				break;
@@ -207,6 +210,7 @@ public:
 			player->lastMove = movement;
 		}
 	}
+
 	void handleAttack(Parser::Event ev)
 	{
 		int playerIndex = findPlayerIndex(ev.sender);
@@ -217,6 +221,7 @@ public:
 		}
 		handleAttack(this->gamePlayerList[playerIndex]);
 	}
+
 	void handleAttack(std::shared_ptr<PlayerObject> player)
 	{
 		int movement = player->lastMove;
@@ -252,8 +257,8 @@ public:
 
 	std::shared_ptr<Tile> getMovementTile(int movement, std::shared_ptr<Tile> tile, int range=1)
 	{
-		int x = tile->x;
-		int y = tile->y;
+		int x = tile->getX();
+		int y = tile->getY();
 		switch (movement)
 		{
 		case 'W':
@@ -271,34 +276,11 @@ public:
 		}
 	}
 	//nieuzywane
-	std::shared_ptr<Tile> getAttackTile(int movement, std::shared_ptr<Tile> tile, int range = 1)
-	{
-		int x = tile->x;
-		int y = tile->y;
-		switch (movement)
-		{
-		case 'W':
-			for (int i = range; i > 1; i--) if (this->getTile(x, y + range)->isMovable) return this->getTile(x, y + range);
-			return this->getTile(x, y + 1);
-			break;
-		case 'S':
-			for (int i = range; i > 1; i--) if (this->getTile(x, y - range)->isMovable) return this->getTile(x, y - range);
-			return this->getTile(x, y - 1);
-			break;
-		case 'A':
-			for (int i = range; i > 1; i--) if (this->getTile(x - range, y)->isMovable) return this->getTile(x - range, y);
-			return this->getTile(x - 1, y);
-			break;
-		case 'D':
-			for (int i = range; i > 1; i--) if (this->getTile(x + range, y)->isMovable) return this->getTile(x + range, y);
-			return this->getTile(x + 1, y);
-			break;
-		}
-	}
+
 	void checkVisionTiles(std::shared_ptr<PlayerObject> player, int movement, std::shared_ptr<Tile> tile)
 	{
-		int x = tile->x;
-		int y = tile->y;
+		int x = tile->getX();
+		int y = tile->getY();
 		switch (movement)
 		{
 		case 'W':
@@ -415,7 +397,14 @@ public:
 				output.addEventMovement(Constants::SERVER_ID, player->getplayerID(), obj->getName(), obj->getX(), obj->getY());
 		}
 	}
-
+	void moveOutEvent(std::shared_ptr<Tile> oldTile, std::shared_ptr<PlayerObject> obj)
+	{
+		for (auto player : gamePlayerList)
+		{
+			if (checkRange(oldTile, player->getTile()) && !checkRange(obj, player))
+				output.addEventMovedOut(Constants::SERVER_ID, player->getplayerID(), obj->getName(), obj->getX(), obj->getY());
+		}
+	}
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<PlayerObject> object)
 	{
 		if (player->getplayerID() != object->getplayerID()) 
@@ -536,9 +525,17 @@ public:
 		int x2 = x1 + Constants::sightValue * 2;
 		int y2 = y1 + Constants::sightValue * 2;
 		return objX > x1 && objX < x2 && objY > y1 && objY < y2;
-
 	}
-
+	int checkRange(std::shared_ptr<Tile> objectF, std::shared_ptr<Tile> objectS, int range = Constants::sightValue)
+	{
+		int objX = objectF->getX();
+		int objY = objectF->getY();
+		int x1 = objectS->getX() - Constants::sightValue;
+		int y1 = objectS->getY() - Constants::sightValue;
+		int x2 = x1 + Constants::sightValue * 2;
+		int y2 = y1 + Constants::sightValue * 2;
+		return objX > x1 && objX < x2 && objY > y1 && objY < y2;
+	}
 	void deletePlayer(int playerID)
 	{
 		int index = findPlayerIndex(playerID);
