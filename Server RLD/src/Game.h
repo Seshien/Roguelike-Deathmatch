@@ -50,14 +50,14 @@ public:
 	int addPlayer(int playerID, std::string playerName)
 	{
 
-		if (int playerIndex = this->findPlayerIndex(playerID) == -1)
+		if (int playerIndex = this->getPlayerIndex(playerID) == -1)
 		{
 			for (int i = 3; i < map.MAP_HEIGHT; i++)
 			{
 				for (int j = 3; j < map.MAP_WIDTH; j++)
 				{
 					auto tile = this->map.tileArray[i][j];
-					if (tile->isSpawnable && !tile->isItem && !tile->isPlayer)
+					if (tile->canSpawn())
 					{
 						auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
 						gamePlayerList.push_back(player);
@@ -109,6 +109,7 @@ public:
 			{
 				object->get()->despawn();
 				this->despawnEvent(*object);
+				this->deleteItem((*object)->getItemID());
 				object = tickObjList.erase(object);
 			}
 			else ++object;
@@ -181,7 +182,7 @@ public:
 	//wasd
 	void handleMovement(Parser::Event ev)
 	{
-		int playerIndex = this->findPlayerIndex(ev.sender);
+		int playerIndex = this->getPlayerIndex(ev.sender);
 		if (playerIndex == -1)
 		{
 			Logger::log("Error: Move Player failure, player not found");
@@ -195,18 +196,18 @@ public:
 		std::shared_ptr<Tile> oldTile = player->getTile();
 		std::shared_ptr<Tile> tile = getMovementTile(movement, player->getTile());
 
-		if (tile->isMovable)
+		if (tile->canMove())
 		{
 			player->move(tile);
 			this->moveEvent(player);
 			this->moveOutEvent(oldTile, player);
 			this->checkVisionTiles(player, movement, player->getTile());
-			switch (tile->type)
+			switch (tile->getType())
 			{
 			case TileType::GROUND:
 				break;
 			case TileType::GROUND_SLIPPY:
-				if (getMovementTile(movement, tile)->type == TileType::GROUND_SLIPPY)
+				if (getMovementTile(movement, tile)->getType() == TileType::GROUND_SLIPPY)
 				{
 					player->move(tile);
 					this->moveEvent(player);
@@ -224,9 +225,9 @@ public:
 				killPlayer(player);
 				break;
 			}
-			if (tile->isItem)
+			if (tile->haveItem())
 			{
-				pickupItem(player, tile->itemID);
+				pickupItem(player, tile->getItemID());
 			}
 			player->lastMove = movement;
 		}
@@ -234,7 +235,7 @@ public:
 
 	void handleAttack(Parser::Event ev)
 	{
-		int playerIndex = findPlayerIndex(ev.sender);
+		int playerIndex = getPlayerIndex(ev.sender);
 		if (playerIndex == -1)
 		{
 			Logger::log("Error: Attack Player failure, player not found");
@@ -248,23 +249,24 @@ public:
 		int movement = player->lastMove;
 		bool moved = false;
 		this->attackEvent(player);
+		auto tile = player->getTile();
+		auto moveTile = player->getTile();
 		for (int i = 0; i < player->getRange(); i++)
 		{
-			auto tile = player->getTile();
-			auto moveTile = getMovementTile(movement, tile);
-			if (moveTile->isPlayer)
+			if (moveTile->havePlayer())
 			{
-				auto hitPlayerIndex = findPlayerIndex(moveTile->playerID);
-				if (hitPlayerIndex == -1)
+				auto hitPlayer = this->getPlayer(moveTile->getPlayerID());
+				if (hitPlayer == nullptr)
 				{
 					Logger::log("Error: Attack Player failure, atacked player not found");
 					return;
 				}
-				auto hitPlayer = this->gamePlayerList[hitPlayerIndex];
 				damagePlayer(player, hitPlayer, player->getDamage());
+				moveTile = getMovementTile(movement, moveTile);
 			}
-			else if (i < player->getRange() - 1 && moveTile->isMovable)
+			else if (i < player->getRange() - 1 && moveTile->canMove())
 			{
+				moveTile = getMovementTile(movement, moveTile);
 				this->checkVisionTiles(player, movement, tile);
 				player->move(moveTile);
 				this->moveEvent(player);
@@ -277,7 +279,6 @@ public:
 
 		handleMovement(player, movement);
 	}
-
 	std::shared_ptr<Tile> getMovementTile(int movement, std::shared_ptr<Tile> tile, int range=1)
 	{
 		int x = tile->getX();
@@ -298,7 +299,6 @@ public:
 			break;
 		}
 	}
-	//nieuzywane
 
 	void checkVisionTiles(std::shared_ptr<PlayerObject> player, int movement, std::shared_ptr<Tile> tile)
 	{
@@ -334,15 +334,15 @@ public:
 	}
 	void getVision(std::shared_ptr<PlayerObject> player, std::shared_ptr<Tile> tile)
 	{
-		if (tile->isItem)
+		if (tile->haveItem())
 		{
-			auto item = this->gameObjectList[this->findItemIndex(tile->itemID)];
+			auto item = this->gameObjectList[this->getItemIndex(tile->getItemID())];
 			if (item->getExist())
 				this->spawnEvent(player, item);
 		}
-		if (tile->isPlayer)
+		if (tile->havePlayer())
 		{
-			auto _player = this->gamePlayerList[this->findPlayerIndex(tile->playerID)];
+			auto _player = this->gamePlayerList[this->getPlayerIndex(tile->getPlayerID())];
 			if (_player->getExist())
 				this->spawnPlayerEvent(player, _player);
 		}
@@ -430,7 +430,7 @@ public:
 
 	void pickupItem(std::shared_ptr<PlayerObject> player, int itemID)
 	{
-		auto item = this->gameObjectList[this->findItemIndex(itemID)];
+		auto item = this->gameObjectList[this->getItemIndex(itemID)];
 		switch (item->getType())
 		{
 		case SpawnableObjectType::BODY:
@@ -553,7 +553,7 @@ public:
 	}
 	void handleRespawn(Parser::Event ev)
 	{
-		int playerIndex = this->findPlayerIndex(ev.sender);
+		int playerIndex = this->getPlayerIndex(ev.sender);
 
 		if (playerIndex == -1)
 		{
@@ -609,7 +609,7 @@ public:
 	}
 	void deletePlayer(int playerID)
 	{
-		int index = findPlayerIndex(playerID);
+		int index = getPlayerIndex(playerID);
 		if (index == -1)
 		{
 			Logger::log("Error: Delete Player failure, player not found");
@@ -624,16 +624,17 @@ public:
 
 	void deleteItem(int itemID)
 	{
-		int index = findItemIndex(itemID);
+		int index = getItemIndex(itemID);
 		if (index == -1)
 		{
 			Logger::log("Error: Delete item failure, item not found");
 			return;
 		}
+		gameObjectList[index]->deleteItem();
 		gameObjectList.erase(gameObjectList.begin() + index);
 
 	}
-	int findPlayerIndex(int playerID)
+	int getPlayerIndex(int playerID)
 	{
 		//if (gamePlayerList[playerID - 1]->getplayerID() == playerID) return playerID - 1;
 		for (int i = 0; i < gamePlayerList.size(); i++)
@@ -643,7 +644,7 @@ public:
 		return -1;
 	}
 
-	int findItemIndex(int itemID)
+	int getItemIndex(int itemID)
 	{
 		if (this->gameObjectList[itemID]->getItemID() == itemID) return itemID;
 		for (int i = 0; i < gameObjectList.size(); i++)
@@ -653,6 +654,12 @@ public:
 		return -1;
 	}
 
+	std::shared_ptr<PlayerObject> getPlayer(int playerID)
+	{
+		for (auto player : this->gamePlayerList)
+			if (player->getPlayerID() == playerID) return player;
+		return std::shared_ptr<PlayerObject>(nullptr);
+	}
 	std::shared_ptr<Tile> getTile(int x, int y)
 	{
 		if (x >= 0 && x <= 99 && y >= 0 && y <= 99)

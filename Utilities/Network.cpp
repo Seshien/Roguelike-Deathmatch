@@ -10,7 +10,7 @@ Network::Network()
 	// Initialize Winsock
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0) {
-		Logger::log("WSAStartup failed", iResult);
+		Logger::error("WSAStartup failed", iResult);
 	}
 }
 
@@ -31,7 +31,7 @@ int Network::startServer(std::string port)
 
 	if (createServerSocket())
 		return 1;
-	Logger::log("Starting server network succeed");
+	Logger::info("Starting server network succeed");
 	//updateDescrList();
 	return 0;
 }
@@ -49,7 +49,7 @@ int Network::startClient(std::string ipAdress, std::string port)
 
 	if (createClientSocket())
 		return 1;
-	Logger::log("Starting client network succeed");
+	Logger::info("Starting client network succeed");
 	return 0;
 }
 
@@ -184,7 +184,7 @@ void Network::handleInnerEvent(Parser::Event ev)
 int Network::createServerSocket()
 {
 
-	Logger::log("Creating server socket.");
+	Logger::debug("Creating server socket.");
 
 	this->mainSocket = INVALID_SOCKET;
 
@@ -209,7 +209,8 @@ int Network::createServerSocket()
 	// Create a SOCKET for connecting to server
 	mainSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 	if (mainSocket == INVALID_SOCKET) {
-		Logger::log("Socket failed", WSAGetLastError());
+		Logger::error("Socket failed");
+		Logger::logNetworkError();
 		freeaddrinfo(result);
 		WSACleanup();
 		return 1;
@@ -219,14 +220,15 @@ int Network::createServerSocket()
 
 	if (ioctlsocket(mainSocket, FIONBIO, &mode) != 0)
 	{
-		Logger::log("ioctl failed");
+		Logger::error("ioctl failed");
 		Logger::logNetworkError();
 		return 1;
 	}
 	// Setup the TCP listening socket
 	iResult = bind(mainSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (iResult == SOCKET_ERROR) {
-		Logger::log("Bind failed", WSAGetLastError());
+		Logger::error("Bind failed");
+		Logger::logNetworkError();
 		freeaddrinfo(result);
 		closesocket(mainSocket);
 		WSACleanup();
@@ -236,17 +238,18 @@ int Network::createServerSocket()
 
 	freeaddrinfo(result);
 
-	Logger::log("Bind succecced.");
+	Logger::debug("Bind succecced.");
 
 	iResult = listen(mainSocket, SOMAXCONN);
 	if (iResult == SOCKET_ERROR) {
-		Logger::log("Listen failed", WSAGetLastError());
+		Logger::error("Listen failed");
+		Logger::logNetworkError();
 		closesocket(mainSocket);
 		WSACleanup();
 		return 1;
 	}
 
-	Logger::log("Listen succecced.");
+	Logger::debug("Listen succecced.");
 
 
 	pollfd fd = pollfd();
@@ -262,7 +265,7 @@ int Network::createServerSocket()
 
 int Network::createClientSocket()
 {
-	Logger::log("Creating client socket.");
+	Logger::debug("Creating client socket.");
 	// Create a SOCKET for connecting to server
 
 
@@ -279,7 +282,8 @@ int Network::createClientSocket()
 
 	iResult = getaddrinfo(this->ipAddress.c_str(), this->port.c_str(), &hints, &result);
 	if (iResult != 0) {
-		Logger::log("getaddrinfo failed with error: %d\n", iResult);
+		Logger::error("Getaddrinfo failed\n");
+		Logger::logNetworkError();
 		WSACleanup();
 		return 1;
 	}
@@ -287,24 +291,24 @@ int Network::createClientSocket()
 	int Iresult;
 	mainSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 	if (mainSocket == INVALID_SOCKET) {
-		Logger::log("Socket function failed");
+		Logger::error("Socket function failed");
 		Logger::logNetworkError();
 		return 1;
 	}
 
-	Logger::log("Connecting to server.");
+	Logger::debug("Connecting to server.");
 
 	Iresult = connect(mainSocket, result->ai_addr, (int)result->ai_addrlen);
 	if (Iresult == SOCKET_ERROR) {
-		Logger::log("Connect function failed");
+		Logger::error("Connect function failed");
 		Logger::logNetworkError();
 		return 1;
 	}
-	Logger::log("Connected to server.");
+	Logger::info("Connected to server.");
 
 	freeaddrinfo(result);
 
-	Logger::log("Creating client.");
+	Logger::debug("Creating contact.");
 
 	auto client = Contact();
 
@@ -324,7 +328,7 @@ int Network::createClientSocket()
 	//input.addEventNewPlayer(playerID, -1);
 	this->clientList.push_back(client);
 
-	Logger::log("Client created.");
+	Logger::debug("Contact created.");
 
 	return 0;
 
@@ -406,7 +410,7 @@ void Network::acceptClient()
 
 	if (ioctlsocket(clientFd, FIONBIO, &mode) != 0)
 	{
-		Logger::log("ioctl failed");
+		Logger::error("ioctl failed");
 		Logger::logNetworkError();
 		return;
 	}
@@ -419,7 +423,7 @@ void Network::acceptClient()
 	client.initClient(playerID, clientFd, infoStorage);
 
 
-	Logger::log("New connection accepted");
+	Logger::info("New connection accepted");
 	//std::string message = std::string(inet_ntoa(address->sin_addr)) + ":" + std::to_string(ntohs(address->sin_port)) 
 	//	+ ":" + std::to_string(clientFd);
 	//Logger::log(message);
@@ -461,7 +465,7 @@ void Network::manageClientEvent(int cIndex)
 
 	if (managed == nullptr)
 	{
-		Logger::log("Client not found. Socket index:", int(sock));
+		Logger::error("Client not found. Socket index:", int(sock));
 		return;
 	}
 	auto message = "Client: " + std::to_string(index) + " player_id:" + std::to_string(managed->playerId)
@@ -474,7 +478,7 @@ void Network::manageClientEvent(int cIndex)
 	}
 	if (revent & ~POLLIN)
 	{
-		Logger::log("Contact disconnected: creating disconnect Event");
+		Logger::debug("Contact disconnected: creating disconnect Event");
 		input.addEventDiscPlayer(clientList[index].playerId, 0);
 	}
 
@@ -496,13 +500,13 @@ void Network::readFromClient(Contact* client)
 	int limit = max(Constants::msgLengthLimit, client->msgExpectedLenght);
 
 	//odbieranie wiadomosci
-	Logger::log("Receiving message");
+	Logger::debug("Receiving message");
 	int result = recv(client->clientSocket, &bufferTemp[0], limit - client->bufferInput.size(), 0);
 
 
 	if (result == -1 || result == 0)
 	{
-		Logger::log("Recv error on client: %d\n", client->playerId);
+		Logger::debug("Recv error on client: %d\n", client->playerId);
 	}
 	else
 	{
@@ -510,8 +514,7 @@ void Network::readFromClient(Contact* client)
 		client->bufferInputCounter += result;
 	}
 
-
-	Logger::log("Content of buffer:  " + std::string(client->bufferInput));
+	Logger::debug("Content of buffer:  " + std::string(client->bufferInput));
 
 	//przetwarzanie wiadomosci
 	processMessage(client);
@@ -524,7 +527,8 @@ void Network::sendToClient(Contact * client)
 	int result = send(client->clientSocket, &client->bufferOutput[0], client->bufferOutput.size(), 0);
 	if (result == SOCKET_ERROR) 
 	{
-		Logger::log("Send error on player id: %d\n", client->playerId);
+		Logger::error("Send error on player id: %d\n", client->playerId);
+
 	}
 	else 
 	{
@@ -542,13 +546,13 @@ void Network::deleteClient(int index)
 {
 	int playerIndex = clientList[index].playerId;
 	closesocket(clientList[index].clientSocket);
+	Logger::info("Client " + std::to_string(playerIndex) + " with playerID" + std::to_string(clientList[playerIndex].playerId) + " was deleted.");
 	clientList.erase(clientList.begin() + index);
 	if (isServer)
 		descrList.erase(descrList.begin() + index + 1);
 	else
 		descrList.erase(descrList.begin() + index);
-	//Parser wiadomosc o usunieciu playera
-	Logger::debug("Client " + std::to_string(playerIndex) + " was deleted");
+
 }
 
 void Network::deleteClient(Contact * client)
@@ -560,7 +564,7 @@ void Network::deleteClient(Contact * client)
 			return;
 		}
 			
-	Logger::log("Error: Client not found");
+	Logger::error("Error: Client meant to be deleted was not found");
 }
 
 void Network::processMessage(Contact * client)
@@ -623,7 +627,7 @@ int Network::checkMessage(Contact * client, Parser::Event * ev)
 	bool good = true;
 	if (this->networkID == -1)
 	{
-		Logger::log("This network have a temporary ID");
+		Logger::debug("This network have a temporary ID");
 		//ev->receiver = this->networkID;
 	}
 	else if (ev->receiver != this->networkID)
@@ -635,7 +639,7 @@ int Network::checkMessage(Contact * client, Parser::Event * ev)
 
 	if (ev->sender < 0 && ev->subtype == Parser::SubType::NEWPLAYER)
 	{
-		Logger::log("Sender have a temporary ID");
+		Logger::debug("Sender have a temporary ID");
 		ev->sender = client->playerId;
 	}
 	else if(ev->sender < 0){
@@ -657,7 +661,7 @@ void Network::increaseTimeout()
 		clientList[i].timeoutTimer++;
 		if (clientList[i].timeoutTimer > Constants::timeoutValue)
 		{
-			Logger::log("Network Event: Player " + std::to_string(clientList[i].playerId) + " reached timeout time");
+			Logger::debug("Network Event: Player " + std::to_string(clientList[i].playerId) + " reached timeout time");
 			this->input.addEventTimeoutReached(clientList[i].playerId, 0);
 			clientList[i].timeoutTimer = 0;
 		}

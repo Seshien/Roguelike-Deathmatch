@@ -9,8 +9,8 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 	this->type = type;
 	this->isExist = false;
 	this->occupiedTile = tile;
-	this->occupiedTile->isSpawnable = false;
-	this->occupiedTile->isMovable = false;
+	this->occupiedTile->setSpawn(false);
+	this->occupiedTile->setMove(false);
 	this->health = Constants::defaultHealth;
 	this->maxHealth = Constants::defaultHealth;
 	this->dmg = Constants::defaultDmg;
@@ -20,9 +20,9 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 
 void PlayerObject::move(std::shared_ptr<Tile> newTile)
 {
-	this->occupiedTile->isPlayer = false;
-	this->occupiedTile->playerID = -1;
-	this->occupiedTile->isMovable = true;
+	this->occupiedTile->setPlayer(false);
+	this->occupiedTile->setPlayerID(-1);
+	this->occupiedTile->setMove(true);
 
 
 	this->occupiedTile = newTile;
@@ -30,24 +30,24 @@ void PlayerObject::move(std::shared_ptr<Tile> newTile)
 	this->y = newTile->getY();
 
 
-	this->occupiedTile->isPlayer = true;
-	this->occupiedTile->playerID = this->playerID;
-	this->occupiedTile->isMovable = false;
+	this->occupiedTile->setPlayer(true);
+	this->occupiedTile->setPlayerID(this->playerID);
+	this->occupiedTile->setMove(false);
 }
 
 void PlayerObject::spawn()
 {
 	this->isExist = true;
-	this->occupiedTile->isPlayer = true;
-	this->occupiedTile->playerID = this->playerID;
-	this->occupiedTile->isMovable = false;
+	this->occupiedTile->setPlayer(true);
+	this->occupiedTile->setPlayerID(this->playerID);
+	this->occupiedTile->setMove(false);
 }
 
 void PlayerObject::despawn()
 {
 	this->isExist = false;
-	this->occupiedTile->isPlayer = false;
-	this->occupiedTile->playerID = this->playerID;
-	this->occupiedTile->isMovable = true;
+	this->occupiedTile->setPlayer(false);
+	this->occupiedTile->setPlayerID(this->playerID);
+	this->occupiedTile->setMove(true);
 	// Operacje na obiekcie map
 }

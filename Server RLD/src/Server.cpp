@@ -16,7 +16,7 @@ void Server::mainLoop()
 {
 	while (true)
 	{
-		Logger::log("Start cyklu serwera.");
+		Logger::debug("Start cyklu serwera.");
 		auto temp = std::chrono::duration_cast<
 			std::chrono::duration<double>>(std::chrono::system_clock::now() - this->turntimer);
 		double wait = 0;
@@ -28,7 +28,7 @@ void Server::mainLoop()
 
 		this->turntimer = std::chrono::system_clock::now();
 		if (input.eventList.size())	
-			Logger::log("------------ Handling Phase ------------");
+			Logger::debug("------------ Handling Phase ------------");
 		//przetwarzanie ich
 		handleEvents(this->input);
 		//
@@ -48,13 +48,13 @@ void Server::mainLoop()
 		}
 
 		if (output.eventList.size()) 
-			Logger::log("------------ Output Phase ------------");
+			Logger::debug("------------ Output Phase ------------");
 		//
 		if (this->stateChange != StateChange::NONE) handleStateChange();
 		//wysylanie ich
 		this->network.outputNetwork(this->output);
 		if (output.eventList.size()) 
-			Logger::log("------------ Input Phase ------------");
+			Logger::debug("------------ Input Phase ------------");
 		this->input = Parser::Messenger();
 		this->output = Parser::Messenger();
 	}
@@ -81,8 +81,8 @@ void Server::handleEvents(Parser::Messenger mess)
 				handleError(ev);
 				break;
 			default:
-				Logger::log("Error: Event type not found.");
-				Logger::log(ev);
+				Logger::error("Error: Event type not found.");
+				Logger::error(ev);
 		}
 
 		// Wykonaj logike
@@ -110,8 +110,8 @@ void Server::handleServer(Parser::Event ev)
 		handleTimeoutAnswer(ev);
 		break;
 	default:
-		Logger::log("Error: Event subtype not found.");
-		Logger::log(ev);
+		Logger::error("Error: Event subtype not found.");
+		Logger::error(ev);
 	}
 }
 
@@ -123,8 +123,8 @@ void Server::handleLobby(Parser::Event ev)
 		handleVote(ev);
 		break;
 	default:
-		Logger::log("Error: Event subtype not found.");
-		Logger::log(ev);
+		Logger::error("Error: Event subtype not found.");
+		Logger::error(ev);
 	}
 }
 
@@ -148,11 +148,11 @@ void Server::handleError(Parser::Event ev)
 	switch (ev.subtype)
 	{
 	case Parser::SubType::NOACCEPT:
-		Logger::log("Error: Problem with accepting contacts");
+		Logger::error("Error: Problem with accepting contacts");
 		break;
 	default:
-		Logger::log("Error: Event subtype not found.");
-		Logger::log(ev);
+		Logger::error("Error: Event subtype not found.");
+		Logger::error(ev);
 	}
 }
 
@@ -263,7 +263,7 @@ void Server::handleDisconnect(int playerID)
 	auto player = this->getPlayer(playerID);
 	if (player == nullptr)
 	{
-		Logger::log("Error: Failure in deleting player");
+		Logger::error("Error: Failure in deleting player");
 		return;
 	}
 	player->state = Player::INACTIVE;
@@ -287,7 +287,7 @@ void Server::handleTimeout(Parser::Event ev)
 	auto player = this->getPlayer(ev.sender);
 	if (player == nullptr)
 	{
-		Logger::log("Error: Failure in handling timeout, player not found");
+		Logger::error("Error: Failure in handling timeout, player not found");
 		return;
 	}
 	//sprawdzamy czy jest zagrozony
@@ -307,7 +307,7 @@ void Server::handleTimeoutAnswer(Parser::Event ev)
 	auto player = this->getPlayer(ev.sender);
 	if (player == nullptr)
 	{
-		Logger::log("Error: Failure in handling timeout answer, player not found");
+		Logger::error("Error: Failure in handling timeout answer, player not found");
 		return;
 	}
 	//wylaczamy timeout bo odpowiedzial
@@ -319,7 +319,7 @@ void Server::handleVote(Parser::Event ev)
 	auto player = this->getPlayer(ev.sender);
 	if (player == nullptr)
 	{
-		Logger::log("Error: Failure in handling vote, player not found");
+		Logger::error("Error: Failure in handling vote, player not found");
 		return;
 	}
 	if (player->voted)
@@ -332,7 +332,7 @@ void Server::handleVote(Parser::Event ev)
 		player->voted = true;
 		this->numOfVotes++;
 	}
-	Logger::log("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
+	Logger::debug("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
 	for (auto player : this->activePlayerList)
 		output.addEventVote(Constants::SERVER_ID, player->playerID, numOfVotes);
 	if (this->activePlayerCount >= 1 && this->numOfVotes >= this->activePlayerCount / 2)
@@ -361,7 +361,7 @@ void Server::InfoDump(int playerId)
 	auto newPlayer = this->getPlayer(playerId);
 	if (newPlayer == nullptr)
 	{
-		Logger::log("Error: New player was not found");
+		Logger::error("Error: New player was not found");
 	}
 	// Wysylamy ID mapy w kazdym wypadku niezaleznie od stanu gry
 	output.addEventMapID(Constants::SERVER_ID, playerId, this->mapID);
@@ -417,12 +417,12 @@ void Server::processConfigLine(std::string line)
 	int pos = line.find(delimiter);
 	if (pos == -1)
 	{
-		Logger::log("Error during parsing of config file");
+		Logger::error("Error during parsing of config file");
 		return;
 	}
 	std::string token = line.substr(0, pos);
 	std::string value = line.substr(pos + 1, line.length() - 1);
-	Logger::log("Token: " + token + " Value: " + value);
+	Logger::debug("Token: " + token + " Value: " + value);
 	this->setConfigValue(token, value);
 	return;
 }
@@ -432,7 +432,7 @@ void Server::setConfigValue(std::string token, std::string value)
 	if (token == "time") this->time = std::stoi(value);
 	else if (token == "special") return;
 	else if (token == "port") this->port = value;
-	else Logger::log("Unknown line in config file");
+	else Logger::debug("Unknown line in config file");
 }
 
 Player * Server::getPlayer(int playerID)
@@ -448,7 +448,7 @@ Player * Server::getPlayer(int playerID)
 				return &player;
 		}
 	}
-	Logger::log("Player not found");
+	Logger::error("Player not found");
 	return nullptr;
 }
 

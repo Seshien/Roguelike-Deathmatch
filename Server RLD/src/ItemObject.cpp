@@ -3,10 +3,11 @@
 ItemObject::ItemObject(int itemID, SpawnableObjectType type, std::shared_ptr<Tile> tile) {
 	this->type = type;
 	this->isExist = false;
-	this->occupiedTile = tile;
-	this->occupiedTile->isItem = false;
-	this->occupiedTile->itemID = itemID;
 	this->itemID = itemID;
+	this->occupiedTile = tile;
+	this->occupiedTile->setItem(false);
+	this->occupiedTile->setItemID(itemID);
+	this->occupiedTile->setSpawn(false);
 	this->x = tile->getX();
 	this->y = tile->getY();
 };
@@ -14,14 +15,22 @@ ItemObject::ItemObject(int itemID, SpawnableObjectType type, std::shared_ptr<Til
 void ItemObject::spawn()
 {
 	this->isExist = true;
-	this->occupiedTile->isItem = true;
-	this->occupiedTile->itemID = itemID;
+	this->occupiedTile->setItem(true);
+	this->occupiedTile->setItemID(itemID);
 }
 
 void ItemObject::despawn()
 {
 	this->isExist = false;
-	this->occupiedTile->isItem = false;
+	this->occupiedTile->setItem(false);
 	// Operacje na obiekcie map
+}
+
+void ItemObject::deleteItem()
+{
+	this->occupiedTile->setItem(false);
+	this->occupiedTile->setItemID(-1);
+	this->occupiedTile->setSpawn(true);
+
 }
 

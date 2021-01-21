@@ -8,18 +8,16 @@ enum class TileType {
 
 class Tile
 {
-public:
+private:
+	int x;
+	int y;
 	TileType type;
-
 	int itemID;
 	bool isItem;
 	bool isPlayer;
 	bool isSpawnable;
 	bool isMovable;
 	int playerID;
-private:
-	int x;
-	int y;
 public:
 	Tile(TileType tileType, int x, int y) 
 	{
@@ -41,6 +39,25 @@ public:
 		}
 
 	}
+	bool havePlayer() { return isPlayer; };
+	void setPlayer(bool value) { this->isPlayer = value; };
+
+	bool haveItem() { return isItem; };
+	void setItem(bool value) { this->isItem = value; };
+
+	int getPlayerID() { return playerID; };
+	void setPlayerID(int value) { this->playerID = value; };
+
+	int getItemID() { return itemID; };
+	void setItemID(int value) { this->itemID = value; };
+
+	bool canSpawn() { return isSpawnable; };
+	void setSpawn(bool value) { this->isSpawnable = value; };
+
+	bool canMove() { return isMovable; };
+	void setMove(bool value) { this->isMovable = value; };
+
+	TileType getType() { return this->type; };
 
 	int getX() { return this->x; };
 	int getY() { return this->y; };
