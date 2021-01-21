@@ -167,13 +167,11 @@ void Messenger::addEventKeyInput(int sender, int receiver, char key) {
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }
-/*
-void Messenger::addEventPlayerInfo(int sender, int receiver, ) {
-	Event ev = Event(sender, receiver, Type::GAME, SubType::PLAYERINFO, std::string(1, key));
+void Messenger::addEventKillCount(int sender, int receiver, std::string playerName, int killcount ) {
+	Event ev = Event(sender, receiver, Type::GAME, SubType::KILLCOUNT, std::string(1, killcount) + playerName);
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }
-*/
 void Messenger::addEventLobby(int sender, int receiver, int numOfVotes) {
 	Event ev = Event(sender, receiver, Type::SERVER, SubType::INFODUMP_LOBBY, std::to_string(numOfVotes));
 	eventList.push_back(ev);

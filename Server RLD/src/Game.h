@@ -51,9 +51,9 @@ public:
 	{
 		if (int playerIndex = this->findPlayerIndex(playerID) == -1)
 		{
-			for (int i = 1; i < map.MAP_HEIGHT; i++)
+			for (int i = 3; i < map.MAP_HEIGHT; i++)
 			{
-				for (int j = 1; j < map.MAP_WIDTH; j++)
+				for (int j = 3; j < map.MAP_WIDTH; j++)
 				{
 					auto tile = this->map.tileArray[i][j];
 					if (tile->isSpawnable && !tile->isItem && !tile->isPlayer)
@@ -76,10 +76,12 @@ public:
 				for (auto Item :player->getItems())
 					this->pickupEvent(player, (int)Item);
 				this->getFullVision(player);
+				return 0;
 			}
 			else
 			{
 				this->addPlayerSpawnToTick(player);
+				return 0;
 			}
 		}
 		return 1;
@@ -256,7 +258,7 @@ public:
 					return;
 				}
 				auto hitPlayer = this->gamePlayerList[hitPlayerIndex];
-				damagePlayer(hitPlayer, player->getDamage());
+				damagePlayer(player, hitPlayer, player->getDamage());
 			}
 			else if (i < player->getRange() - 1 && moveTile->isMovable)
 			{
@@ -342,18 +344,49 @@ public:
 
 	}
 
-	void damagePlayer(std::shared_ptr<PlayerObject> player, int dmgValue)
+	void damagePlayer(std::shared_ptr<PlayerObject> hitPlayer, int dmgValue)
 	{
-		int newHealth = player->getHealth() - dmgValue;
-		if (newHealth > player->getMaxHealth()) player->setHealth(player->getMaxHealth());
+		int newHealth = hitPlayer->getHealth() - dmgValue;
+		if (newHealth > hitPlayer->getMaxHealth()) hitPlayer->setHealth(hitPlayer->getMaxHealth());
 		else
-			player->setHealth(newHealth);
+			hitPlayer->setHealth(newHealth);
 
-		this->hitEvent(player, dmgValue);
-		this->damageEvent(player, dmgValue);
+		this->hitEvent(hitPlayer, dmgValue);
+		this->damageEvent(hitPlayer, dmgValue);
 
 		if (newHealth <= 0)
-			killPlayer(player);
+		{
+			killPlayer(hitPlayer);
+		}
+	}
+
+	void damagePlayer(std::shared_ptr<PlayerObject> player, std::shared_ptr<PlayerObject> hitPlayer, int dmgValue)
+	{
+		int newHealth = hitPlayer->getHealth() - dmgValue;
+		if (newHealth > hitPlayer->getMaxHealth()) hitPlayer->setHealth(hitPlayer->getMaxHealth());
+		else
+			hitPlayer->setHealth(newHealth);
+
+		this->hitEvent(hitPlayer, dmgValue);
+		this->damageEvent(hitPlayer, dmgValue);
+
+		if (newHealth <= 0)
+		{
+			killPlayer(hitPlayer);
+			player->setkillCount(player->getkillCount() + 1);
+			handleKillCount(player);
+		}
+	}
+
+	void handleKillCount(std::shared_ptr<PlayerObject> player, std::shared_ptr<PlayerObject> sended)
+	{
+		output.addEventKillCount(Constants::SERVER_ID, sended->getPlayerID(), player->getName(), player->getkillCount());
+	}
+
+	void handleKillCount(std::shared_ptr<PlayerObject> player)
+	{
+		for (auto _player : this->gamePlayerList)
+			output.addEventKillCount(Constants::SERVER_ID, _player->getPlayerID(), player->getName(), player->getkillCount());
 	}
 
 	void addPlayerSpawnToTick(std::shared_ptr<PlayerObject> player)
@@ -410,7 +443,7 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(obj, player))
-				output.addEventMovement(Constants::SERVER_ID, player->getplayerID(), obj->getName(), obj->getX(), obj->getY());
+				output.addEventMovement(Constants::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY());
 		}
 	}
 	void moveOutEvent(std::shared_ptr<Tile> oldTile, std::shared_ptr<PlayerObject> obj)
@@ -418,28 +451,28 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(oldTile, player->getTile()) && !checkRange(obj, player))
-				output.addEventMovedOut(Constants::SERVER_ID, player->getplayerID(), obj->getName(), obj->getX(), obj->getY());
+				output.addEventMovedOut(Constants::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY());
 		}
 	}
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<PlayerObject> object)
 	{
-		if (player->getplayerID() != object->getplayerID()) 
-			output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), object->getName(), object->getX(), object->getY());
+		if (player->getPlayerID() != object->getPlayerID()) 
+			output.addEventPlayerSpawn(Constants::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
 	}
 
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject> object)
 	{
 		for (auto player : gamePlayerList)
 		{
-			if (player->getplayerID() != object->getplayerID())
+			if (player->getPlayerID() != object->getPlayerID())
 				if (checkRange(object, player))
-					output.addEventPlayerSpawn(Constants::SERVER_ID, player->getplayerID(), object->getName(), object->getX(), object->getY());
+					output.addEventPlayerSpawn(Constants::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
 		}
 	}
 
 	void spawnEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<SpawnableObject> object)
 	{
-		output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
+		output.addEventSpawn(Constants::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
 	}
 
 	void spawnEvent(std::shared_ptr<ItemObject> object)
@@ -447,18 +480,18 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(object, player))
-				output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
+				output.addEventSpawn(Constants::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
 	}
 
 	void respawnEvent(std::shared_ptr<PlayerObject> object)
 	{
-		output.addEventRespawn(Constants::SERVER_ID, object->getplayerID(), object->getX(), object->getY());
+		output.addEventRespawn(Constants::SERVER_ID, object->getPlayerID(), object->getX(), object->getY());
 	}
 
 	void respawnAskEvent(std::shared_ptr<PlayerObject> object)
 	{
-		output.addEventAskRespawn(Constants::SERVER_ID, object->getplayerID(), object->getX(), object->getY());
+		output.addEventAskRespawn(Constants::SERVER_ID, object->getPlayerID(), object->getX(), object->getY());
 		Logger::log("Respawn ask event added");
 	}
 
@@ -467,7 +500,7 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(object, player))
-				output.addEventSpawn(Constants::SERVER_ID, player->getplayerID(), (int)object->getType(), object->getX(), object->getY());
+				output.addEventSpawn(Constants::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
 	}
 	void attackEvent(std::shared_ptr<PlayerObject> obj)
@@ -475,7 +508,7 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(obj, player))
-				output.addEventAttack(Constants::SERVER_ID, player->getplayerID(), obj->getName());
+				output.addEventAttack(Constants::SERVER_ID, player->getPlayerID(), obj->getName());
 		}
 	}
 	void hitEvent(std::shared_ptr<PlayerObject> obj, int dmg)
@@ -483,21 +516,21 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(obj, player))
-				output.addEventHit(Constants::SERVER_ID, player->getplayerID(), obj->getName(), dmg);
+				output.addEventHit(Constants::SERVER_ID, player->getPlayerID(), obj->getName(), dmg);
 		}
 	}
 	void damageEvent(std::shared_ptr<PlayerObject> player, int newHealth)
 	{
-		output.addEventDamaged(Constants::SERVER_ID, player->getplayerID(), newHealth);
+		output.addEventDamaged(Constants::SERVER_ID, player->getPlayerID(), newHealth);
 	}
 
 	void pickupEvent(std::shared_ptr<PlayerObject> player, std::shared_ptr<SpawnableObject> object)
 	{
-		output.addEventPickUp(Constants::SERVER_ID, player->getplayerID(), (int) object->getType());
+		output.addEventPickUp(Constants::SERVER_ID, player->getPlayerID(), (int) object->getType());
 	}
 	void pickupEvent(std::shared_ptr<PlayerObject> player, int itemType)
 	{
-		output.addEventPickUp(Constants::SERVER_ID, player->getplayerID(), itemType);
+		output.addEventPickUp(Constants::SERVER_ID, player->getPlayerID(), itemType);
 	}
 	void handleRespawn(Parser::Event ev)
 	{
@@ -585,7 +618,7 @@ public:
 	{
 		//if (gamePlayerList[playerID - 1]->getplayerID() == playerID) return playerID - 1;
 		for (int i = 0; i < gamePlayerList.size(); i++)
-			if (gamePlayerList[i]->getplayerID() == playerID)
+			if (gamePlayerList[i]->getPlayerID() == playerID)
 				return i;
 
 		return -1;
