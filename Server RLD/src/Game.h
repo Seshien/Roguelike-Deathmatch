@@ -232,7 +232,46 @@ public:
 			player->lastMove = movement;
 		}
 	}
-
+	void handleMovement(std::shared_ptr<PlayerObject> player, std::shared_ptr<Tile> tile)
+	{
+		std::shared_ptr<Tile> oldTile = player->getTile();
+		int movement = player->lastMove;
+		if (tile->canMove())
+		{
+			player->move(tile);
+			this->moveEvent(player);
+			this->moveOutEvent(oldTile, player);
+			this->checkVisionTiles(player, movement, player->getTile());
+			switch (tile->getType())
+			{
+			case TileType::GROUND:
+				break;
+			case TileType::GROUND_SLIPPY:
+				if (getMovementTile(movement, tile)->getType() == TileType::GROUND_SLIPPY)
+				{
+					player->move(tile);
+					this->moveEvent(player);
+					this->moveOutEvent(tile, player);
+					this->checkVisionTiles(player, movement, player->getTile());
+				}
+				break;
+			case TileType::EMPTY:
+				killPlayer(player);
+				break;
+			case TileType::SPIKES:
+				damagePlayer(player, Constants::spikeDmg);
+				break;
+			case TileType::LAVA:
+				killPlayer(player);
+				break;
+			}
+			if (tile->haveItem())
+			{
+				pickupItem(player, tile->getItemID());
+			}
+			player->lastMove = movement;
+		}
+	}
 	void handleAttack(Parser::Event ev)
 	{
 		int playerIndex = getPlayerIndex(ev.sender);
@@ -249,34 +288,34 @@ public:
 		int movement = player->lastMove;
 		bool moved = false;
 		this->attackEvent(player);
-		auto tile = player->getTile();
-		auto moveTile = tile;
+		auto startTile = player->getTile();
+		auto previousTile = player->getTile();
+		auto finalTile = startTile;
+		auto iterTile = player->getTile();
 		for (int i = 0; i < player->getRange(); i++)
 		{
-			if (moveTile->havePlayer())
+			iterTile = getMovementTile(movement, iterTile);;
+			if (iterTile->havePlayer())
 			{
-				auto hitPlayer = this->getPlayer(moveTile->getPlayerID());
+
+				auto hitPlayer = this->getPlayer(iterTile->getPlayerID());
 				if (hitPlayer == nullptr)
 				{
 					Logger::log("Error: Attack Player failure, atacked player not found");
 					return;
 				}
 				damagePlayer(player, hitPlayer, player->getDamage());
-				moveTile = getMovementTile(movement, moveTile);
+				this->checkVisionTiles(player, movement, iterTile);
 			}
-			else if (i < player->getRange() - 1 && moveTile->canMove())
+			else if (i < player->getRange() && iterTile->canMove())
 			{
-				moveTile = getMovementTile(movement, moveTile);
-				this->checkVisionTiles(player, movement, tile);
-				player->move(moveTile);
-				this->moveEvent(player);
-				this->moveOutEvent(tile, player);
+				finalTile = iterTile;
+				this->checkVisionTiles(player, movement, iterTile);
 			}
 			else
 				break;
 		}
-
-		handleMovement(player, movement);
+		handleMovement(player, finalTile);
 	}
 	std::shared_ptr<Tile> getMovementTile(int movement, std::shared_ptr<Tile> tile, int range=1)
 	{

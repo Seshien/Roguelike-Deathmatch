@@ -42,6 +42,12 @@ void PlayerObject::spawn()
 	this->occupiedTile->setPlayer(true);
 	this->occupiedTile->setPlayerID(this->playerID);
 	this->occupiedTile->setMove(false);
+	this->health = Constants::defaultHealth;
+	this->maxHealth = Constants::defaultHealth;
+	this->dmg = Constants::defaultDmg;
+	this->attackRange = Constants::attackRange;
+	this->items.clear();
+
 }
 
 void PlayerObject::despawn()

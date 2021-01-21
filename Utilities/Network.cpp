@@ -546,7 +546,7 @@ void Network::deleteClient(int index)
 {
 	int playerIndex = clientList[index].playerId;
 	closesocket(clientList[index].clientSocket);
-	Logger::info("Client " + std::to_string(playerIndex) + " with playerID" + std::to_string(clientList[playerIndex].playerId) + " was deleted.");
+	Logger::info("Client " + std::to_string(index) + " with playerID" + std::to_string(clientList[index].playerId) + " was deleted.");
 	clientList.erase(clientList.begin() + index);
 	if (isServer)
 		descrList.erase(descrList.begin() + index + 1);
