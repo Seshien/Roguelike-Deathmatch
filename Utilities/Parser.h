@@ -54,6 +54,8 @@ namespace Parser
 
 		void addEventDespawn(int sender, int receiver, int objectType, int x, int y);
 
+		void addEventDespawnPlayer(int sender, int receiver, std::string playerName, int x, int y);
+
 		void addEventAttack(int sender, int receiver, std::string playerName);
 		void addEventHit(int sender, int receiver, std::string playerName, int damage);
 		void addEventDamaged(int sender, int receiver, int newHealth);

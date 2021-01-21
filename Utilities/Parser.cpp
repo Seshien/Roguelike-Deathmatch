@@ -133,6 +133,17 @@ void Messenger::addEventDespawn(int sender, int receiver, int objectType, int x,
 	Logger::debug(ev);
 }
 
+void Messenger::addEventDespawnPlayer(int sender, int receiver, std::string playerName, int x, int y)
+{
+	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
+	Event ev = Event(sender, receiver, Type::GAME, SubType::PDESPAWN, subdata);
+	eventList.push_back(ev);
+	Logger::debug(ev);
+}
+
+
+
+
 void Messenger::addEventAttack(int sender, int receiver, std::string playerName)
 {
 	Event ev = Event(sender, receiver, Type::GAME, SubType::ATTACK, playerName);

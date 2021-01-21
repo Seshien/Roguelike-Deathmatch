@@ -356,6 +356,7 @@ void Client::handleGame(Parser::Event ev)
 		for (int i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerInfos[i]->getPlayerName() == evString) {
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
+				this->playerInfos[i]->setIsAlive(true);
 			if (this->playerInfos[i]->getPlayerName() == this->playerName) {
 					for (int j = 0; j < this->playerInfos.size(); j++) {
 						Logger::log("Our player found.");
@@ -428,6 +429,14 @@ void Client::handleGame(Parser::Event ev)
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
 			}
 		}
+		break;
+	// RESPAWN DESPAWN KILLCOUNT SPAWN
+	case Parser::SubType::SPAWN:
+		Logger::log("Spawn item: " + std::string("ObjID: ") + ev.subdata[0] + "X: " + ev.subdata[1] + "Y: " + ev.subdata[2]);
+		break;
+	//case Parser::SubType::RESPAWN:
+	//	Logger::log("Respawn item: " + std::string(" X: ") + ev.subdata[0] + " Y: " + ev.subdata[1]);
+	//	break;
 	default:
 		Logger::log("Error, event subtype not found.");
 		Logger::log(ev);

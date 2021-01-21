@@ -264,6 +264,8 @@ public:
 			{
 				this->checkVisionTiles(player, movement, tile);
 				player->move(moveTile);
+				this->moveEvent(player);
+				this->moveOutEvent(tile, player);
 				moved = true;
 			}
 			else
@@ -304,25 +306,25 @@ public:
 		case 'W':
 			for (int i = x - Constants::sightValue; i <= x + Constants::sightValue; i++)
 			{
-				getVision(player, this->getTile(i, y + Constants::sightValue));
+				getVision(player, this->getTile(i, y - Constants::sightValue + 1));
 			}
 			break;
 		case 'S':
 			for (int i = x - Constants::sightValue; i <= x + Constants::sightValue; i++)
 			{
-				getVision(player, this->getTile(i, y - Constants::sightValue));
+				getVision(player, this->getTile(i, y + Constants::sightValue - 1));
 			}
 			break;
 		case 'A':
 			for (int i = y - Constants::sightValue; i <= y + Constants::sightValue; i++)
 			{
-				getVision(player, this->getTile(x - Constants::sightValue, i));
+				getVision(player, this->getTile(x - Constants::sightValue + 1, i));
 			}
 			break;
 		case 'D':
 			for (int i = y - Constants::sightValue; i <= y + Constants::sightValue; i++)
 			{
-				getVision(player, this->getTile(x + Constants::sightValue, i));
+				getVision(player, this->getTile(x + Constants::sightValue - 1, i));
 			}
 			break;
 		}
@@ -400,7 +402,7 @@ public:
 	void killPlayer(std::shared_ptr<PlayerObject> player)
 	{
 		// usuwamy gracza z mapy
-		this->despawnEvent(player);
+		this->despawnPlayerEvent(player);
 		player->despawn();
 		player->startSpawnTimer();
 		// tworzyc nowy obiekt z trupem
@@ -500,9 +502,19 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (checkRange(object, player))
-				output.addEventSpawn(Constants::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
+				output.addEventDespawn(Constants::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
 	}
+
+	void despawnPlayerEvent(std::shared_ptr<SpawnableObject> object)
+	{
+		for (auto player : gamePlayerList)
+		{
+			if (checkRange(object, player))
+				output.addEventDespawnPlayer(Constants::SERVER_ID, player->getPlayerID(), player->getName(), object->getX(), object->getY());
+		}
+	}
+
 	void attackEvent(std::shared_ptr<PlayerObject> obj)
 	{
 		for (auto player : gamePlayerList)
