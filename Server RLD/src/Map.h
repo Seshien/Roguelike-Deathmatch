@@ -30,6 +30,7 @@ public:
 		Logger::log("Creating dummy map completed");
 		return;
 	}
+	
 	std::array<std::array<std::shared_ptr<Tile>, MAP_HEIGHT>, MAP_WIDTH> tileArray;
 	std::vector<SpawnableObject> upperLayer;
 };
