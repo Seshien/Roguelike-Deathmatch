@@ -250,7 +250,7 @@ public:
 		bool moved = false;
 		this->attackEvent(player);
 		auto tile = player->getTile();
-		auto moveTile = player->getTile();
+		auto moveTile = tile;
 		for (int i = 0; i < player->getRange(); i++)
 		{
 			if (moveTile->havePlayer())
@@ -271,7 +271,6 @@ public:
 				player->move(moveTile);
 				this->moveEvent(player);
 				this->moveOutEvent(tile, player);
-				moved = true;
 			}
 			else
 				break;
@@ -357,7 +356,7 @@ public:
 			hitPlayer->setHealth(newHealth);
 
 		this->hitEvent(hitPlayer, dmgValue);
-		this->damageEvent(hitPlayer, dmgValue);
+		this->damageEvent(hitPlayer, newHealth);
 
 		if (newHealth <= 0)
 		{
@@ -373,7 +372,7 @@ public:
 			hitPlayer->setHealth(newHealth);
 
 		this->hitEvent(hitPlayer, dmgValue);
-		this->damageEvent(hitPlayer, dmgValue);
+		this->damageEvent(hitPlayer, newHealth);
 
 		if (newHealth <= 0)
 		{

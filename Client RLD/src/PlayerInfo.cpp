@@ -74,3 +74,11 @@ int PlayerInfo::getX() {
 int PlayerInfo::getY() {
 	return this->yPos;
 }
+
+int PlayerInfo::getKillCount() {
+	return this->killCount;
+}
+
+void PlayerInfo::setKillCount(int killNum) {
+	this->killCount = killNum;
+}

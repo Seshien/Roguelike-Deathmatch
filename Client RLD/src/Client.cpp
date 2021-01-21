@@ -5,6 +5,7 @@ void Client::startClient()
 	this->voted = false;
 	this->currentTextureSet = 0;
 	this->health = Constants::defaultHealth;
+	this->maxHealth = Constants::defaultHealth;
 
 	this->startLogger();
 	this->loadConfig();
@@ -22,12 +23,13 @@ void Client::startClient()
 	mainLoop();
 
 }
+
 void Client::startWindow()
 {
 	window.create(sf::VideoMode(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT), "Roguelike Deathmatch");
 	window.setFramerateLimit(60);
 	// Initialize the view to a rectangle located at (100, 100) and with a size of 400x200
-	gameView.reset(sf::FloatRect(0, 0, 768, 576));
+	gameView.reset(sf::FloatRect(0, 0, Constants::GAME_SCREEN_WIDTH, Constants::GAME_SCREEN_HEIGHT));
 	lobbyView.reset(sf::FloatRect(0, 0, 192, 576));
 	interfaceView.reset(sf::FloatRect(0, 0, 960, 144));
 
@@ -106,6 +108,18 @@ void Client::mainLoop()
 	}
 }
 
+void Client::centerMap() {
+	int x = this->xOurPos * Constants::SPRITE_WIDTH;
+	int y = this->yOurPos * Constants::SPRITE_HEIGHT;
+	if (x <= Constants::GAME_SCREEN_WIDTH / 2) x = Constants::GAME_SCREEN_WIDTH / 2;
+	if (y <= Constants::GAME_SCREEN_WIDTH / 2) y = Constants::GAME_SCREEN_HEIGHT / 2;
+	if (x > this->map.MAP_WIDTH* Constants::SPRITE_WIDTH - Constants::GAME_SCREEN_WIDTH / 2) 
+		x = this->map.MAP_WIDTH * Constants::SPRITE_WIDTH - Constants::GAME_SCREEN_WIDTH / 2;
+	if (y > this->map.MAP_HEIGHT* Constants::SPRITE_HEIGHT - Constants::GAME_SCREEN_HEIGHT / 2)
+		y = this->map.MAP_HEIGHT * Constants::SPRITE_HEIGHT - Constants::GAME_SCREEN_HEIGHT / 2;
+	gameView.setCenter(x, y);
+}
+
 void Client::graphicsUpdate() {
 	window.clear();
 	rectangle.setSize(sf::Vector2f(1000, 1000));
@@ -116,7 +130,19 @@ void Client::graphicsUpdate() {
 
 	// Rysuje wszystko w grze (co jest jeszcze potrzebne to interpolacja pomiedzy ruchem gracza TO DO)
 	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD) {
+		this->centerMap();
 		this->map.drawMap(window);
+		// Draw semi-transparent fog-of-war (so we see map tiles and players and items are despawned/moved out anyway)
+		sf::Sprite fog;
+		fog.setTexture(this->fogTexture);
+		for (int i = 0; i < this->map.MAP_WIDTH; i++) {
+			for (int j = 0; j < this->map.MAP_HEIGHT; j++) {
+				if (i <= this->xOurPos - Constants::sightValue || i >= this->xOurPos + Constants::sightValue || j <= this->yOurPos - Constants::sightValue || j >= this->yOurPos + Constants::sightValue) {
+					fog.setPosition(i * Constants::SPRITE_WIDTH, j * Constants::SPRITE_HEIGHT);
+					window.draw(fog);
+				}
+			}
+		}
 		for (int i = 0; i < this->playerInfos.size(); i++) {
 			this->playerInfos[i]->interpolate(1.0f, 1.0f);
 			this->playerInfos[i]->draw(window);
@@ -131,9 +157,12 @@ void Client::graphicsUpdate() {
 	window.draw(rectangle);
 
 	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD) {
-		hpBar.changeFillPercent((double)this->health / (double)this->maxHealth);
+		hpBar.changeFillPercent((double)this->health / (double)this->maxHealth * 100.0f);
 		hpBar.changeVisibility(true);
 		hpBar.draw(window);
+		for (int i = 0; i < this->items.size(); i++) {
+			this->items[i]->drawInPocket(window, 330 + (i * (Constants::SPRITE_WIDTH + 5)), 65);
+		}
 	}
 
 	window.setView(lobbyView);
@@ -148,8 +177,16 @@ void Client::graphicsUpdate() {
 		str.append("/");
 		str.append(std::to_string(this->playerList.size()));
 		str.append("\n");
+		for (auto player : playerList) str.append(player + "\n");
 	}
-	for (auto player : playerList) str.append(player + "\n");
+	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD) {
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			str.append(this->playerInfos[i]->getPlayerName());
+			str.append(" [");
+			str.append(std::to_string(this->playerInfos[i]->getKillCount()));
+			str.append("]\n");
+		}
+	}
 	text.setString(str);
 
 	// Rysujemy button
@@ -345,7 +382,7 @@ void Client::handleLobby(Parser::Event ev)
 void Client::handleGame(Parser::Event ev)
 {
 	std::string evString;
-	bool newPlayer;
+	bool newPlayer = true;
 	switch (ev.subtype)
 	{
 	case Parser::SubType::MOVE:
@@ -358,6 +395,10 @@ void Client::handleGame(Parser::Event ev)
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
 				this->playerInfos[i]->setIsAlive(true);
 			if (this->playerInfos[i]->getPlayerName() == this->playerName) {
+				if (this->playerName == evString) {
+					this->xOurPos = this->playerInfos[i]->getX();
+					this->yOurPos = this->playerInfos[i]->getY();
+				}
 					for (int j = 0; j < this->playerInfos.size(); j++) {
 						Logger::log("Our player found.");
 						if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Constants::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Constants::sightValue) {
@@ -379,8 +420,20 @@ void Client::handleGame(Parser::Event ev)
 	case Parser::SubType::RESPAWN:
 		Logger::log("Our player respawn info received.");
 		Logger::log(std::to_string(ev.subdata[0]) + std::to_string(ev.subdata[1]));
-		this->playerInfos.push_back(std::make_shared<OurPlayerInfo>(this->playerName, (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
-		this->currentTextureSet++;
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (this->playerInfos[i]->getPlayerName() == std::to_string(ev.subdata[1])) {
+				newPlayer == false;
+			}
+		}
+		if (newPlayer) {
+			this->playerInfos.push_back(std::make_shared<OurPlayerInfo>(this->playerName, (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
+			this->currentTextureSet++;
+			if (this->currentTextureSet == 4) {
+				this->currentTextureSet = 0;
+			}
+		}
+		this->xOurPos = (int)ev.subdata[0];
+		this->yOurPos = (int)ev.subdata[1];
 		this->gameStage = GameStage::ALIVE;
 		break;
 	case Parser::SubType::PSPAWN:
@@ -399,6 +452,9 @@ void Client::handleGame(Parser::Event ev)
 			Logger::log("Other player spawn new info received.");
 			this->playerInfos.push_back(std::make_shared<PlayerInfo>(evString.substr(2, evString.size() - 2), (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
 			this->currentTextureSet++;
+			if (this->currentTextureSet == 4) {
+				this->currentTextureSet = 0;
+			}
 		}
 		break;
 	case Parser::SubType::DAMAGE:
@@ -417,7 +473,28 @@ void Client::handleGame(Parser::Event ev)
 		for (int i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
 				OurPlayerInfo* ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
-				ourPlayer->pocket.push_back(std::make_shared<Item>((ItemType)(int)ev.subdata[0], -1, -1, *(tileObjectsTextures[(int)ev.subdata[0]]), false, true));
+				// Na serwerze ITEM_SWORD, ITEM_SHIELD, ITEM_BOOTS, ITEM_POTION, PLAYER, BODY
+				int clientItemID;
+				switch (ev.subdata[0]) {
+				case 0:
+					clientItemID = (int)ItemType::SWORD;
+					break;
+				case 1:
+					clientItemID = (int)ItemType::SHIELD;
+					break;
+				case 2:
+					clientItemID = (int)ItemType::BOOTS;
+					break;
+				case 3:
+					clientItemID = (int)ItemType::POTION;
+					break;
+				case 5:
+					clientItemID = (int)ItemType::BONES;
+					break;
+				default:
+					Logger::log("Wrong item type received!");
+				}
+				ourPlayer->pocket.push_back(std::make_shared<Item>((ItemType)clientItemID, -1, -1, *(tileObjectsTextures[clientItemID]), false, true));
 			}
 		}
 		break;
@@ -430,13 +507,66 @@ void Client::handleGame(Parser::Event ev)
 			}
 		}
 		break;
-	// RESPAWN DESPAWN KILLCOUNT SPAWN
+	// DESPAWN PDESPAWN KILLCOUNT SPAWN
 	case Parser::SubType::SPAWN:
-		Logger::log("Spawn item: " + std::string("ObjID: ") + ev.subdata[0] + "X: " + ev.subdata[1] + "Y: " + ev.subdata[2]);
+		Logger::log("Spawn item: " + std::string("ObjID: ") + ev.subdata[2] + "X: " + ev.subdata[0] + "Y: " + ev.subdata[1]);
+		int clientItemID;
+		bool wrongItem;
+		switch (ev.subdata[2]) {
+		case 0:
+			clientItemID = (int)ItemType::SWORD;
+			wrongItem = false;
+			break;
+		case 1:
+			clientItemID = (int)ItemType::SHIELD;
+			wrongItem = false;
+			break;
+		case 2:
+			clientItemID = (int)ItemType::BOOTS;
+			wrongItem = false;
+			break;
+		case 3:
+			clientItemID = (int)ItemType::POTION;
+			wrongItem = false;
+			break;
+		case 5:
+			clientItemID = (int)ItemType::BONES;
+			wrongItem = false;
+			break;
+		default:
+			Logger::log("Wrong item type received!");
+			wrongItem = true;
+		}
+		if (!wrongItem) 
+			this->items.push_back(std::make_shared<Item>((ItemType)clientItemID, (int)ev.subdata[0], (int)ev.subdata[1], *(tileObjectsTextures[clientItemID]), true, false));
 		break;
-	//case Parser::SubType::RESPAWN:
-	//	Logger::log("Respawn item: " + std::string(" X: ") + ev.subdata[0] + " Y: " + ev.subdata[1]);
-	//	break;
+	case Parser::SubType::DESPAWN:
+		// Despawnuje item na danym X i Y wiec musze znalezc w vectorze itemsow miejsce w ktorym jest item o danym X i Y
+	 	Logger::log("Despawn item: " + std::string(" X: ") + ev.subdata[0] + " Y: " + ev.subdata[1]);
+		for (int i = 0; i < this->items.size(); i++) {
+			if (this->items[i]->getX() == (int)ev.subdata[0] && this->items[i]->getY() == (int)ev.subdata[1]) {
+				this->items.erase(this->items.begin() + i);
+				Logger::log("Despawning item " + std::to_string(i));
+				break;
+			}
+		}
+		break;
+	case Parser::SubType::PDESPAWN:
+		Logger::log("Player despawn: " + ev.subdata.substr(2, ev.subdata.size() - 2));
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (ev.subdata.substr(2, ev.subdata.size() - 2) == this->playerInfos[i]->getPlayerName()) {
+				this->playerInfos[i]->setIsAlive(false);
+			}
+		}
+		break;
+	case Parser::SubType::KILLCOUNT:
+		Logger::log("Killcount" + ev.subdata.substr(1, ev.subdata.size()-1) + "num:" + ev.subdata[0]);
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (ev.subdata.substr(1, ev.subdata.size() - 1) == this->playerInfos[i]->getPlayerName()) {
+				this->playerInfos[i]->setKillCount((int)ev.subdata[0]);
+			}
+		}
+		break;
 	default:
 		Logger::log("Error, event subtype not found.");
 		Logger::log(ev);
@@ -553,6 +683,10 @@ void Client::loadUITextures() {
 	if (!barTexture.loadFromFile("data/hpbar.png"))
 	{
 		Logger::log("Error. File hpbar.png not found.");
+	}
+	if (!fogTexture.loadFromFile("data/fog.png"))
+	{
+		Logger::log("Error. File fog.pnh not found.");
 	}
 }
 
