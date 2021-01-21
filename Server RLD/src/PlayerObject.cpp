@@ -20,12 +20,6 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 
 void PlayerObject::move(std::shared_ptr<Tile> newTile)
 {
-<<<<<<< HEAD
-	this->x = newTile->getX();
-	this->y = newTile->getY();
-=======
-
->>>>>>> 28a1448e19aea2112987ff6b8453f8e672027c7d
 	this->occupiedTile->isPlayer = false;
 	this->occupiedTile->playerID = -1;
 	this->occupiedTile->isMovable = true;

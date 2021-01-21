@@ -358,8 +358,13 @@ void Client::handleGame(Parser::Event ev)
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
 			if (this->playerInfos[i]->getPlayerName() == this->playerName) {
 					for (int j = 0; j < this->playerInfos.size(); j++) {
-						if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) > Constants::sightValue&& abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) > Constants::sightValue) {
+						Logger::log("Our player found.");
+						if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Constants::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Constants::sightValue) {
 							this->playerInfos[j]->setIsAlive(false);
+							Logger::log("Player moved out from another player");
+						}
+						else {
+							Logger::log("Player didnt move out from another player");
 						}
 					}
 				}
