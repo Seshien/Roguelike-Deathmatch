@@ -31,5 +31,7 @@ public:
 	void setIsAlive(bool isAlive);
 	int getX();
 	int getY();
+	int getKillCount();
+	void setKillCount(int killNum);
 };
 

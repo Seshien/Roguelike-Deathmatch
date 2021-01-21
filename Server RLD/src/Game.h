@@ -245,10 +245,11 @@ public:
 		int movement = player->lastMove;
 		bool moved = false;
 		this->attackEvent(player);
+		auto tile = player->getTile();
+		auto moveTile = tile;
 		for (int i = 0; i < player->getRange(); i++)
 		{
-			auto tile = player->getTile();
-			auto moveTile = getMovementTile(movement, tile);
+			
 			if (moveTile->isPlayer)
 			{
 				auto hitPlayerIndex = findPlayerIndex(moveTile->playerID);
@@ -259,14 +260,16 @@ public:
 				}
 				auto hitPlayer = this->gamePlayerList[hitPlayerIndex];
 				damagePlayer(player, hitPlayer, player->getDamage());
+				moveTile = getMovementTile(movement, moveTile);
 			}
 			else if (i < player->getRange() - 1 && moveTile->isMovable)
 			{
-				this->checkVisionTiles(player, movement, tile);
+				this->checkVisionTiles(player, movement, moveTile);
+				moved = true;
+				moveTile = getMovementTile(movement, moveTile);
 				player->move(moveTile);
 				this->moveEvent(player);
 				this->moveOutEvent(tile, player);
-				moved = true;
 			}
 			else
 				break;
@@ -354,7 +357,7 @@ public:
 			hitPlayer->setHealth(newHealth);
 
 		this->hitEvent(hitPlayer, dmgValue);
-		this->damageEvent(hitPlayer, dmgValue);
+		this->damageEvent(hitPlayer, newHealth);
 
 		if (newHealth <= 0)
 		{
@@ -370,7 +373,7 @@ public:
 			hitPlayer->setHealth(newHealth);
 
 		this->hitEvent(hitPlayer, dmgValue);
-		this->damageEvent(hitPlayer, dmgValue);
+		this->damageEvent(hitPlayer, newHealth);
 
 		if (newHealth <= 0)
 		{

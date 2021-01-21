@@ -3,6 +3,7 @@
 PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType type, std::shared_ptr<Tile> tile)
 {
 	this->x = tile->getX();
+	this->lastMove = (int)'S';
 	this->y = tile->getY();
 	this->playerID = id;
 	this->playerName = playerName;

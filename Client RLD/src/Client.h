@@ -74,6 +74,7 @@ private:
 
 	sf::Texture buttonTexture;
 	sf::Texture barTexture;
+	sf::Texture fogTexture;
 
 	std::vector<std::shared_ptr<sf::Texture>> tileObjectsTextures;
 	std::vector<std::vector<std::shared_ptr<sf::Texture>>> playerTextures;
@@ -82,6 +83,9 @@ private:
 	UIButton respawn;
 	UIButton vote;
 	UIBar hpBar;
+
+	int xOurPos;
+	int yOurPos;
 
 	Map map;
 
@@ -120,5 +124,7 @@ private:
 	void loadPlayerTextures();
 	void loadUITextures();
 	void graphicsUpdate();
+
+	void centerMap();
 };
 

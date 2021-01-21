@@ -23,6 +23,9 @@ namespace Constants
 	const static int SPRITE_WIDTH = 32;
 	const static int SPRITE_HEIGHT = 32;
 
+	const static int GAME_SCREEN_WIDTH = 768;
+	const static int GAME_SCREEN_HEIGHT = 576;
+
 	const static int ITEM_RESPAWN_TIME = 30;
 	const static int PLAYER_RESPAWN_TIME = 5;
 };
