@@ -49,6 +49,7 @@ public:
 
 	int addPlayer(int playerID, std::string playerName)
 	{
+
 		if (int playerIndex = this->findPlayerIndex(playerID) == -1)
 		{
 			for (int i = 3; i < map.MAP_HEIGHT; i++)
@@ -61,6 +62,7 @@ public:
 						auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
 						gamePlayerList.push_back(player);
 						this->addPlayerSpawnToTick(player);
+						allKillCountsEvent(player);
 						return 0;
 					}
 				}
@@ -69,6 +71,7 @@ public:
 		else
 		{
 			auto player = gamePlayerList[playerIndex];
+			allKillCountsEvent(player);
 			if (player->getExist())
 			{
 				this->respawnEvent(player);
@@ -376,21 +379,25 @@ public:
 		{
 			killPlayer(hitPlayer);
 			player->setkillCount(player->getkillCount() + 1);
-			handleKillCount(player);
+			killCountEvent(player);
 		}
 	}
 
-	void handleKillCount(std::shared_ptr<PlayerObject> player, std::shared_ptr<PlayerObject> sended)
+	void killCountEvent(std::shared_ptr<PlayerObject> receiver, std::shared_ptr<PlayerObject> player)
 	{
-		output.addEventKillCount(Constants::SERVER_ID, sended->getPlayerID(), player->getName(), player->getkillCount());
+		output.addEventKillCount(Constants::SERVER_ID, receiver->getPlayerID(), player->getName(), player->getkillCount());
 	}
 
-	void handleKillCount(std::shared_ptr<PlayerObject> player)
+	void killCountEvent(std::shared_ptr<PlayerObject> player)
 	{
 		for (auto _player : this->gamePlayerList)
 			output.addEventKillCount(Constants::SERVER_ID, _player->getPlayerID(), player->getName(), player->getkillCount());
 	}
-
+	void allKillCountsEvent(std::shared_ptr<PlayerObject> player)
+	{
+		for (auto _player : this->gamePlayerList)
+			output.addEventKillCount(Constants::SERVER_ID, player->getPlayerID(), _player->getName(), _player->getkillCount());
+	}
 	void addPlayerSpawnToTick(std::shared_ptr<PlayerObject> player)
 	{
 		player->startSpawnTimer();
