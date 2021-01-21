@@ -49,22 +49,38 @@ public:
 
 	int addPlayer(int playerID, std::string playerName)
 	{
-		int i = 0, j = 0;
-		for (i = 1; i < map.MAP_HEIGHT; i++)
+		if (int playerIndex = this->findPlayerIndex(playerID) == -1)
 		{
-			for (j = 1; j < map.MAP_WIDTH; j++)
+			for (int i = 1; i < map.MAP_HEIGHT; i++)
 			{
-				auto tile = this->map.tileArray[i][j];
-				if (tile->isSpawnable && !tile->isItem && !tile->isPlayer)
+				for (int j = 1; j < map.MAP_WIDTH; j++)
 				{
-					auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
-					gamePlayerList.push_back(player);
-					this->addPlayerSpawnToTick(player);
-					return 0;
+					auto tile = this->map.tileArray[i][j];
+					if (tile->isSpawnable && !tile->isItem && !tile->isPlayer)
+					{
+						auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
+						gamePlayerList.push_back(player);
+						this->addPlayerSpawnToTick(player);
+						return 0;
+					}
 				}
-
 			}
-
+		}
+		else
+		{
+			auto player = gamePlayerList[playerIndex];
+			if (player->getExist())
+			{
+				this->respawnEvent(player);
+				this->damageEvent(player, player->getHealth());
+				for (auto Item :player->getItems())
+					this->pickupEvent(player, (int)Item);
+				this->getFullVision(player);
+			}
+			else
+			{
+				this->addPlayerSpawnToTick(player);
+			}
 		}
 		return 1;
 	}
@@ -479,7 +495,10 @@ public:
 	{
 		output.addEventPickUp(Constants::SERVER_ID, player->getplayerID(), (int) object->getType());
 	}
-
+	void pickupEvent(std::shared_ptr<PlayerObject> player, int itemType)
+	{
+		output.addEventPickUp(Constants::SERVER_ID, player->getplayerID(), itemType);
+	}
 	void handleRespawn(Parser::Event ev)
 	{
 		int playerIndex = this->findPlayerIndex(ev.sender);

@@ -25,6 +25,7 @@ public:
 	int getplayerID() { return this->playerID; };
 	int getRange() { return this->attackRange; };
 	int getDamage() { return this->dmg; };
+	std::vector<ItemType> getItems() { return this->items; };
 
 	std::string getName() { return this->playerName; };
 
