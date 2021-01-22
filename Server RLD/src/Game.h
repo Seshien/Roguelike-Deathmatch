@@ -13,6 +13,7 @@
 class Game
 {
 public:
+	enum class MOVEDIR { UP, DOWN, LEFT, RIGHT };
 	Game()
 	{
 
@@ -134,10 +135,10 @@ public:
 			switch (ev.subtype)
 			{
 			case Parser::SubType::MOVE:
-				handleMovement(ev);
+				//handleMovement(ev);
 				break;
 			case Parser::SubType::ATTACK:
-				handleAttack(ev);
+				//handleAttack(ev);
 				break;
 			case Parser::SubType::ACTION:
 				//do something
@@ -163,39 +164,41 @@ public:
 		switch (ev.subdata[0])
 		{
 		case ('W'):
-			handleMovement(ev);
+			handleMovement(ev.sender, MOVEDIR::UP);
 			break;
 		case ('S'):
-			handleMovement(ev);
+			handleMovement(ev.sender, MOVEDIR::DOWN);
 			break;
 		case ('A'):
-			handleMovement(ev);
+			handleMovement(ev.sender, MOVEDIR::LEFT);
 			break;
 		case ('D'):
-			handleMovement(ev);
+			handleMovement(ev.sender, MOVEDIR::RIGHT);
 			break;
 		case ' ':
-			handleAttack(ev);
+			handleAttack(ev.sender);
 			break;
 		default:
 			Logger::error("Error: Not handled key");
 		}
 	}
 	//wasd
-	void handleMovement(Parser::Event ev)
+	void handleMovement(int playerID, MOVEDIR movement)
 	{
-		int playerIndex = this->getPlayerIndex(ev.sender);
-		if (playerIndex == -1)
+		auto player = this->getPlayer(playerID);
+		if (player == nullptr)
 		{
 			Logger::log("Error: Move Player failure, player not found");
 			return;
 		}
-		handleMovement(this->gamePlayerList[playerIndex], ev.subdata[0]);
+		player->lastMove = (int) movement;
+		handleMovement(player);
 	}
 
-	void handleMovement(std::shared_ptr<PlayerObject> player, int movement)
+	void handleMovement(std::shared_ptr<PlayerObject> player)
 	{
 		std::shared_ptr<Tile> oldTile = player->getTile();
+		MOVEDIR movement = (MOVEDIR) player->lastMove;
 		std::shared_ptr<Tile> tile = getMovementTile(movement, player->getTile());
 
 		if (tile->canMove())
@@ -203,7 +206,7 @@ public:
 			player->move(tile);
 			this->moveEvent(player);
 			this->moveOutEvent(oldTile, player);
-			this->checkVisionTiles(player, movement, player->getTile());
+			this->checkVisionTiles(player, player->getTile());
 			switch (tile->getType())
 			{
 			case TileType::GROUND:
@@ -214,7 +217,7 @@ public:
 					player->move(tile);
 					this->moveEvent(player);
 					this->moveOutEvent(tile, player);
-					this->checkVisionTiles(player, movement, player->getTile());
+					this->checkVisionTiles(player, player->getTile());
 				}
 				break;
 			case TileType::EMPTY:
@@ -231,19 +234,18 @@ public:
 			{
 				pickupItem(player, tile->getItemID());
 			}
-			player->lastMove = movement;
 		}
 	}
 	void handleMovement(std::shared_ptr<PlayerObject> player, std::shared_ptr<Tile> tile)
 	{
 		std::shared_ptr<Tile> oldTile = player->getTile();
-		int movement = player->lastMove;
+		MOVEDIR movement = (MOVEDIR) player->lastMove;
 		if (tile->canMove())
 		{
 			player->move(tile);
 			this->moveEvent(player);
 			this->moveOutEvent(oldTile, player);
-			this->checkVisionTiles(player, movement, player->getTile());
+			this->checkVisionTiles(player, player->getTile());
 			switch (tile->getType())
 			{
 			case TileType::GROUND:
@@ -254,7 +256,7 @@ public:
 					player->move(tile);
 					this->moveEvent(player);
 					this->moveOutEvent(tile, player);
-					this->checkVisionTiles(player, movement, player->getTile());
+					this->checkVisionTiles(player, player->getTile());
 				}
 				break;
 			case TileType::EMPTY:
@@ -271,12 +273,11 @@ public:
 			{
 				pickupItem(player, tile->getItemID());
 			}
-			player->lastMove = movement;
 		}
 	}
-	void handleAttack(Parser::Event ev)
+	void handleAttack(int playerID)
 	{
-		int playerIndex = getPlayerIndex(ev.sender);
+		int playerIndex = getPlayerIndex(playerID);
 		if (playerIndex == -1)
 		{
 			Logger::log("Error: Attack Player failure, player not found");
@@ -287,16 +288,16 @@ public:
 
 	void handleAttack(std::shared_ptr<PlayerObject> player)
 	{
-		int movement = player->lastMove;
+		MOVEDIR movement = (MOVEDIR)player->lastMove;
 		bool moved = false;
 		this->attackEvent(player);
 		auto startTile = player->getTile();
-		auto previousTile = player->getTile();
 		auto finalTile = startTile;
 		auto iterTile = player->getTile();
 		for (int i = 0; i < player->getRange(); i++)
 		{
-			iterTile = getMovementTile(movement, iterTile);;
+			iterTile = getMovementTile(movement, iterTile);
+			if (iterTile == nullptr) break;
 			if (iterTile->havePlayer())
 			{
 
@@ -307,64 +308,65 @@ public:
 					return;
 				}
 				damagePlayer(player, hitPlayer, player->getDamage());
-				this->checkVisionTiles(player, movement, iterTile);
+				this->checkVisionTiles(player, iterTile);
 			}
 			else if (i < player->getRange() && iterTile->canMove())
 			{
 				finalTile = iterTile;
-				this->checkVisionTiles(player, movement, iterTile);
+				this->checkVisionTiles(player, iterTile);
 			}
 			else
 				break;
 		}
 		handleMovement(player, finalTile);
 	}
-	std::shared_ptr<Tile> getMovementTile(int movement, std::shared_ptr<Tile> tile, int range=1)
+	std::shared_ptr<Tile> getMovementTile(MOVEDIR movement, std::shared_ptr<Tile> tile, int range=1)
 	{
 		int x = tile->getX();
 		int y = tile->getY();
 		switch (movement)
 		{
-		case 'W':
+		case MOVEDIR::UP:
 			return this->getTile(x, y - range);
 			break;
-		case 'S':
+		case MOVEDIR::DOWN:
 			return this->getTile(x, y + range);
 			break;
-		case 'A':
+		case MOVEDIR::LEFT:
 			return this->getTile(x - range, y);
 			break;
-		case 'D':
+		case MOVEDIR::RIGHT:
 			return this->getTile(x + range, y);
 			break;
 		}
 	}
 
-	void checkVisionTiles(std::shared_ptr<PlayerObject> player, int movement, std::shared_ptr<Tile> tile)
+	void checkVisionTiles(std::shared_ptr<PlayerObject> player, std::shared_ptr<Tile> tile)
 	{
+		MOVEDIR movement = (MOVEDIR)player->lastMove;
 		int x = tile->getX();
 		int y = tile->getY();
 		switch (movement)
 		{
-		case 'W':
+		case MOVEDIR::UP:
 			for (int i = x - Constants::sightValue; i <= x + Constants::sightValue; i++)
 			{
 				getVision(player, this->getTile(i, y - Constants::sightValue + 1));
 			}
 			break;
-		case 'S':
+		case MOVEDIR::DOWN:
 			for (int i = x - Constants::sightValue; i <= x + Constants::sightValue; i++)
 			{
 				getVision(player, this->getTile(i, y + Constants::sightValue - 1));
 			}
 			break;
-		case 'A':
+		case MOVEDIR::LEFT:
 			for (int i = y - Constants::sightValue; i <= y + Constants::sightValue; i++)
 			{
 				getVision(player, this->getTile(x - Constants::sightValue + 1, i));
 			}
 			break;
-		case 'D':
+		case MOVEDIR::RIGHT:
 			for (int i = y - Constants::sightValue; i <= y + Constants::sightValue; i++)
 			{
 				getVision(player, this->getTile(x + Constants::sightValue - 1, i));
@@ -374,6 +376,7 @@ public:
 	}
 	void getVision(std::shared_ptr<PlayerObject> player, std::shared_ptr<Tile> tile)
 	{
+		if (tile == nullptr) return;
 		if (tile->haveItem())
 		{
 			auto item = this->gameObjectList[this->getItemIndex(tile->getItemID())];
@@ -700,12 +703,13 @@ public:
 			if (player->getPlayerID() == playerID) return player;
 		return std::shared_ptr<PlayerObject>(nullptr);
 	}
+
 	std::shared_ptr<Tile> getTile(int x, int y)
 	{
-		if (x >= 0 && x <= 99 && y >= 0 && y <= 99)
+		if (x >= 0 && x < this->map.MAP_WIDTH && y >= 0 && y < this->map.MAP_HEIGHT)
 			return this->map.tileArray[x][y];
 		else
-			return this->map.tileArray[0][0];
+			return std::shared_ptr<Tile>(nullptr);
 	}
 
 private:
