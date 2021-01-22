@@ -52,11 +52,13 @@ public:
 
 		if (int playerIndex = this->getPlayerIndex(playerID) == -1)
 		{
-			for (int i = 3; i < map.MAP_HEIGHT; i++)
+			for (int i = 0; i < map.MAP_HEIGHT; i++)
 			{
-				for (int j = 3; j < map.MAP_WIDTH; j++)
+				for (int j = 0; j < map.MAP_WIDTH; j++)
 				{
-					auto tile = this->map.tileArray[i][j];
+					auto tile = this->getTile(i, j);//map.tileArray[i][j];
+					if (tile == nullptr)
+						continue;
 					if (tile->canSpawn())
 					{
 						auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
