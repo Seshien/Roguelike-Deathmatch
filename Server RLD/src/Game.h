@@ -362,10 +362,8 @@ public:
 	void damagePlayer(std::shared_ptr<PlayerObject> hitPlayer, int dmgValue)
 	{
 		int newHealth = hitPlayer->getHealth() - dmgValue;
-		if (newHealth > hitPlayer->getMaxHealth()) 
-			hitPlayer->setHealth(hitPlayer->getMaxHealth());
-		else
-			hitPlayer->setHealth(newHealth);
+		if (newHealth > hitPlayer->getMaxHealth()) newHealth = hitPlayer->getMaxHealth();
+		hitPlayer->setHealth(newHealth);
 
 		this->hitEvent(hitPlayer, dmgValue);
 		this->damageEvent(hitPlayer, newHealth);
@@ -379,9 +377,8 @@ public:
 	void damagePlayer(std::shared_ptr<PlayerObject> player, std::shared_ptr<PlayerObject> hitPlayer, int dmgValue)
 	{
 		int newHealth = hitPlayer->getHealth() - dmgValue;
-		if (newHealth > hitPlayer->getMaxHealth()) hitPlayer->setHealth(hitPlayer->getMaxHealth());
-		else
-			hitPlayer->setHealth(newHealth);
+		if (newHealth > hitPlayer->getMaxHealth()) newHealth = hitPlayer->getMaxHealth();
+		hitPlayer->setHealth(newHealth);
 
 		this->hitEvent(hitPlayer, dmgValue);
 		this->damageEvent(hitPlayer, newHealth);
