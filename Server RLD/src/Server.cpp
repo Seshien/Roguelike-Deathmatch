@@ -12,6 +12,18 @@ void Server::startMap()
 	this->game.startMap("data/map/map" + std::to_string(Config::mapID) + ".txt");
 }
 
+void Server::startLobby()
+{
+	//poczatek prawdziwej dzialalnosci serwera, nie wiem co tu dac zbytnio
+	numOfVotes = 0;
+	this->gameState = GameState::LOBBY;
+	for (auto player : this->activePlayerList)
+	{
+		player->voted = false;
+		output.addEventLobby(Config::SERVER_ID, player->playerID, numOfVotes);
+	}
+}
+
 void Server::mainLoop()
 {
 	while (true)
@@ -44,9 +56,14 @@ void Server::mainLoop()
 				handleGameOutput(this->game.loopGame(this->gameInput));
 				this->gameInput = Parser::Messenger();
 			}
-
 		}
-
+		else if (this->gameState == GameState::GAME_END)
+			if (this->gameTickTimer < 100)
+				gameTickTimer++;
+			else
+			{
+				this->startLobby();
+			}
 		if (output.eventList.size()) 
 			Logger::debug("------------ Output Phase ------------");
 		//
@@ -174,9 +191,17 @@ void Server::handleStateChange()
 		}
 		this->game.startGame(playerIDs, playerNames);
 		this->stateChange = StateChange::NONE;
-	
 	}
-	
+	if (this->stateChange == StateChange::GAME_END)
+	{
+		this->gameState = GameState::GAME_END;
+		gameTickTimer = 0;
+		for (auto player : this->activePlayerList)
+		{
+			output.addEventGameEnd(Config::SERVER_ID, player->playerID, winner);
+		}
+		this->stateChange = StateChange::NONE;
+	}
 }
 
 void Server::handleGameOutput(Parser::Messenger gOutput)
@@ -190,6 +215,11 @@ void Server::handleGameOutput(Parser::Messenger gOutput)
 				this->output.addEvent(ev);
 				break;
 			}
+		}
+		if (ev.receiver == Constants::SERVER_ID && ev.subtype == Parser::SubType::INFODUMP_GAME_END)
+		{
+			stateChange = StateChange::GAME_END;
+			winner = ev.subdata;
 		}
 
 	}
@@ -244,7 +274,6 @@ void Server::handleNewPlayer(Parser::Event ev)
 	}
 
 }
-
 
 void Server::handleDisconnect(Parser::Event ev)
 {

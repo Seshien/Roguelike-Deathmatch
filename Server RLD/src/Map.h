@@ -42,6 +42,15 @@ public:
 		}
 		file.close();
 	}
+	void refresh()
+	{
+		for (auto& arr : tileArray)
+			for (auto& tile : arr)
+			{
+				if (tile == nullptr) break;
+				tile = std::make_shared<Tile>(tile->getType(), tile->getX(), tile->getY());
+			}
+	}
 
 	std::shared_ptr<Tile> getTile(int x, int y);
 	bool checkRange(std::shared_ptr<Tile> objectF, std::shared_ptr<Tile> objectS, int range = Config::sightValue);

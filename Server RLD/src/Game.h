@@ -20,6 +20,11 @@ public:
 
 	void startGame(std::vector<int> playerID, std::vector<std::string> playerName)
 	{
+		this->gameObjectList.clear();
+		this->gamePlayerList.clear();
+		this->tickObjList.clear();
+		this->tickPlayList.clear();
+		this->map.refresh();
 		spawnObjects();
 		addPlayers(playerID, playerName);
 	}
@@ -384,9 +389,17 @@ public:
 		if (newHealth <= 0)
 		{
 			killPlayer(hitPlayer);
-			player->setkillCount(player->getKillCount() + 1);
+			int newKillCount = player->getKillCount() + 1;
+			player->setkillCount(newKillCount);
 			killCountEvent(player);
+			if (newKillCount >= 10)
+				endGame(player);
 		}
+	}
+
+	void endGame(std::shared_ptr<PlayerObject> player)
+	{
+		output.addEventGameEnd(Config::SERVER_ID, Config::SERVER_ID, player->getName());
 	}
 
 	void killCountEvent(std::shared_ptr<PlayerObject> receiver, std::shared_ptr<PlayerObject> player)

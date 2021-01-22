@@ -57,11 +57,7 @@ class Server
 		// void GenerateMap();
 		void startMap();
 
-		void startLobby()
-		{
-			//poczatek prawdziwej dzialalnosci serwera, nie wiem co tu dac zbytnio
-			this->gameState = GameState::LOBBY;
-		}
+		void startLobby();
 		void mainLoop();
 		void startGame()
 		{
@@ -109,6 +105,7 @@ class Server
 		int numOfVotes;
 		int activePlayerCount;
 		StateChange stateChange;
+		std::string winner;
 
 		std::chrono::system_clock::time_point gameStartTime;
 		std::chrono::system_clock::time_point turntimer;
