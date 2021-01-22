@@ -12,11 +12,12 @@ namespace Constants
 	const static int defaultDmg = 3;
 	const static int bodyHeal = 2;
 	const static int attackRange = 3;
+	const static int attackCooldown = 3;
 	//zmiana tego zepsuje program
 	const static int SERVER_ID = 0;
 	const static float serverTurnTimer = 0.05f;
 	const static float clientTurnTimer = 0.01f;
-	const static int gameTickRate = 10;
+	const static int gameTickRate = 5;
 	// Opcje grafiki klienta
 	const static int SCREEN_WIDTH = 960;
 	const static int SCREEN_HEIGHT = 720;

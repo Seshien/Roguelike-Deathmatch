@@ -23,7 +23,7 @@
     <ProjectGuid>{38597006-CB14-4719-91ED-085FE1048737}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ServerRLD</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <ProjectName>Server RLD</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

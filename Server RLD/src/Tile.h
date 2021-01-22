@@ -35,6 +35,7 @@ public:
 		}
 		else if ((int)tileType == 11 || (int)tileType == 10 || (int)tileType == 12 ) {
 			isMovable = true;
+			isSpawnable = false;
 		}
 		else {
 			isSpawnable = false;

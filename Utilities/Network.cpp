@@ -156,7 +156,7 @@ void Network::handleInnerEvent(Parser::Event ev)
 		else if (isClient && this->networkID == -1)
 		{
 			this->networkID = newID;
-			Logger::log("New ID was assigned to network");
+			Logger::debug("New ID was assigned to network");
 		}
 		else
 		{
@@ -468,9 +468,9 @@ void Network::manageClientEvent(int cIndex)
 		Logger::error("Client not found. Socket index:", int(sock));
 		return;
 	}
-	auto message = "Client: " + std::to_string(index) + " player_id:" + std::to_string(managed->playerId)
-		+ " socket: " + std::to_string(sock) + " event";
-	Logger::log(message);
+	//auto message = "Client: " + std::to_string(index) + " player_id:" + std::to_string(managed->playerId)
+	//	+ " socket: " + std::to_string(sock) + " event";
+	//Logger::log(message);
 
 	if (revent & POLLIN)
 	{

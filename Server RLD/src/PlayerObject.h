@@ -13,6 +13,8 @@ class PlayerObject : public SpawnableObject
 	int dmg;
 	int attackRange;
 	int killCount;
+	int spawnX;
+	int spawnY;
 	std::vector<ItemType> items;
 	std::string playerName;
 
@@ -28,12 +30,19 @@ public:
 	int getDamage() { return this->dmg; };
 	int getkillCount() { return this->killCount; };
 	void setkillCount(int newKillCount) { this->killCount = newKillCount; };
+	int getspawnX() { return this->spawnX; };
+	int getspawnY() { return this->spawnY; };
+
+	tickResult tick();
+
+
 	std::vector<ItemType> getItems() { return this->items; };
 
 	std::string getName() { return this->playerName; };
 
 	int lastMove;
 	bool readyToRespawn;
+	int cooldownTimer;
 
 	void move(std::shared_ptr<Tile> newTile);
 

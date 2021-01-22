@@ -42,7 +42,7 @@ public:
 		{
 			if (addPlayer(playerID[x], playerName[x]))
 			{
-				Logger::log("Spawn was unsuccesfull");
+				Logger::error("Spawn was unsuccesfull");
 			}
 		}
 
@@ -95,7 +95,7 @@ public:
 
 	Parser::Messenger loopGame(Parser::Messenger input)
 	{
-		Logger::log("Loop game.");
+		Logger::debug("Loop game.");
 		output = Parser::Messenger();
 		for (auto object = tickObjList.begin(); object != tickObjList.end();)
 		{
@@ -119,12 +119,17 @@ public:
 		}
 		for (auto object = tickPlayList.begin(); object != tickPlayList.end();)
 		{
-			Logger::log("Tick!");
+			Logger::debug("Tick!");
 			auto result = object->get()->tick();
 			if (result == tickResult::SPAWNED)
 			{
 				object->get()->readyToRespawn = true;
 				this->respawnAskEvent(*object);
+				object = tickPlayList.erase(object);
+
+			}
+			else if (result == tickResult::CAN_ATTACK && object->get()->getTimetoRespawn() <= 0)
+			{
 				object = tickPlayList.erase(object);
 
 			}
@@ -161,6 +166,9 @@ public:
 
 	void handleKey(Parser::Event ev)
 	{
+		auto player = this->getPlayer(ev.sender);
+		if (player->getExist() == false)
+			return;
 		switch (ev.subdata[0])
 		{
 		case ('W'):
@@ -197,44 +205,7 @@ public:
 
 	void handleMovement(std::shared_ptr<PlayerObject> player)
 	{
-		std::shared_ptr<Tile> oldTile = player->getTile();
-		MOVEDIR movement = (MOVEDIR) player->lastMove;
-		std::shared_ptr<Tile> tile = getMovementTile(movement, player->getTile());
-
-		if (tile->canMove())
-		{
-			player->move(tile);
-			this->moveEvent(player);
-			this->moveOutEvent(oldTile, player);
-			this->checkVisionTiles(player, player->getTile());
-			switch (tile->getType())
-			{
-			case TileType::GROUND:
-				break;
-			case TileType::GROUND_SLIPPY:
-				if (getMovementTile(movement, tile)->getType() == TileType::GROUND_SLIPPY)
-				{
-					player->move(tile);
-					this->moveEvent(player);
-					this->moveOutEvent(tile, player);
-					this->checkVisionTiles(player, player->getTile());
-				}
-				break;
-			case TileType::EMPTY:
-				killPlayer(player);
-				break;
-			case TileType::SPIKES:
-				damagePlayer(player, Constants::spikeDmg);
-				break;
-			case TileType::LAVA:
-				killPlayer(player);
-				break;
-			}
-			if (tile->haveItem())
-			{
-				pickupItem(player, tile->getItemID());
-			}
-		}
+		handleMovement(player, getMovementTile((MOVEDIR) player->lastMove, player->getTile()));
 	}
 	void handleMovement(std::shared_ptr<PlayerObject> player, std::shared_ptr<Tile> tile)
 	{
@@ -288,6 +259,7 @@ public:
 
 	void handleAttack(std::shared_ptr<PlayerObject> player)
 	{
+		if (player->cooldownTimer > 0) return;
 		MOVEDIR movement = (MOVEDIR)player->lastMove;
 		bool moved = false;
 		this->attackEvent(player);
@@ -318,6 +290,8 @@ public:
 			else
 				break;
 		}
+		player->cooldownTimer = Constants::attackCooldown;
+		tickPlayList.push_back(player);
 		handleMovement(player, finalTile);
 	}
 	std::shared_ptr<Tile> getMovementTile(MOVEDIR movement, std::shared_ptr<Tile> tile, int range=1)
@@ -456,14 +430,17 @@ public:
 		player->despawn();
 		player->startSpawnTimer();
 		// tworzyc nowy obiekt z trupem
-		std::shared_ptr<ItemObject> body = std::make_shared<ItemObject>(this->gameObjectList.size(),SpawnableObjectType::BODY, player->getTile());
+		std::shared_ptr<ItemObject> body = std::make_shared<ItemObject>(this->gameObjectList.size(), SpawnableObjectType::BODY, player->getTile());
 
 		body->spawn();
 		body->startSpawnTimer();
 		this->gameObjectList.push_back(body);
+
+		auto tile = getTile(player->getspawnX(), player->getspawnY());
+		//poruszamy gracza do respawna 
+		if (tile != nullptr)
+			player->move(tile);
 		//dodajemy do tickow
-
-
 		this->tickObjList.push_back(body);
 		this->tickPlayList.push_back(player);
 		//eventy
@@ -615,6 +592,7 @@ public:
 			object->spawn();
 			this->spawnPlayerEvent(object);
 			this->respawnEvent(object);
+			this->damageEvent(object, object->getHealth());
 			this->getFullVision(object);
 		}
 	}
