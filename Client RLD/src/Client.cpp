@@ -170,6 +170,20 @@ void Client::graphicsUpdate() {
 		}
 	}
 
+	if (gameStage == Client::GameStage::END) {
+		sf::Sprite crown;
+		crown.setTexture(*(this->tileObjectsTextures[22]));
+		crown.setPosition(Config::SCREEN_WIDTH / 2 - 32, Config::SCREEN_HEIGHT / 2);
+		window.draw(crown);
+		sf::Text wText;
+		std::string tmpWinner = "Winner: ";
+		tmpWinner.append(this->winner);
+		wText.setFont(this->font);
+		wText.setPosition(Config::SCREEN_WIDTH / 2, Config::SCREEN_HEIGHT / 2);
+		wText.setString(tmpWinner);
+		window.draw(wText);
+	}
+
 	window.setView(interfaceView);
 	rectangle.setFillColor(sf::Color::Blue);
 	window.draw(rectangle);
@@ -367,6 +381,7 @@ void Client::handleServer(Parser::Event ev)
 		Logger::log("Ilosc glosow: " + std::string(1, ev.subdata[0]) + ":" + std::to_string(playerList.size()));
 		this->numVotes = ev.subdata[0] - '0';
 		this->gameStage = GameStage::LOBBY;
+		this->gameReset();
 		break;
 	case Parser::SubType::INFODUMP_GAME_MID:
 		Logger::log("Czas trwania gry:" + ev.subdata);
@@ -375,6 +390,9 @@ void Client::handleServer(Parser::Event ev)
 		break;
 	case Parser::SubType::INFODUMP_GAME_END:
 		Logger::log("Statystyki:" + ev.subdata);
+		this->gameStage = GameStage::END;
+		this->winner = ev.subdata;
+		this->gameView.setCenter(Config::SCREEN_WIDTH / 2, Config::SCREEN_HEIGHT / 2);
 		break;
 	default:
 		Logger::log("Error, event subtype not found.");
@@ -756,4 +774,17 @@ void Client::setConfigValue(std::string token, std::string value)
 	else if (token == "playerName") this->playerName = value;
 	else if (token == "Server Address") this->IPAddress = value;
 	else Logger::debug("Unknown line in config file");
+}
+
+void Client::gameReset() {
+	this->voted = false;
+	this->vote.changeVisibility(true);
+	this->vote.setText("Vote");
+	this->currentTextureSet = 0;
+	this->spawnedFirstTime = false;
+	this->health = Config::defaultHealth;
+	this->maxHealth = Config::defaultHealth;
+	this->playerInfos.clear();
+	this->items.clear();
+	this->damages.clear();
 }

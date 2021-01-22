@@ -392,7 +392,7 @@ public:
 			int newKillCount = player->getKillCount() + 1;
 			player->setkillCount(newKillCount);
 			killCountEvent(player);
-			if (newKillCount >= 10)
+			if (newKillCount >= 5)
 				endGame(player);
 		}
 	}
@@ -680,7 +680,7 @@ public:
 
 	int getItemIndex(int itemID)
 	{
-		if (this->gameObjectList[itemID]->getItemID() == itemID) return itemID;
+		//if (this->gameObjectList[itemID]->getItemID() == itemID) return itemID;
 		for (int i = 0; i < gameObjectList.size(); i++)
 			if (gameObjectList[i]->getItemID() == itemID)
 				return i;

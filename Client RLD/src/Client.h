@@ -33,7 +33,7 @@ public:
 private:
 
 	enum class ConnectionState {NOTCONNECTED, CONNECTED, FAILED};
-	enum class GameStage {NOTJOINED, LOBBY, DEAD, ALIVE};
+	enum class GameStage {NOTJOINED, LOBBY, DEAD, ALIVE, END};
 		
 
 	void connectClient();
@@ -68,6 +68,8 @@ private:
 	std::vector<std::string> playerList;
 
 	Network network;
+
+	std::string winner;
 
 	//std::array<sf::Texture, 16> tileTextures;
 
@@ -130,6 +132,8 @@ private:
 	void loadConfig();
 	void processConfigLine(std::string line);
 	void setConfigValue(std::string token, std::string value);
+
+	void gameReset();
 
 };
 
