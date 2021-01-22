@@ -4,12 +4,18 @@ void Client::startClient()
 {
 	this->voted = false;
 	this->currentTextureSet = 0;
+	this->spawnedFirstTime = false;
 	this->health = Config::defaultHealth;
 	this->maxHealth = Config::defaultHealth;
 
+	this->IPAddress = Config::IPAddress;
+	this->port = Config::port;
+
 	this->startLogger();
-	Config::loadConfig();
+
 	this->playerName = Config::playerName;
+	this->loadConfig();
+	
 
 	this->font.loadFromFile("data/arial2.ttf");
 
@@ -65,11 +71,11 @@ void Client::connectClient()
 	playerList.clear();
 	this->ID = -1;
 	//probujemy rozpoczac polaczenie
-	if (network.startClient(Config::IPAddress, Config::port) == 0)
+	if (network.startClient(this->IPAddress, this->port) == 0)
 	{
 		this->cState = ConnectionState::CONNECTED;
 		Logger::log("Connecting to server succeed");
-		output.addEventNewPlayer(ID, Config::SERVER_ID, Config::playerName);
+		output.addEventNewPlayer(ID, Config::SERVER_ID, playerName);
 	}
 	else
 	{
@@ -150,6 +156,17 @@ void Client::graphicsUpdate() {
 		}
 		for (int i = 0; i < this->items.size(); i++) {
 			this->items[i]->draw(window);
+		}
+		for (auto it = begin(this->damages); it != end(this->damages);) {
+			it->draw(window);
+			it->decreaseTimer();
+			if (int(it->getTimer()) == 0) {
+				it = this->damages.erase(it);
+			}
+			else
+			{
+				++it;
+			}
 		}
 	}
 
@@ -421,16 +438,19 @@ void Client::handleGame(Parser::Event ev)
 	case Parser::SubType::RESPAWN:
 		Logger::log("Our player respawn info received.");
 		Logger::log(std::to_string(ev.subdata[0]) + std::to_string(ev.subdata[1]));
-		for (int i = 0; i < this->playerInfos.size(); i++) {
-			if (this->playerInfos[i]->getPlayerName() == std::to_string(ev.subdata[1])) {
-				newPlayer == false;
-			}
-		}
-		if (newPlayer) {
+		if (this->spawnedFirstTime == false) {
 			this->playerInfos.push_back(std::make_shared<OurPlayerInfo>(this->playerName, (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
 			this->currentTextureSet++;
 			if (this->currentTextureSet == 4) {
 				this->currentTextureSet = 0;
+			}
+			this->spawnedFirstTime = true;
+		}
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (this->playerInfos[i]->getPlayerName() == this->playerName) {
+				this->playerInfos[i]->setIsAlive(true);
+				this->playerInfos[i]->setNewPosition(ev.subdata[0], ev.subdata[1]);
+				this->playerInfos[i]->setPrevPosition(0, 0);
 			}
 		}
 		this->xOurPos = (int)ev.subdata[0];
@@ -561,10 +581,18 @@ void Client::handleGame(Parser::Event ev)
 		}
 		break;
 	case Parser::SubType::KILLCOUNT:
-		Logger::log("Killcount" + ev.subdata.substr(1, ev.subdata.size()-1) + "num:" + ev.subdata[0]);
+		Logger::log("Killcount" + ev.subdata.substr(1, ev.subdata.size()-1) + "num:" + std::to_string((int)ev.subdata[0]));
 		for (int i = 0; i < this->playerInfos.size(); i++) {
 			if (ev.subdata.substr(1, ev.subdata.size() - 1) == this->playerInfos[i]->getPlayerName()) {
 				this->playerInfos[i]->setKillCount((int)ev.subdata[0]);
+			}
+		}
+		break;
+	case Parser::SubType::HIT:
+		Logger::log("Hit: " + ev.subdata);
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (this->playerInfos[i]->getPlayerName() == ev.subdata) {
+				this->damages.push_back(Damage(Config::SPRITE_WIDTH* this->playerInfos[i]->getX(), Config::SPRITE_WIDTH* this->playerInfos[i]->getY(), damageTextures, 3));
 			}
 		}
 		break;
@@ -611,6 +639,12 @@ void Client::handleDisconnectPlayer(Parser::Event ev)
 			playerList.erase(playerList.begin() + i);
 			return;
 		}
+	for (auto it = this->playerInfos.begin(); it < this->playerInfos.end(); ++it) {
+		if ((*it)->getPlayerName() == playerName) {
+			this->playerInfos.erase(it);
+			break;
+		}
+	}
 }
 
 void Client::handleLostConnection(Parser::Event ev)
@@ -643,6 +677,10 @@ void Client::loadUITextures() {
 	{
 		Logger::log("Error. File fog.pnh not found.");
 	}
+	for (int i = 0; i < 3; i++) {
+		this->damageTextures.push_back(std::make_shared<sf::Texture>());
+		this->damageTextures[i]->loadFromFile("data/damage.png", sf::IntRect(i * Config::SPRITE_WIDTH, 0, 32, 32));
+	}
 }
 
 void Client::loadPlayerTextures() {
@@ -668,4 +706,54 @@ void Client::loadTileTextures() {
 			tileObjectsTextures[i + j * 8]->loadFromFile("data/tilesObjects.png", sf::IntRect(i * 32, j * 32, 32, 32));
 		}
 	}
+}
+
+void Client::loadConfig()
+{
+	std::fstream file;
+	std::string line;
+	file.open("data/config.txt");
+	if (file.is_open())
+	{
+		Logger::log("Config file opened:");
+		while (std::getline(file, line))
+		{
+			Logger::log(line);
+			processConfigLine(line);
+		}
+	}
+
+	else
+	{
+		Logger::log("Config file not found");
+		Logger::log("Creating default config file TODO");
+		//something something
+
+	}
+	file.close();
+}
+
+void Client::processConfigLine(std::string line)
+{
+	std::string delimiter = ":";
+	int pos = line.find(delimiter);
+	if (pos == -1)
+	{
+		Logger::error("Error during parsing of config file");
+		return;
+	}
+	std::string token = line.substr(0, pos);
+	std::string value = line.substr(pos + 1, line.length() - 1);
+	Logger::debug("Token: " + token + " Value: " + value);
+	setConfigValue(token, value);
+	return;
+}
+
+void Client::setConfigValue(std::string token, std::string value)
+{
+	if (token == "special") return;
+	else if (token == "port") this->port = value;
+	else if (token == "playerName") this->playerName = value;
+	else if (token == "Server Address") this->IPAddress = value;
+	else Logger::debug("Unknown line in config file");
 }

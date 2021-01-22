@@ -27,7 +27,7 @@ namespace Config
 	static int attackRange = 3;
 	static int attackCooldown = 3;
 	static int mapID = 0;
-	static std::string port = "7777";
+	static std::string port= "7777";
 	static std::string playerName = "Player";
 	static std::string IPAddress = "127.0.0.1";
 

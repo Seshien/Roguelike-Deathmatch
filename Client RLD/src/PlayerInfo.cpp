@@ -27,7 +27,17 @@ void PlayerInfo::setNewPosition(int x, int y) {
 	this->yPos = y;
 }
 
+// Only for respawn purposes
+void PlayerInfo::setPrevPosition(int x, int y) {
+	this->prevxPos = x;
+	this->prevyPos = y;
+}
+
 std::string PlayerInfo::getFacing() {
+	// For respawn purposes only
+	if (prevxPos == 0 && prevyPos == 0) {
+		return std::string("down");
+	}
 	if (prevxPos < xPos) {
 		return std::string("right");
 	}
@@ -47,8 +57,8 @@ void PlayerInfo::draw(sf::RenderWindow& window) {
 		std::string facing = this->getFacing();
 		//Logger::log("Drawing character");
 		this->sprite.setPosition(this->realXPos * Config::SPRITE_WIDTH, this->realYPos * Config::SPRITE_HEIGHT);
-		if (facing == "down") {
-			this->sprite.setTexture(*(this->textureSet[0]));
+		if (facing == "left") {
+			this->sprite.setTexture(*(this->textureSet[3]));
 		}
 		else if (facing == "up") {
 			this->sprite.setTexture(*(this->textureSet[1]));
@@ -57,7 +67,7 @@ void PlayerInfo::draw(sf::RenderWindow& window) {
 			this->sprite.setTexture(*(this->textureSet[2]));
 		}
 		else {
-			this->sprite.setTexture(*(this->textureSet[3]));
+			this->sprite.setTexture(*(this->textureSet[0]));
 		}
 		window.draw(this->sprite);
 	}

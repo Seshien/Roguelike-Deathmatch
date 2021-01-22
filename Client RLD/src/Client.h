@@ -12,7 +12,7 @@
 #include "Item.h"
 #include "PlayerInfo.h"
 #include "OurPlayerInfo.h"
-
+#include "Damage.h"
 
 #include "UIButton.h"
 #include "UIBar.h"
@@ -62,6 +62,9 @@ private:
 	ConnectionState cState;
 	GameStage gameStage;
 
+	std::string port;
+	std::string IPAddress;
+
 	std::vector<std::string> playerList;
 
 	Network network;
@@ -75,6 +78,8 @@ private:
 	std::vector<std::shared_ptr<sf::Texture>> tileObjectsTextures;
 	std::vector<std::vector<std::shared_ptr<sf::Texture>>> playerTextures;
 
+	std::vector<std::shared_ptr<sf::Texture>> damageTextures;
+
 	UIButton getIn;
 	UIButton respawn;
 	UIButton vote;
@@ -87,12 +92,15 @@ private:
 
 	std::vector<std::shared_ptr<Item>> items;
 	std::vector<std::shared_ptr<PlayerInfo>> playerInfos;
+	std::vector<Damage> damages;
 
 
 	// Information about which player textureSet has to be used now to create new player in PlayerInfo object
 	int currentTextureSet;
 
 	boolean voted;
+
+	boolean spawnedFirstTime;
 
 	sf::Clock turnTimer;
 
@@ -117,5 +125,11 @@ private:
 	void graphicsUpdate();
 
 	void centerMap();
+
+
+	void loadConfig();
+	void processConfigLine(std::string line);
+	void setConfigValue(std::string token, std::string value);
+
 };
 

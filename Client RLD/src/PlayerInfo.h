@@ -26,6 +26,8 @@ public:
 	std::string getPlayerName();
 	void interpolate(double time, double maxTime);
 	void setNewPosition(int x, int y);
+	// Only for respawn purposes
+	void setPrevPosition(int x, int y);
 	void draw(sf::RenderWindow& window);
 	std::string getFacing();
 	void setIsAlive(bool isAlive);

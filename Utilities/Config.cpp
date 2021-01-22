@@ -45,7 +45,7 @@ void Config::setConfigValue(std::string token, std::string value)
 {
 	if (token == "special") return;
 	else if (token == "port") port = value;
-	else if (token == "playerName") playerName = value;
+	else if (token == "playerName") playerName = value; 
 	else if (token == "Server Address") IPAddress= value;
 	else if (token == "Item Respawn Time") ITEM_RESPAWN_TIME = std::stoi(value);
 	else if (token == "Player Respawn Time") PLAYER_RESPAWN_TIME = std::stoi(value);
