@@ -537,6 +537,7 @@ public:
 	void respawnEvent(std::shared_ptr<PlayerObject> object)
 	{
 		output.addEventRespawn(Constants::SERVER_ID, object->getPlayerID(), object->getX(), object->getY());
+
 	}
 
 	void respawnAskEvent(std::shared_ptr<PlayerObject> object)
