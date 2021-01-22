@@ -8,7 +8,7 @@
 #include "..\..\Utilities\Event.h"
 #include "..\..\Utilities\Logger.h"
 #include "..\..\Utilities\Parser.h"
-#include "..\..\Utilities\Constants.h"
+#include "..\..\Utilities\Config.h"
 
 class Game
 {
@@ -239,7 +239,7 @@ public:
 				killPlayer(player);
 				break;
 			case TileType::SPIKES:
-				damagePlayer(player, Constants::spikeDmg);
+				damagePlayer(player, Config::spikeDmg);
 				break;
 			case TileType::LAVA:
 				killPlayer(player);
@@ -291,7 +291,7 @@ public:
 			else
 				break;
 		}
-		player->cooldownTimer = Constants::attackCooldown;
+		player->cooldownTimer = Config::attackCooldown;
 		tickPlayList.push_back(player);
 		handleMovement(player, finalTile);
 	}
@@ -304,27 +304,27 @@ public:
 		switch (movement)
 		{
 		case Map::MOVEDIR::UP:
-			for (int i = x - Constants::sightValue; i <= x + Constants::sightValue; i++)
+			for (int i = x - Config::sightValue; i <= x + Config::sightValue; i++)
 			{
-				getVision(player, this->map.getTile(i, y - Constants::sightValue + 1));
+				getVision(player, this->map.getTile(i, y - Config::sightValue + 1));
 			}
 			break;
 		case Map::MOVEDIR::DOWN:
-			for (int i = x - Constants::sightValue; i <= x + Constants::sightValue; i++)
+			for (int i = x - Config::sightValue; i <= x + Config::sightValue; i++)
 			{
-				getVision(player, this->map.getTile(i, y + Constants::sightValue - 1));
+				getVision(player, this->map.getTile(i, y + Config::sightValue - 1));
 			}
 			break;
 		case Map::MOVEDIR::LEFT:
-			for (int i = y - Constants::sightValue; i <= y + Constants::sightValue; i++)
+			for (int i = y - Config::sightValue; i <= y + Config::sightValue; i++)
 			{
-				getVision(player, this->map.getTile(x - Constants::sightValue + 1, i));
+				getVision(player, this->map.getTile(x - Config::sightValue + 1, i));
 			}
 			break;
 		case Map::MOVEDIR::RIGHT:
-			for (int i = y - Constants::sightValue; i <= y + Constants::sightValue; i++)
+			for (int i = y - Config::sightValue; i <= y + Config::sightValue; i++)
 			{
-				getVision(player, this->map.getTile(x + Constants::sightValue - 1, i));
+				getVision(player, this->map.getTile(x + Config::sightValue - 1, i));
 			}
 			break;
 		}
@@ -384,28 +384,28 @@ public:
 
 	void killCountEvent(std::shared_ptr<PlayerObject> receiver, std::shared_ptr<PlayerObject> player)
 	{
-		output.addEventKillCount(Constants::SERVER_ID, receiver->getPlayerID(), player->getName(), player->getKillCount());
+		output.addEventKillCount(Config::SERVER_ID, receiver->getPlayerID(), player->getName(), player->getKillCount());
 	}
 
 	void killCountEvent(std::shared_ptr<PlayerObject> player)
 	{
 		for (auto _player : this->gamePlayerList)
-			output.addEventKillCount(Constants::SERVER_ID, _player->getPlayerID(), player->getName(), player->getKillCount());
+			output.addEventKillCount(Config::SERVER_ID, _player->getPlayerID(), player->getName(), player->getKillCount());
 	}
 	void allKillCountsEvent(std::shared_ptr<PlayerObject> player)
 	{
 		for (auto _player : this->gamePlayerList)
-			output.addEventKillCount(Constants::SERVER_ID, player->getPlayerID(), _player->getName(), _player->getKillCount());
+			output.addEventKillCount(Config::SERVER_ID, player->getPlayerID(), _player->getName(), _player->getKillCount());
 	}
 	void deathCountEvent(std::shared_ptr<PlayerObject> player)
 	{
 		for (auto _player : this->gamePlayerList)
-			output.addEventDeathCount(Constants::SERVER_ID, _player->getPlayerID(), player->getName(), player->getDeathCount());
+			output.addEventDeathCount(Config::SERVER_ID, _player->getPlayerID(), player->getName(), player->getDeathCount());
 	}
 	void allDeathCountsEvent(std::shared_ptr<PlayerObject> player)
 	{
 		for (auto _player : this->gamePlayerList)
-			output.addEventDeathCount(Constants::SERVER_ID, player->getPlayerID(), _player->getName(), _player->getDeathCount());
+			output.addEventDeathCount(Config::SERVER_ID, player->getPlayerID(), _player->getName(), _player->getDeathCount());
 	}
 	void addPlayerSpawnToTick(std::shared_ptr<PlayerObject> player)
 	{
@@ -447,12 +447,12 @@ public:
 		switch (item->getType())
 		{
 		case SpawnableObjectType::BODY:
-			this->damagePlayer(player, Constants::bodyHeal * -1);
+			this->damagePlayer(player, Config::bodyHeal * -1);
 			item->despawn();
 			break;
 		case SpawnableObjectType::ITEM_SWORD:
 			this->pickupEvent(player, item);
-			player->setDamage(Constants::defaultDmg + 2);
+			player->setDamage(Config::defaultDmg + 2);
 			player->addItem((int) item->getType());
 			item->despawn();
 			break;
@@ -462,12 +462,12 @@ public:
 			break;
 		case SpawnableObjectType::ITEM_SHIELD:
 			this->pickupEvent(player, item);
-			player->setMaxHealth(player->getMaxHealth + 5);
+			player->setMaxHealth(player->getMaxHealth() + 5);
 			this->damagePlayer(player, -5);
 			item->despawn();
 			break;
 		case SpawnableObjectType::ITEM_BOOTS:
-			this->damagePlayer(player, Constants::bodyHeal * -1);
+			this->damagePlayer(player, Config::bodyHeal * -1);
 			item->despawn();
 			break;
 		default:
@@ -485,7 +485,7 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (this->map.checkRange(obj->getTile(), player->getTile()))
-				output.addEventMovement(Constants::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY());
+				output.addEventMovement(Config::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY());
 		}
 	}
 	void moveOutEvent(std::shared_ptr<Tile> oldTile, std::shared_ptr<PlayerObject> obj)
@@ -493,13 +493,13 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (this->map.checkRange(oldTile, player->getTile()) && !this->map.checkRange(obj->getTile(), player->getTile()))
-				output.addEventMovedOut(Constants::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY());
+				output.addEventMovedOut(Config::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY());
 		}
 	}
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<PlayerObject> object)
 	{
 		if (player->getPlayerID() != object->getPlayerID()) 
-			output.addEventPlayerSpawn(Constants::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
+			output.addEventPlayerSpawn(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
 	}
 
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject> object)
@@ -508,13 +508,13 @@ public:
 		{
 			if (player->getPlayerID() != object->getPlayerID())
 				if (this->map.checkRange(object->getTile(), player->getTile()))
-					output.addEventPlayerSpawn(Constants::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
+					output.addEventPlayerSpawn(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
 		}
 	}
 
 	void spawnEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<SpawnableObject> object)
 	{
-		output.addEventSpawn(Constants::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
+		output.addEventSpawn(Config::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
 	}
 
 	void spawnEvent(std::shared_ptr<ItemObject> object)
@@ -522,19 +522,19 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (this->map.checkRange(object->getTile(), player->getTile()))
-				output.addEventSpawn(Constants::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
+				output.addEventSpawn(Config::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
 	}
 
 	void respawnEvent(std::shared_ptr<PlayerObject> object)
 	{
-		output.addEventRespawn(Constants::SERVER_ID, object->getPlayerID(), object->getX(), object->getY());
+		output.addEventRespawn(Config::SERVER_ID, object->getPlayerID(), object->getX(), object->getY());
 
 	}
 
 	void respawnAskEvent(std::shared_ptr<PlayerObject> object)
 	{
-		output.addEventAskRespawn(Constants::SERVER_ID, object->getPlayerID(), object->getX(), object->getY());
+		output.addEventAskRespawn(Config::SERVER_ID, object->getPlayerID(), object->getX(), object->getY());
 		Logger::log("Respawn ask event added");
 	}
 
@@ -543,7 +543,7 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (this->map.checkRange(object->getTile(), player->getTile()))
-				output.addEventDespawn(Constants::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
+				output.addEventDespawn(Config::SERVER_ID, player->getPlayerID(), (int)object->getType(), object->getX(), object->getY());
 		}
 	}
 
@@ -552,7 +552,7 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (this->map.checkRange(object->getTile(), player->getTile()))
-				output.addEventDespawnPlayer(Constants::SERVER_ID, player->getPlayerID(), player->getName(), object->getX(), object->getY());
+				output.addEventDespawnPlayer(Config::SERVER_ID, player->getPlayerID(), player->getName(), object->getX(), object->getY());
 		}
 	}
 
@@ -561,7 +561,7 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (this->map.checkRange(obj->getTile(), player->getTile()))
-				output.addEventAttack(Constants::SERVER_ID, player->getPlayerID(), obj->getName());
+				output.addEventAttack(Config::SERVER_ID, player->getPlayerID(), obj->getName());
 		}
 	}
 	void hitEvent(std::shared_ptr<PlayerObject> obj, int dmg)
@@ -569,21 +569,21 @@ public:
 		for (auto player : gamePlayerList)
 		{
 			if (this->map.checkRange(obj->getTile(), player->getTile()))
-				output.addEventHit(Constants::SERVER_ID, player->getPlayerID(), obj->getName(), dmg);
+				output.addEventHit(Config::SERVER_ID, player->getPlayerID(), obj->getName(), dmg);
 		}
 	}
 	void damageEvent(std::shared_ptr<PlayerObject> player, int newHealth)
 	{
-		output.addEventDamaged(Constants::SERVER_ID, player->getPlayerID(), newHealth);
+		output.addEventDamaged(Config::SERVER_ID, player->getPlayerID(), newHealth);
 	}
 
 	void pickupEvent(std::shared_ptr<PlayerObject> player, std::shared_ptr<SpawnableObject> object)
 	{
-		output.addEventPickUp(Constants::SERVER_ID, player->getPlayerID(), (int) object->getType());
+		output.addEventPickUp(Config::SERVER_ID, player->getPlayerID(), (int) object->getType());
 	}
 	void pickupEvent(std::shared_ptr<PlayerObject> player, int itemType)
 	{
-		output.addEventPickUp(Constants::SERVER_ID, player->getPlayerID(), itemType);
+		output.addEventPickUp(Config::SERVER_ID, player->getPlayerID(), itemType);
 	}
 	void handleRespawn(Parser::Event ev)
 	{
@@ -612,10 +612,10 @@ public:
 
 	void getFullVision(std::shared_ptr<PlayerObject> player)
 	{
-		int x1 = player->getX() - Constants::sightValue;
-		int y1 = player->getY() - Constants::sightValue;
-		int x2 = player->getX() + Constants::sightValue;
-		int y2 = player->getY() + Constants::sightValue;
+		int x1 = player->getX() - Config::sightValue;
+		int y1 = player->getY() - Config::sightValue;
+		int x2 = player->getX() + Config::sightValue;
+		int y2 = player->getY() + Config::sightValue;
 		for (int i = x1; i <= x2; i++)
 			for (int j = y1; j <= y2; j++)
 				this->getVision(player, this->map.getTile(i, j));

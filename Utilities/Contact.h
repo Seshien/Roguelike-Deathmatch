@@ -3,7 +3,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include "Constants.h"
+#include "Config.h"
 class Contact
 {
 public:

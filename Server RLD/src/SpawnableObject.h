@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "..\..\Utilities\Constants.h"
+#include "..\..\Utilities\Config.h"
 #include "Tile.h"
 
 enum class SpawnableObjectType {

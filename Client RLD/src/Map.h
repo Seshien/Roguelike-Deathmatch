@@ -2,7 +2,7 @@
 #include <array>
 #include <SFML/Graphics.hpp>
 #include "../../Utilities/Logger.h"
-#include "../../Utilities/Constants.h"
+#include "../../Utilities/Config.h"
 #include "Tile.h"
 #include <fstream>
 
@@ -48,7 +48,7 @@ public:
 	void drawMap(sf::RenderWindow& window) {
 		for (int j = 0; j <this->MAP_HEIGHT; j++) {
 			for (int i = 0; i < this->MAP_WIDTH; i++) {
-				this->tileArray[i][j]->draw(window, i * Constants::SPRITE_WIDTH, j * Constants::SPRITE_HEIGHT);
+				this->tileArray[i][j]->draw(window, i * Config::SPRITE_WIDTH, j * Config::SPRITE_HEIGHT);
 			}
 		}
 	}

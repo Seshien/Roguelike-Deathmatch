@@ -44,7 +44,7 @@ public:
 	}
 
 	std::shared_ptr<Tile> getTile(int x, int y);
-	bool checkRange(std::shared_ptr<Tile> objectF, std::shared_ptr<Tile> objectS, int range = Constants::sightValue);
+	bool checkRange(std::shared_ptr<Tile> objectF, std::shared_ptr<Tile> objectS, int range = Config::sightValue);
 	
 	std::array<std::array<std::shared_ptr<Tile>, MAP_HEIGHT>, MAP_WIDTH> tileArray;
 	std::vector<SpawnableObject> upperLayer;

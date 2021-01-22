@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "..\..\Utilities\Constants.h"
+#include "..\..\Utilities\Config.h"
 
 enum class ItemType { BOOTS = 17, POTION, SHIELD, BONES, SWORD };
 

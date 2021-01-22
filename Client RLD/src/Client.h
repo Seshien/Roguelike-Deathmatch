@@ -1,17 +1,18 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <stdlib.h>
 #include <SFML/Graphics.hpp>
 #include "..\..\Utilities\Event.h"
 #include "..\..\Utilities\Network.h"
 #include "..\..\Utilities\Parser.h"
 #include "..\..\Utilities\Logger.h"
-#include "..\..\Utilities\Constants.h"
+#include "..\..\Utilities\Config.h"
 #include "Map.h"
 #include "Item.h"
 #include "PlayerInfo.h"
 #include "OurPlayerInfo.h"
-#include <stdlib.h>
+
 
 #include "UIButton.h"
 #include "UIBar.h"
@@ -47,13 +48,12 @@ private:
 	sf::View gameView;
 	sf::View lobbyView;
 	sf::View interfaceView;
-
 	sf::Font font;
 
 	int numVotes;
+	std::string playerName="DefaultName";
 
 	int ID;
-	int time;
 	int mapID;
 
 	int health;
@@ -62,12 +62,8 @@ private:
 	ConnectionState cState;
 	GameStage gameStage;
 
-	std::string confName = "./data/config.txt";
-	std::string playerName = "Player";
 	std::vector<std::string> playerList;
 
-	std::string port = "7777";
-	std::string IpAddress = "127.0.0.1";
 	Network network;
 
 	//std::array<sf::Texture, 16> tileTextures;
@@ -114,11 +110,6 @@ private:
 	void handleTimeout(Parser::Event ev);
 	void handleDisconnectPlayer(Parser::Event ev);
 	void handleLostConnection(Parser::Event ev);
-	void loadConfig();
-
-	void processConfigLine(std::string line);
-
-	void setConfigValue(std::string token, std::string value);
 
 	void loadTileTextures();
 	void loadPlayerTextures();

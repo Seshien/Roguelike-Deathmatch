@@ -46,7 +46,7 @@ void PlayerInfo::draw(sf::RenderWindow& window) {
 	if (this->isAlive) {
 		std::string facing = this->getFacing();
 		//Logger::log("Drawing character");
-		this->sprite.setPosition(this->realXPos * Constants::SPRITE_WIDTH, this->realYPos * Constants::SPRITE_HEIGHT);
+		this->sprite.setPosition(this->realXPos * Config::SPRITE_WIDTH, this->realYPos * Config::SPRITE_HEIGHT);
 		if (facing == "down") {
 			this->sprite.setTexture(*(this->textureSet[0]));
 		}

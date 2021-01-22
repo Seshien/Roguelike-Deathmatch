@@ -495,9 +495,9 @@ void Network::readFromClient(int index)
 
 void Network::readFromClient(Contact* client)
 {
-	char bufferTemp[Constants::bufferLength];
+	char bufferTemp[Config::bufferLength];
 	//nie znamy jeszcze dlugosci wiadomosci
-	int limit = max(Constants::msgLengthLimit, client->msgExpectedLenght);
+	int limit = max(Config::msgLengthLimit, client->msgExpectedLenght);
 
 	//odbieranie wiadomosci
 	Logger::debug("Receiving message");
@@ -659,7 +659,7 @@ void Network::increaseTimeout()
 	for (size_t i = 0; i < this->clientList.size(); i++)
 	{
 		clientList[i].timeoutTimer++;
-		if (clientList[i].timeoutTimer > Constants::timeoutValue)
+		if (clientList[i].timeoutTimer > Config::timeoutValue)
 		{
 			Logger::debug("Network Event: Player " + std::to_string(clientList[i].playerId) + " reached timeout time");
 			this->input.addEventTimeoutReached(clientList[i].playerId, 0);

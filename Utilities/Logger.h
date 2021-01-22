@@ -5,12 +5,12 @@
 #include <filesystem>
 #include <winsock2.h>
 
+
 #include "Event.h"
-#include"Constants.h"
 
 namespace Logger
 {
-	void startLogger(std::string name, int logLevel = Constants::debug);
+	void startLogger(std::string name, int logLevel);
 
 	void endLogger();
 

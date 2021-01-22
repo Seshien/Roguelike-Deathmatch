@@ -4,11 +4,12 @@ void Client::startClient()
 {
 	this->voted = false;
 	this->currentTextureSet = 0;
-	this->health = Constants::defaultHealth;
-	this->maxHealth = Constants::defaultHealth;
+	this->health = Config::defaultHealth;
+	this->maxHealth = Config::defaultHealth;
 
 	this->startLogger();
-	this->loadConfig();
+	Config::loadConfig();
+	this->playerName = Config::playerName;
 
 	this->font.loadFromFile("data/arial2.ttf");
 
@@ -26,10 +27,10 @@ void Client::startClient()
 
 void Client::startWindow()
 {
-	window.create(sf::VideoMode(Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT), "Roguelike Deathmatch");
+	window.create(sf::VideoMode(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT), "Roguelike Deathmatch");
 	window.setFramerateLimit(60);
 	// Initialize the view to a rectangle located at (100, 100) and with a size of 400x200
-	gameView.reset(sf::FloatRect(0, 0, Constants::GAME_SCREEN_WIDTH, Constants::GAME_SCREEN_HEIGHT));
+	gameView.reset(sf::FloatRect(0, 0, Config::GAME_SCREEN_WIDTH, Config::GAME_SCREEN_HEIGHT));
 	lobbyView.reset(sf::FloatRect(0, 0, 192, 576));
 	interfaceView.reset(sf::FloatRect(0, 0, 960, 144));
 
@@ -64,11 +65,11 @@ void Client::connectClient()
 	playerList.clear();
 	this->ID = -1;
 	//probujemy rozpoczac polaczenie
-	if (network.startClient(this->IpAddress, this->port) == 0)
+	if (network.startClient(Config::IPAddress, Config::port) == 0)
 	{
 		this->cState = ConnectionState::CONNECTED;
 		Logger::log("Connecting to server succeed");
-		output.addEventNewPlayer(ID, Constants::SERVER_ID, playerName);
+		output.addEventNewPlayer(ID, Config::SERVER_ID, Config::playerName);
 	}
 	else
 	{
@@ -83,8 +84,8 @@ void Client::mainLoop()
 		//odbieranie wiadomosci
 		auto time = this->turnTimer.getElapsedTime().asSeconds();
 		double wait = 0;
-		if (time <= Constants::clientTurnTimer)
-			wait = Constants::clientTurnTimer - time;
+		if (time <= Config::clientTurnTimer)
+			wait = Config::clientTurnTimer - time;
 
 		if (cState == ConnectionState::CONNECTED)
 			this->input = this->network.inputNetwork(wait);
@@ -109,14 +110,14 @@ void Client::mainLoop()
 }
 
 void Client::centerMap() {
-	int x = this->xOurPos * Constants::SPRITE_WIDTH;
-	int y = this->yOurPos * Constants::SPRITE_HEIGHT;
-	if (x <= Constants::GAME_SCREEN_WIDTH / 2) x = Constants::GAME_SCREEN_WIDTH / 2;
-	if (y <= Constants::GAME_SCREEN_WIDTH / 2) y = Constants::GAME_SCREEN_HEIGHT / 2;
-	if (x > this->map.MAP_WIDTH* Constants::SPRITE_WIDTH - Constants::GAME_SCREEN_WIDTH / 2) 
-		x = this->map.MAP_WIDTH * Constants::SPRITE_WIDTH - Constants::GAME_SCREEN_WIDTH / 2;
-	if (y > this->map.MAP_HEIGHT* Constants::SPRITE_HEIGHT - Constants::GAME_SCREEN_HEIGHT / 2)
-		y = this->map.MAP_HEIGHT * Constants::SPRITE_HEIGHT - Constants::GAME_SCREEN_HEIGHT / 2;
+	int x = this->xOurPos * Config::SPRITE_WIDTH;
+	int y = this->yOurPos * Config::SPRITE_HEIGHT;
+	if (x <= Config::GAME_SCREEN_WIDTH / 2) x = Config::GAME_SCREEN_WIDTH / 2;
+	if (y <= Config::GAME_SCREEN_WIDTH / 2) y = Config::GAME_SCREEN_HEIGHT / 2;
+	if (x > this->map.MAP_WIDTH* Config::SPRITE_WIDTH - Config::GAME_SCREEN_WIDTH / 2) 
+		x = this->map.MAP_WIDTH * Config::SPRITE_WIDTH - Config::GAME_SCREEN_WIDTH / 2;
+	if (y > this->map.MAP_HEIGHT* Config::SPRITE_HEIGHT - Config::GAME_SCREEN_HEIGHT / 2)
+		y = this->map.MAP_HEIGHT * Config::SPRITE_HEIGHT - Config::GAME_SCREEN_HEIGHT / 2;
 	gameView.setCenter(x, y);
 }
 
@@ -137,8 +138,8 @@ void Client::graphicsUpdate() {
 		fog.setTexture(this->fogTexture);
 		for (int i = 0; i < this->map.MAP_WIDTH; i++) {
 			for (int j = 0; j < this->map.MAP_HEIGHT; j++) {
-				if (i <= this->xOurPos - Constants::sightValue || i >= this->xOurPos + Constants::sightValue || j <= this->yOurPos - Constants::sightValue || j >= this->yOurPos + Constants::sightValue) {
-					fog.setPosition(i * Constants::SPRITE_WIDTH, j * Constants::SPRITE_HEIGHT);
+				if (i <= this->xOurPos - Config::sightValue || i >= this->xOurPos + Config::sightValue || j <= this->yOurPos - Config::sightValue || j >= this->yOurPos + Config::sightValue) {
+					fog.setPosition(i * Config::SPRITE_WIDTH, j * Config::SPRITE_HEIGHT);
 					window.draw(fog);
 				}
 			}
@@ -161,7 +162,7 @@ void Client::graphicsUpdate() {
 		hpBar.changeVisibility(true);
 		hpBar.draw(window);
 		for (int i = 0; i < this->items.size(); i++) {
-			this->items[i]->drawInPocket(window, 330 + (i * (Constants::SPRITE_WIDTH + 5)), 65);
+			this->items[i]->drawInPocket(window, 330 + (i * (Config::SPRITE_WIDTH + 5)), 65);
 		}
 	}
 
@@ -214,35 +215,35 @@ void Client::handleIntEvents()
 			if (event.key.code == sf::Keyboard::Left)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(this->ID, Constants::SERVER_ID, 'A');
+					output.addEventKeyInput(this->ID, Config::SERVER_ID, 'A');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Right)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(this->ID, Constants::SERVER_ID, 'D');
+					output.addEventKeyInput(this->ID, Config::SERVER_ID, 'D');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Up)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(this->ID, Constants::SERVER_ID, 'W');
+					output.addEventKeyInput(this->ID, Config::SERVER_ID, 'W');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Down)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(this->ID, Constants::SERVER_ID, 'S');
+					output.addEventKeyInput(this->ID, Config::SERVER_ID, 'S');
 				else
 					Logger::log("You are not alive");
 			}
 			if (event.key.code == sf::Keyboard::Space)
 			{
 				if (this->gameStage == GameStage::ALIVE)
-					output.addEventKeyInput(this->ID, Constants::SERVER_ID, ' ');
+					output.addEventKeyInput(this->ID, Config::SERVER_ID, ' ');
 				else
 					Logger::log("You are not alive");
 			}
@@ -253,14 +254,14 @@ void Client::handleIntEvents()
 		{
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
-				if (getIn.isClickInBounds(event.mouseButton.x - Constants::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+				if (getIn.isClickInBounds(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
 					this->connectClient();
 					getIn.changeVisibility(false);
 					vote.changeVisibility(true);
 					Logger::log("Get in button clicked!");
 				}
-				else if (vote.isClickInBounds(event.mouseButton.x - Constants::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
-					output.addEventVote(this->ID, Constants::SERVER_ID);
+				else if (vote.isClickInBounds(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+					output.addEventVote(this->ID, Config::SERVER_ID);
 					this->voted = !this->voted;
 					Logger::log("Vote button clicked!");
 					if (this->voted)
@@ -268,10 +269,10 @@ void Client::handleIntEvents()
 					else
 						vote.setText("Vote");
 				}
-				else if (respawn.isClickInBounds(event.mouseButton.x - Constants::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+				else if (respawn.isClickInBounds(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
 					Logger::log("Respawn button clicked!");
 					respawn.changeVisibility(false);
-					this->output.addEventWillToRespawn(this->ID, Constants::SERVER_ID);
+					this->output.addEventWillToRespawn(this->ID, Config::SERVER_ID);
 				}
 				//std::cout << "the right button was pressed" << std::endl;
 				//std::cout << "mouse x: " << event.mouseButton.x << std::endl;
@@ -401,7 +402,7 @@ void Client::handleGame(Parser::Event ev)
 				}
 					for (int j = 0; j < this->playerInfos.size(); j++) {
 						Logger::log("Our player found.");
-						if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Constants::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Constants::sightValue) {
+						if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Config::sightValue) {
 							this->playerInfos[j]->setIsAlive(false);
 							Logger::log("Player moved out from another player");
 						}
@@ -614,7 +615,7 @@ void Client::handleDisconnectPlayer(Parser::Event ev)
 
 void Client::handleLostConnection(Parser::Event ev)
 {
-	this->output.addInnerDiscPlayer(Constants::SERVER_ID, this->ID);
+	this->output.addInnerDiscPlayer(Config::SERVER_ID, this->ID);
 	this->cState = ConnectionState::FAILED;
 	this->gameStage = GameStage::NOTJOINED;
 }
@@ -626,53 +627,7 @@ void Client::handleTimeout(Parser::Event ev)
 
 void Client::startLogger()
 {
-	Logger::startLogger("Client");
-}
-
-void Client::loadConfig()
-{
-	std::fstream file;
-	std::string line;
-	file.open(this->confName);
-	if (file.is_open())
-	{
-		Logger::log("Config file opened:");
-		while (std::getline(file, line))
-		{
-			Logger::log(line);
-			this->processConfigLine(line);
-		}
-	}
-
-	else
-	{
-		Logger::log("Config file not found");
-	}
-	file.close();
-}
-
-void Client::processConfigLine(std::string line)
-{
-	std::string delimiter = "=";
-	int pos = line.find(delimiter);
-	if (pos == -1)
-	{
-		Logger::log("Error during parsing of config file");
-		return;
-	}
-	std::string token = line.substr(0, pos);
-	std::string value = line.substr(pos + 1, line.length() - 1);
-	Logger::log("Token: " + token + " Value: " + value);
-	this->setConfigValue(token, value);
-	return;
-}
-
-void Client::setConfigValue(std::string token, std::string value)
-{
-	if (token == "player_name") this->playerName = value;
-	else if (token == "IP") this->IpAddress = value;
-	else if (token == "port") this->port = value;
-	else Logger::log("Unknown line in config file");
+	Logger::startLogger("Client", Config::debug);
 }
 
 void Client::loadUITextures() {

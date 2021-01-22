@@ -14,10 +14,10 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 	this->occupiedTile = tile;
 	this->occupiedTile->setSpawn(false);
 	this->occupiedTile->setMove(false);
-	this->health = Constants::defaultHealth;
-	this->maxHealth = Constants::defaultHealth;
-	this->dmg = Constants::defaultDmg;
-	this->attackRange = Constants::attackRange;
+	this->health = Config::defaultHealth;
+	this->maxHealth = Config::defaultHealth;
+	this->dmg = Config::defaultDmg;
+	this->attackRange = Config::attackRange;
 	this->readyToRespawn = false;
 	this->deathCount = 0;
 	this->killCount = 0;
@@ -51,10 +51,10 @@ void PlayerObject::spawn()
 	this->occupiedTile->setPlayerID(this->playerID);
 	this->occupiedTile->setMove(false);
 
-	this->health = Constants::defaultHealth;
-	this->maxHealth = Constants::defaultHealth;
-	this->dmg = Constants::defaultDmg;
-	this->attackRange = Constants::attackRange;
+	this->health = Config::defaultHealth;
+	this->maxHealth = Config::defaultHealth;
+	this->dmg = Config::defaultDmg;
+	this->attackRange = Config::attackRange;
 	this->items.clear();
 	this->readyToRespawn = false;
 	this->cooldownTimer = 0;

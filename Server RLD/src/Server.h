@@ -12,6 +12,7 @@
 #include "..\..\Utilities\Logger.h"
 #include "..\..\Utilities\Network.h"
 #include "..\..\Utilities\Constants.h"
+#include "..\..\Utilities\Config.h"
 
 enum class GameState { LOBBY, GAME_MID, GAME_END };
 enum class StateChange { NONE, VOTE_END, GAME_END };
@@ -31,10 +32,10 @@ class Server
 		void StartServer()
 		{
 			startLogger();
-			loadConfig();
+			Config::loadConfig();
 			startMap();
 
-			if (network.startServer(this->port))
+			if (network.startServer(Config::port))
 			{
 				Logger::log("Server network start failed. Closing server.");
 				return;
@@ -86,9 +87,6 @@ class Server
 
 		void handleVote(Parser::Event ev);
 
-		void loadConfig();
-
-		void processConfigLine(std::string line);
 
 		int getPlayerCount();
 		int getPlayerCount(Player::State state);
@@ -104,17 +102,10 @@ class Server
 		Player * getPlayer(int playerID);
 
 
-		void setConfigValue(std::string token, std::string value);
-		std::string confName = "./data/config.txt";
-		std::string mapPath = "./data/world0.txt";
-		std::string port = "7777";
-
-		int mapID = 0;
 		int gameTickTimer = 0;
 		Network network;
 		Game game;
 
-		int time;
 		int numOfVotes;
 		int activePlayerCount;
 		StateChange stateChange;

@@ -2,14 +2,14 @@
 
 void Server::startLogger()
 {
-	Logger::startLogger("Server");
+	Logger::startLogger("Server", Config::debug);
 }
 
 // void GenerateMap();
 
 void Server::startMap()
 {
-	this->game.startMap("data/map/map" + std::to_string(this->mapID) + ".txt");
+	this->game.startMap("data/map/map" + std::to_string(Config::mapID) + ".txt");
 }
 
 void Server::mainLoop()
@@ -20,8 +20,8 @@ void Server::mainLoop()
 		auto temp = std::chrono::duration_cast<
 			std::chrono::duration<double>>(std::chrono::system_clock::now() - this->turntimer);
 		double wait = 0;
-		if (temp.count() <= Constants::serverTurnTimer)
-			wait = Constants::serverTurnTimer - temp.count();
+		if (temp.count() <= Config::serverTurnTimer)
+			wait = Config::serverTurnTimer - temp.count();
 
 		//odbieranie wiadomosci
 		this->input = this->network.inputNetwork(wait);
@@ -34,7 +34,7 @@ void Server::mainLoop()
 		//
 		if (this->gameState == GameState::GAME_MID)
 		{
-			if (this->gameTickTimer < Constants::gameTickRate)
+			if (this->gameTickTimer < Config::gameTickRate)
 			{
 				gameTickTimer++;
 			}
@@ -131,7 +131,7 @@ void Server::handleLobby(Parser::Event ev)
 void Server::handleGame(Parser::Event ev)
 {
 	for (auto it = begin(this->gameInput.eventList); it != end(this->gameInput.eventList);) {
-		if (it->sender == ev.sender && ev.sender != Constants::SERVER_ID)
+		if (it->sender == ev.sender && ev.sender != Config::SERVER_ID)
 		{
 			it = gameInput.eventList.erase(it);
 			break;
@@ -170,7 +170,7 @@ void Server::handleStateChange()
 		}
 		for (auto player : this->activePlayerList)
 		{
-			output.addEventMidGame(Constants::SERVER_ID, player->playerID, this->getCurrentGameTime());
+			output.addEventMidGame(Config::SERVER_ID, player->playerID, this->getCurrentGameTime());
 		}
 		this->game.startGame(playerIDs, playerNames);
 		this->stateChange = StateChange::NONE;
@@ -215,7 +215,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 			else
 			{
 				//odrzucamy gracza, bo juz taki istnieje
-				output.addEventInitPlayer(Constants::SERVER_ID, ev.sender, -1);
+				output.addEventInitPlayer(Config::SERVER_ID, ev.sender, -1);
 				return;
 			}
 		}
@@ -229,9 +229,9 @@ void Server::handleNewPlayer(Parser::Event ev)
 	}
 	this->refreshActivePlayerList();
 	//tworzymy Event wewnetrzny ktory mowi network o tym ze trzeba zmienic id na playerID, network potem przekazuje to dalej
-	output.addInnerInitPlayer(ev.sender, Constants::SERVER_ID, playerID);
+	output.addInnerInitPlayer(ev.sender, Config::SERVER_ID, playerID);
 
-	output.addEventInitPlayer(Constants::SERVER_ID, playerID, playerID);
+	output.addEventInitPlayer(Config::SERVER_ID, playerID, playerID);
 
 	//teraz powinnismy podac info o tej grze Playerowi
 	this->InfoDump(playerID);
@@ -240,7 +240,7 @@ void Server::handleNewPlayer(Parser::Event ev)
 	for (auto player_ : this->activePlayerList)
 	{
 		if (player_->playerID == playerID) continue;
-		output.addEventNewPlayer(Constants::SERVER_ID, player_->playerID, playerName);
+		output.addEventNewPlayer(Config::SERVER_ID, player_->playerID, playerName);
 	}
 
 }
@@ -256,7 +256,7 @@ void Server::handleDisconnect(int playerID)
 	//to znaczy ze to nie jest zalogowany gracz, tylko ktos kto probowal wejsc i mu sie nie udalo
 	if (playerID < 0)
 	{
-		output.addInnerDiscPlayer(playerID, Constants::SERVER_ID);
+		output.addInnerDiscPlayer(playerID, Config::SERVER_ID);
 		return;
 	}
 
@@ -273,7 +273,7 @@ void Server::handleDisconnect(int playerID)
 	// TODO
 
 	//powiadomienie networka o usunieciu tego gracza
-	output.addInnerDiscPlayer(playerID, Constants::SERVER_ID);
+	output.addInnerDiscPlayer(playerID, Config::SERVER_ID);
 
 	//powiadomienie innych graczy o zniknieciu tego gracza
 	for (auto player_ : this->activePlayerList)
@@ -297,7 +297,7 @@ void Server::handleTimeout(Parser::Event ev)
 	}
 	else
 	{
-		output.addEventTimeoutReached(Constants::SERVER_ID, player->playerID);
+		output.addEventTimeoutReached(Config::SERVER_ID, player->playerID);
 	}
 
 }
@@ -334,7 +334,7 @@ void Server::handleVote(Parser::Event ev)
 	}
 	Logger::debug("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
 	for (auto player : this->activePlayerList)
-		output.addEventVote(Constants::SERVER_ID, player->playerID, numOfVotes);
+		output.addEventVote(Config::SERVER_ID, player->playerID, numOfVotes);
 	if (this->activePlayerCount >= 1 && this->numOfVotes >= this->activePlayerCount / 2)
 	{
 		this->stateChange = StateChange::VOTE_END;
@@ -355,7 +355,7 @@ void Server::InfoDump(int playerId)
 	// Wysylamy graczowi nazwy wszystkich pozostalych graczy w przypadku dolaczenia do gry
 	for (auto player : this->activePlayerList) {
 		if (player->playerID != playerId) {
-			output.addEventNewPlayer(Constants::SERVER_ID, playerId, player->name);
+			output.addEventNewPlayer(Config::SERVER_ID, playerId, player->name);
 		}
 	}
 	auto newPlayer = this->getPlayer(playerId);
@@ -364,75 +364,25 @@ void Server::InfoDump(int playerId)
 		Logger::error("Error: New player was not found");
 	}
 	// Wysylamy ID mapy w kazdym wypadku niezaleznie od stanu gry
-	output.addEventMapID(Constants::SERVER_ID, playerId, this->mapID);
+	output.addEventMapID(Config::SERVER_ID, playerId, Config::mapID);
 
 	// Wiadomosci zalezne od stanu gry
 	switch (gameState) {
 	case GameState::LOBBY:
-		output.addEventLobby(Constants::SERVER_ID, playerId, numOfVotes);
+		output.addEventLobby(Config::SERVER_ID, playerId, numOfVotes);
 		break;
 	case GameState::GAME_MID:
 		// Wysylamy fakt, ze jest w grze oraz czas trwania danej gry. (za pomoca subType?)
-		output.addEventMidGame(Constants::SERVER_ID, playerId, getCurrentGameTime());
-		gameInput.addEvent(Constants::SERVER_ID, playerId, Parser::Type::GAME, Parser::SubType::NEWPLAYER, newPlayer->name);
+		output.addEventMidGame(Config::SERVER_ID, playerId, getCurrentGameTime());
+		gameInput.addEvent(Config::SERVER_ID, playerId, Parser::Type::GAME, Parser::SubType::NEWPLAYER, newPlayer->name);
 
 		break;
 	case GameState::GAME_END:
 		// wysylamy wyniki wszystkich graczy (nazwy juz dostanie)
-		output.addEventGameEnd(Constants::SERVER_ID, playerId, getResults());
+		output.addEventGameEnd(Config::SERVER_ID, playerId, getResults());
 		break;
 	}
 	//output.addEvent(SERVER_ID, playerId, Parser::SERVER, Parser::INFODUMP, subdata);
-}
-
-
-void Server::loadConfig()
-{
-	std::fstream file;
-	std::string line;
-	file.open(this->confName);
-	if (file.is_open())
-	{
-		Logger::log("Config file opened:");
-		while (std::getline(file, line))
-		{
-			Logger::log(line);
-			this->processConfigLine(line);
-		}
-	}
-
-	else
-	{
-		Logger::log("Config file not found");
-		Logger::log("Creating default config file TODO");
-		//something something
-
-	}
-	file.close();
-}
-
-void Server::processConfigLine(std::string line)
-{
-	std::string delimiter = ":";
-	int pos = line.find(delimiter);
-	if (pos == -1)
-	{
-		Logger::error("Error during parsing of config file");
-		return;
-	}
-	std::string token = line.substr(0, pos);
-	std::string value = line.substr(pos + 1, line.length() - 1);
-	Logger::debug("Token: " + token + " Value: " + value);
-	this->setConfigValue(token, value);
-	return;
-}
-
-void Server::setConfigValue(std::string token, std::string value)
-{
-	if (token == "time") this->time = std::stoi(value);
-	else if (token == "special") return;
-	else if (token == "port") this->port = value;
-	else Logger::debug("Unknown line in config file");
 }
 
 Player * Server::getPlayer(int playerID)

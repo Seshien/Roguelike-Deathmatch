@@ -156,6 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Utilities\Config.cpp" />
     <ClCompile Include="..\Utilities\Contact.cpp" />
     <ClCompile Include="..\Utilities\Event.cpp" />
     <ClCompile Include="..\Utilities\Logger.cpp" />
@@ -172,7 +173,7 @@
     <ClCompile Include="src\Tile.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Utilities\Constants.h" />
+    <ClInclude Include="..\Utilities\Config.h" />
     <ClInclude Include="..\Utilities\Contact.h" />
     <ClInclude Include="..\Utilities\Event.h" />
     <ClInclude Include="..\Utilities\Logger.h" />
