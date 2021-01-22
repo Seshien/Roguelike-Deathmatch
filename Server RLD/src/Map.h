@@ -8,8 +8,8 @@
 class Map
 {
 public:
-	static const int MAP_HEIGHT = 100;
-	static const int MAP_WIDTH = 100;
+	static const int MAP_HEIGHT = 50;
+	static const int MAP_WIDTH = 50;
 	
 public:
 	Map()
@@ -17,18 +17,28 @@ public:
 	}
 	void init(std::string path)
 	{
-		loadFromFile(path);
+		loadFromFile(std::string("data/map1.txt"));
 	}
 	void loadFromFile(std::string path)
 	{
-		Logger::log("Creating dummy map started");
-		for (int i = 0;i < MAP_HEIGHT;i++)
-			for (int j = 0;j < MAP_WIDTH; j++)
-			{
-				tileArray[j][i] = std::make_shared<Tile>(TileType::GROUND, j, i);
+		Logger::log("Loading map from file");
+		std::fstream file;
+		std::string line;
+		file.open(path);
+		int j = 0;
+		if (file.is_open()) {
+			while (std::getline(file, line)) {
+				for (int i = 0; i < line.size(); i += 2) {
+					tileArray[i / 2][j] = std::make_shared<Tile>((TileType)(line[i] - 'A'), i/2 , j);
+				}
+				j++;
 			}
-		Logger::log("Creating dummy map completed");
-		return;
+			Logger::log("Map loading completed!");
+		}
+		else {
+			Logger::log("Error. Map with filename " + path + "not found!");
+		}
+		file.close();
 	}
 	
 	std::array<std::array<std::shared_ptr<Tile>, MAP_HEIGHT>, MAP_WIDTH> tileArray;
