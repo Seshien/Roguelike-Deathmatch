@@ -547,12 +547,12 @@ public:
 		}
 	}
 
-	void despawnPlayerEvent(std::shared_ptr<SpawnableObject> object)
+	void despawnPlayerEvent(std::shared_ptr<PlayerObject> object)
 	{
 		for (auto player : gamePlayerList)
 		{
 			if (this->map.checkRange(object->getTile(), player->getTile()))
-				output.addEventDespawnPlayer(Config::SERVER_ID, player->getPlayerID(), player->getName(), object->getX(), object->getY());
+				output.addEventDespawnPlayer(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
 		}
 	}
 
