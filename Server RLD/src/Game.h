@@ -225,15 +225,22 @@ public:
 			case TileType::GROUND:
 				break;
 			case TileType::GROUND_SLIPPY:
-				if (this->map.getMovementTile(movement, tile)->getType() == TileType::GROUND_SLIPPY)
+				while (1)
 				{
-					player->move(tile);
-					this->moveEvent(player);
-					this->moveOutEvent(tile, player);
-					this->checkVisionTiles(player, player->getTile());
-					if (tile->haveItem())
-						pickupItem(player, tile->getItemID());
+					tile = this->map.getMovementTile(movement, tile);
+					if (tile->getType() == TileType::GROUND_SLIPPY)
+					{
+						player->move(tile);
+						this->moveEvent(player);
+						this->moveOutEvent(tile, player);
+						this->checkVisionTiles(player, player->getTile());
+						if (tile->haveItem())
+							pickupItem(player, tile->getItemID());
+					}
+					else
+						break;
 				}
+
 				break;
 			case TileType::EMPTY:
 				killPlayer(player);
