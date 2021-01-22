@@ -19,6 +19,8 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 	this->dmg = Constants::defaultDmg;
 	this->attackRange = Constants::attackRange;
 	this->readyToRespawn = false;
+	this->deathCount = 0;
+	this->killCount = 0;
 }
 
 void PlayerObject::move(std::shared_ptr<Tile> newTile)
@@ -48,6 +50,7 @@ void PlayerObject::spawn()
 	this->occupiedTile->setPlayer(true);
 	this->occupiedTile->setPlayerID(this->playerID);
 	this->occupiedTile->setMove(false);
+
 	this->health = Constants::defaultHealth;
 	this->maxHealth = Constants::defaultHealth;
 	this->dmg = Constants::defaultDmg;
@@ -64,6 +67,7 @@ void PlayerObject::despawn()
 	this->occupiedTile->setPlayer(false);
 	this->occupiedTile->setPlayerID(this->playerID);
 	this->occupiedTile->setMove(true);
+	this->deathCount++;
 	// Operacje na obiekcie map
 }
 

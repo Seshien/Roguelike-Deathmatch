@@ -12,6 +12,8 @@ public:
 	static const int MAP_WIDTH = 50;
 	
 public:
+
+	enum class MOVEDIR { UP, DOWN, LEFT, RIGHT };
 	Map()
 	{
 	}
@@ -40,8 +42,13 @@ public:
 		}
 		file.close();
 	}
+
+	std::shared_ptr<Tile> getTile(int x, int y);
+	bool checkRange(std::shared_ptr<Tile> objectF, std::shared_ptr<Tile> objectS, int range = Constants::sightValue);
 	
 	std::array<std::array<std::shared_ptr<Tile>, MAP_HEIGHT>, MAP_WIDTH> tileArray;
 	std::vector<SpawnableObject> upperLayer;
+	std::shared_ptr<Tile> getMovementTile(MOVEDIR movement, std::shared_ptr<Tile> tile, int range = 1);
+
 };
 

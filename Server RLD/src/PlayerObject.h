@@ -13,6 +13,7 @@ class PlayerObject : public SpawnableObject
 	int dmg;
 	int attackRange;
 	int killCount;
+	int deathCount;
 	int spawnX;
 	int spawnY;
 	std::vector<ItemType> items;
@@ -28,8 +29,13 @@ public:
 	int getPlayerID() { return this->playerID; };
 	int getRange() { return this->attackRange; };
 	int getDamage() { return this->dmg; };
-	int getkillCount() { return this->killCount; };
+	void setDamage(int value) { this->dmg = value; };
+	int getKillCount() { return this->killCount; };
 	void setkillCount(int newKillCount) { this->killCount = newKillCount; };
+
+	int getDeathCount() { return this->deathCount; };
+	void setDeathCount(int newDeathCount) { this->deathCount = newDeathCount; };
+
 	int getspawnX() { return this->spawnX; };
 	int getspawnY() { return this->spawnY; };
 
@@ -37,6 +43,7 @@ public:
 
 
 	std::vector<ItemType> getItems() { return this->items; };
+	void addItem(int value) { this->items.push_back((ItemType)value); };
 
 	std::string getName() { return this->playerName; };
 

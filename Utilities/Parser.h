@@ -47,6 +47,7 @@ namespace Parser
 		void addEventSpawn(int sender, int receiver, int objectType, int x, int y);
 		void addEventPlayerSpawn(int sender, int receiver, std::string, int x, int y);
 		void addEventKillCount(int sender, int receiver, std::string playerName, int killcount);
+		void addEventDeathCount(int sender, int receiver, std::string playerName, int deathcount);
 
 		void addEventAskRespawn(int sender, int receiver, int x, int y);
 		void addEventWillToRespawn(int sender, int receiver);
