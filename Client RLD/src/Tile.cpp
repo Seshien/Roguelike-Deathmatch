@@ -1,4 +1,4 @@
-#include "Tile.h";
+#include "Tile.h"
 
 Tile::Tile(TileType type, sf::Texture& tex) {
 	this->type = type;

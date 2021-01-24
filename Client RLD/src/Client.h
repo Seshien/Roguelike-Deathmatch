@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
-#include <SFML/Graphics.hpp>
+#include <SFML\Graphics.hpp>
 #include "..\..\Utilities\Event.h"
 #include "..\..\Utilities\Network.h"
 #include "..\..\Utilities\Parser.h"
