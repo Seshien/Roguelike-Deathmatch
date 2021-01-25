@@ -37,7 +37,25 @@ public:
 
 	void spawnObjects()
 	{
-
+		for (int i = 0; i < map.MAP_HEIGHT; i++)
+		{
+			for (int j = 0; j < map.MAP_WIDTH; j++)
+			{
+				auto tile = this->map.getTile(i, j);//map.tileArray[i][j];
+				if (tile == nullptr)
+					continue;
+				if (tile->isItemSpawner())
+				{
+					tile->setItemSpawner(false);
+					int temp = (i + j) % 4;
+					auto item = std::make_shared<ItemObject>(itemID++, (SpawnableObjectType) temp, tile);
+					gameObjectList.push_back(item);
+					item->startSpawnTimer();
+					this->tickObjList.push_back(item);
+					return;
+				}
+			}
+		}
 	}
 
 	void addPlayers(std::vector<int> playerID, std::vector<std::string> playerName)
@@ -64,8 +82,9 @@ public:
 					auto tile = this->map.getTile(i, j);//map.tileArray[i][j];
 					if (tile == nullptr)
 						continue;
-					if (tile->canSpawn())
+					if (tile->isPlayerSpawner())
 					{
+						tile->setPlayerSpawner(false);
 						auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
 						gamePlayerList.push_back(player);
 						this->addPlayerSpawnToTick(player);
@@ -98,6 +117,7 @@ public:
 		}
 		return 1;
 	}
+
 
 	Parser::Messenger loopGame(Parser::Messenger input)
 	{
@@ -440,7 +460,7 @@ public:
 		this->despawnPlayerEvent(player);
 		this->deathCountEvent(player);
 		// tworzyc nowy obiekt z trupem
-		std::shared_ptr<ItemObject> body = std::make_shared<ItemObject>(this->gameObjectList.size(), SpawnableObjectType::BODY, player->getTile());
+		std::shared_ptr<ItemObject> body = std::make_shared<ItemObject>(itemID++, SpawnableObjectType::BODY, player->getTile());
 		body->spawn();
 		body->startSpawnTimer();
 		this->gameObjectList.push_back(body);
@@ -696,6 +716,7 @@ private:
 
 	Map map;
 	Parser::Messenger output;
+	int itemID=0;
 	std::vector<std::shared_ptr<ItemObject>> gameObjectList;
 	std::vector<std::shared_ptr<ItemObject>> tickObjList;
 	std::vector<std::shared_ptr<PlayerObject>> gamePlayerList;

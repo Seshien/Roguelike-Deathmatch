@@ -18,6 +18,8 @@ private:
 	bool isSpawnable;
 	bool isMovable;
 	int playerID;
+	bool canPlayerSpawn;
+	bool canItemSpawn;
 public:
 	Tile(TileType tileType, int x, int y) 
 	{
@@ -32,14 +34,20 @@ public:
 		{
 			isSpawnable = true;
 			isMovable = true;
+			canPlayerSpawn = true;
+			canItemSpawn = false;
 		}
 		else if ((int)tileType == 11 || (int)tileType == 10 || (int)tileType == 12 ) {
 			isMovable = true;
 			isSpawnable = false;
+			canPlayerSpawn = false;
+			canItemSpawn = false;
 		}
 		else {
 			isSpawnable = false;
 			isMovable = false;
+			canPlayerSpawn = false;
+			canItemSpawn = false;
 		}
 
 	}
@@ -57,6 +65,12 @@ public:
 
 	bool canSpawn() { return isSpawnable; };
 	void setSpawn(bool value) { this->isSpawnable = value; };
+
+	bool isPlayerSpawner() { return canPlayerSpawn; };
+	void setPlayerSpawner(bool value) { this->canPlayerSpawn = value; };
+
+	bool isItemSpawner() { return canItemSpawn; };
+	void setItemSpawner(bool value) { this->canItemSpawn = value; };
 
 	bool canMove() { return isMovable; };
 	void setMove(bool value) { this->isMovable = value; };
