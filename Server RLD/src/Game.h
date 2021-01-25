@@ -48,7 +48,6 @@ public:
 				{
 					tile->setItemSpawner(false);
 					int temp = (i + j) % 4;
-					if (temp == 2) temp = 3;
 					auto item = std::make_shared<ItemObject>(itemID++, (SpawnableObjectType) temp, tile);
 					gameObjectList.push_back(item);
 					item->startSpawnTimer();
@@ -498,10 +497,14 @@ public:
 			player->setDamage(Config::defaultDmg + 2);
 			player->addItem((int) item->getType());
 			item->despawn();
+			item->startSpawnTimer();
+			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_POTION:
 			this->damagePlayer(player, -10);
 			item->despawn();
+			item->startSpawnTimer();
+			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_SHIELD:
 			this->pickupEvent(player, item);
@@ -509,10 +512,15 @@ public:
 			this->maxHealthEvent(player);
 			this->damagePlayer(player, -5);
 			item->despawn();
+			item->startSpawnTimer();
+			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_BOOTS:
+			this->pickupEvent(player, item);
 			player->setRange(Config::attackRange + 2);
 			item->despawn();
+			item->startSpawnTimer();
+			this->tickObjList.push_back(item);
 			break;
 		default:
 			this->pickupEvent(player, item);
