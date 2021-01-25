@@ -514,7 +514,7 @@ void Client::handleGame(Parser::Event ev)
 				OurPlayerInfo* ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
 				// Na serwerze ITEM_SWORD, ITEM_SHIELD, ITEM_BOOTS, ITEM_POTION, PLAYER, BODY
 				int clientItemID;
-				switch (ev.subdata[0]) {
+				switch (std::stoi(ev.subdata)) {
 				case 0:
 					clientItemID = (int)ItemType::SWORD;
 					break;
@@ -533,7 +533,9 @@ void Client::handleGame(Parser::Event ev)
 				default:
 					Logger::log("Wrong item type received!");
 				}
-				ourPlayer->pocket.push_back(std::make_shared<Item>((ItemType)clientItemID, -1, -1, *(tileObjectsTextures[clientItemID]), false, true));
+				this->items.push_back(std::make_shared<Item>((ItemType)clientItemID, -1, -1, *(tileObjectsTextures[clientItemID]), false, true));
+
+				//ourPlayer->pocket.push_back(std::make_shared<Item>((ItemType)clientItemID, -1, -1, *(tileObjectsTextures[clientItemID]), false, true));
 			}
 		}
 		break;
