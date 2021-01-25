@@ -24,7 +24,7 @@ void ItemObject::despawn()
 	this->isExist = false;
 	this->occupiedTile->setItem(false);
 	//lepiej to zrobic
-	this->itemID = (itemID + 1) % 4
+	this->type = (SpawnableObjectType) (((int)type + 1) % 4);
 	// Operacje na obiekcie map
 }
 

@@ -104,6 +104,7 @@ public:
 			{
 				this->respawnEvent(player);
 				this->damageEvent(player, player->getHealth());
+				this->maxHealthEvent(player);
 				for (auto Item :player->getItems())
 					this->pickupEvent(player, (int)Item);
 				this->getFullVision(player);
@@ -659,6 +660,7 @@ public:
 			this->spawnPlayerEvent(object);
 			this->respawnEvent(object);
 			this->damageEvent(object, object->getHealth());
+			this->maxHealthEvent(object);
 			this->getFullVision(object);
 		}
 	}
