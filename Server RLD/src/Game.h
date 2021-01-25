@@ -47,6 +47,7 @@ public:
 				if (tile->isItemSpawner())
 				{
 					tile->setItemSpawner(false);
+					// bardzo prosty sposob na wybor rodzaju itemu
 					int temp = (i + j) % 4;
 					auto item = std::make_shared<ItemObject>(itemID++, (SpawnableObjectType) temp, tile);
 					gameObjectList.push_back(item);
