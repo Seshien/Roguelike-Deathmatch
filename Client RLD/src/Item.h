@@ -22,5 +22,39 @@ public:
 
 	int getX();
 	int getY();
+
+	bool isOnMap();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 };
 

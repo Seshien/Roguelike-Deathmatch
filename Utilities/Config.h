@@ -32,7 +32,7 @@ namespace Config
 	static std::string playerName = "Player";
 	static std::string IPAddress = "127.0.0.1";
 
-	static int ITEM_RESPAWN_TIME = 30;
+	static int ITEM_RESPAWN_TIME = 90;
 	static int PLAYER_RESPAWN_TIME = 5;
 
 	//zmiana tego zepsuje program
