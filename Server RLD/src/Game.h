@@ -418,10 +418,16 @@ public:
 		output.addEventGameEnd(Config::SERVER_ID, Config::SERVER_ID, player->getName());
 	}
 
+	void maxHealthEvent(std::shared_ptr<PlayerObject> player)
+	{
+		output.addEventMaxHealth(Config::SERVER_ID, player->getPlayerID(), player->getMaxHealth());
+	}
+
 	void killCountEvent(std::shared_ptr<PlayerObject> receiver, std::shared_ptr<PlayerObject> player)
 	{
 		output.addEventKillCount(Config::SERVER_ID, receiver->getPlayerID(), player->getName(), player->getKillCount());
 	}
+
 
 	void killCountEvent(std::shared_ptr<PlayerObject> player)
 	{
@@ -491,20 +497,30 @@ public:
 			player->setDamage(Config::defaultDmg + 2);
 			player->addItem((int) item->getType());
 			item->despawn();
+			item->startSpawnTimer();
+			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_POTION:
 			this->damagePlayer(player, -10);
 			item->despawn();
+			item->startSpawnTimer();
+			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_SHIELD:
 			this->pickupEvent(player, item);
 			player->setMaxHealth(player->getMaxHealth() + 5);
+			this->maxHealthEvent(player);
 			this->damagePlayer(player, -5);
 			item->despawn();
+			item->startSpawnTimer();
+			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_BOOTS:
-			this->damagePlayer(player, Config::bodyHeal * -1);
+			this->pickupEvent(player, item);
+			player->setRange(Config::attackRange + 2);
 			item->despawn();
+			item->startSpawnTimer();
+			this->tickObjList.push_back(item);
 			break;
 		default:
 			this->pickupEvent(player, item);

@@ -59,7 +59,10 @@ namespace Parser
 
 		void addEventAttack(int sender, int receiver, std::string playerName);
 		void addEventHit(int sender, int receiver, std::string playerName, int damage);
+
+
 		void addEventDamaged(int sender, int receiver, int newHealth);
+		void addEventMaxHealth(int sender, int receiver, int newHealth);
 
 		void addEventPickUp(int sender, int receiver, int itemType);
 		

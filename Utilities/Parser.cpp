@@ -158,10 +158,17 @@ void Messenger::addEventHit(int sender, int receiver, std::string playerName, in
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }
-
+//przekazuje dmg
 void Messenger::addEventDamaged(int sender, int receiver, int newHealth)
 {
 	Event ev = Event(sender, receiver, Type::GAME, SubType::DAMAGE, std::to_string(newHealth));
+	eventList.push_back(ev);
+	Logger::debug(ev);
+}
+
+void Messenger::addEventMaxHealth(int sender, int receiver, int newHealth)
+{
+	Event ev = Event(sender, receiver, Type::GAME, SubType::MAXHEALTH, std::to_string(newHealth));
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }
