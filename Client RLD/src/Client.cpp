@@ -445,6 +445,24 @@ void Client::handleGame(Parser::Event ev)
 							Logger::log("Player didnt move out from another player");
 						}
 					}
+					for (auto it = items.begin(); it != items.end();) {
+						Logger::log("Checking items despawn.");
+						if ((*it)->isOnMap()) {
+							if (abs((int)ev.subdata[0] - (*it)->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - (*it)->getY()) >= Config::sightValue) {
+								it = items.erase(it);
+								Logger::log("Player moved out from item");
+							}
+							else {
+								++it;
+							}
+						}
+						else
+							++it;
+					}
+
+					for (int j = 0; j < this->items.size(); j++) {
+
+					}
 				}
 			}
 		}
@@ -502,6 +520,16 @@ void Client::handleGame(Parser::Event ev)
 			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
 				OurPlayerInfo *ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
 				ourPlayer->health = std::stoi(ev.subdata);
+				this->maxHealth = ourPlayer->maxHealth;
+				this->health = ourPlayer->health;
+			}
+		}
+		break;
+	case Parser::SubType::MAXHEALTH:
+		for (int i = 0; i < this->playerInfos.size(); i++) {
+			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
+				OurPlayerInfo* ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
+				ourPlayer->maxHealth = std::stoi(ev.subdata);
 				this->maxHealth = ourPlayer->maxHealth;
 				this->health = ourPlayer->health;
 			}
