@@ -24,10 +24,20 @@ namespace Config
 	static int lavaDmg = 30;
 	static int defaultHealth = 10;
 	static int defaultDmg = 3;
-	static int bodyHeal = 2;
+	static int bodyBonus = 2;
 	static int attackRange = 3;
 	static int attackCooldown = 10;
+
+	static int shieldBonus = 10;
+	static int potionBonus = 10;
+	static int swordBonus = 2;
+	static int bootsBonus = 2;
+
+
 	static int mapID = 0;
+
+
+
 	static std::string port= "7777";
 	static std::string playerName = "Player";
 	static std::string IPAddress = "127.0.0.1";

@@ -491,35 +491,35 @@ public:
 		switch (item->getType())
 		{
 		case SpawnableObjectType::BODY:
-			this->damagePlayer(player, Config::bodyHeal * -1);
+			this->damagePlayer(player, Config::bodyBonus * -1);
 			item->despawn();
 			break;
 		case SpawnableObjectType::ITEM_SWORD:
 			this->pickupEvent(player, item);
-			player->setDamage(Config::defaultDmg + 2);
+			player->setDamage(Config::defaultDmg + Config::swordBonus);
 			player->addItem((int) item->getType());
 			item->despawn();
 			item->startSpawnTimer();
 			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_POTION:
-			this->damagePlayer(player, -10);
+			this->damagePlayer(player, -1 * Config::potionBonus);
 			item->despawn();
 			item->startSpawnTimer();
 			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_SHIELD:
 			this->pickupEvent(player, item);
-			player->setMaxHealth(player->getMaxHealth() + 5);
+			player->setMaxHealth(Config::defaultHealth + Config::shieldBonus);
 			this->maxHealthEvent(player);
-			this->damagePlayer(player, -5);
+			this->damagePlayer(player, -1 * Config::shieldBonus);
 			item->despawn();
 			item->startSpawnTimer();
 			this->tickObjList.push_back(item);
 			break;
 		case SpawnableObjectType::ITEM_BOOTS:
 			this->pickupEvent(player, item);
-			player->setRange(Config::attackRange + 2);
+			player->setRange(Config::attackRange + Config::bootsBonus);
 			item->despawn();
 			item->startSpawnTimer();
 			this->tickObjList.push_back(item);
@@ -552,8 +552,12 @@ public:
 	}
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<PlayerObject> object)
 	{
-		if (player->getPlayerID() != object->getPlayerID()) 
+		if (player->getPlayerID() != object->getPlayerID())
+		{
 			output.addEventPlayerSpawn(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
+			output.addEventKillCount(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getKillCount());
+		}
+
 	}
 
 	void spawnPlayerEvent(std::shared_ptr<PlayerObject> object)
