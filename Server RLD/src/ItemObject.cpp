@@ -17,7 +17,7 @@ void ItemObject::spawn()
 	this->isExist = true;
 	this->occupiedTile->setItem(true);
 	this->occupiedTile->setItemID(itemID);
-}
+}  
 
 void ItemObject::despawn()
 {

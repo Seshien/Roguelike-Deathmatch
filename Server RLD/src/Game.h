@@ -48,6 +48,7 @@ public:
 				{
 					tile->setItemSpawner(false);
 					int temp = (i + j) % 4;
+					if (temp == 2) temp = 3;
 					auto item = std::make_shared<ItemObject>(itemID++, (SpawnableObjectType) temp, tile);
 					gameObjectList.push_back(item);
 					item->startSpawnTimer();
@@ -419,10 +420,16 @@ public:
 		output.addEventGameEnd(Config::SERVER_ID, Config::SERVER_ID, player->getName());
 	}
 
+	void maxHealthEvent(std::shared_ptr<PlayerObject> player)
+	{
+		output.addEventMaxHealth(Config::SERVER_ID, player->getPlayerID(), player->getMaxHealth());
+	}
+
 	void killCountEvent(std::shared_ptr<PlayerObject> receiver, std::shared_ptr<PlayerObject> player)
 	{
 		output.addEventKillCount(Config::SERVER_ID, receiver->getPlayerID(), player->getName(), player->getKillCount());
 	}
+
 
 	void killCountEvent(std::shared_ptr<PlayerObject> player)
 	{
@@ -500,11 +507,12 @@ public:
 		case SpawnableObjectType::ITEM_SHIELD:
 			this->pickupEvent(player, item);
 			player->setMaxHealth(player->getMaxHealth() + 5);
+			this->maxHealthEvent(player);
 			this->damagePlayer(player, -5);
 			item->despawn();
 			break;
 		case SpawnableObjectType::ITEM_BOOTS:
-			this->damagePlayer(player, Config::bodyHeal * -1);
+			player->setRange(Config::attackRange + 2);
 			item->despawn();
 			break;
 		default:

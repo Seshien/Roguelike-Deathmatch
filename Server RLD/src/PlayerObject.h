@@ -24,12 +24,18 @@ public:
 
 	int getHealth() { return this->health; };
 	void setHealth(int h) { this->health = h; }
+
 	int getMaxHealth() { return this->maxHealth; };
 	void setMaxHealth(int h) { this->maxHealth = h; }
+
 	int getPlayerID() { return this->playerID; };
+
 	int getRange() { return this->attackRange; };
+	void setRange(int value) { this->attackRange = value; };
+
 	int getDamage() { return this->dmg; };
 	void setDamage(int value) { this->dmg = value; };
+
 	int getKillCount() { return this->killCount; };
 	void setkillCount(int newKillCount) { this->killCount = newKillCount; };
 
