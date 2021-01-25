@@ -21,11 +21,12 @@ namespace Config
 	static int sightValue = 5;
 	static int timeoutValue = 10000;
 	static int spikeDmg = 2;
+	static int lavaDmg = 30;
 	static int defaultHealth = 10;
 	static int defaultDmg = 3;
 	static int bodyHeal = 2;
 	static int attackRange = 3;
-	static int attackCooldown = 3;
+	static int attackCooldown = 10;
 	static int mapID = 0;
 	static std::string port= "7777";
 	static std::string playerName = "Player";

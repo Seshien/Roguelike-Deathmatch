@@ -274,7 +274,7 @@ public:
 				damagePlayer(player, Config::spikeDmg);
 				break;
 			case TileType::LAVA:
-				killPlayer(player);
+				damagePlayer(player, Config::lavaDmg);
 				break;
 			}
 		}
