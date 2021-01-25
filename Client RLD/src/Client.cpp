@@ -758,7 +758,7 @@ void Client::loadTileTextures() {
 
 void Client::loadConfig()
 {
-	std::fstream file;
+	std::ifstream file;
 	std::string line;
 	file.open("data/config.txt");
 	if (file.is_open())
