@@ -53,7 +53,6 @@ public:
 					gameObjectList.push_back(item);
 					item->startSpawnTimer();
 					this->tickObjList.push_back(item);
-					return;
 				}
 			}
 		}
