@@ -717,9 +717,9 @@ void Client::loadPlayerTextures() {
 }
 
 void Client::loadTileTextures() {
-	for (int j = 0; j < 3; j++) {
+	for (int j = 0; j < 4; j++) {
 		for (int i = 0; i < 8; i++) {
-			if (j == 2 && i == 7) break;
+			if (j == 3 && i == 1) break;
 			tileObjectsTextures.push_back(std::make_shared<sf::Texture>());
 			tileObjectsTextures[i + j * 8]->loadFromFile("data/tilesObjects.png", sf::IntRect(i * 32, j * 32, 32, 32));
 		}
