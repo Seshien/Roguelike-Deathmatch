@@ -24,37 +24,7 @@ public:
 	int getY();
 
 	bool isOnMap();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	ItemType getType();
 
 };
 
