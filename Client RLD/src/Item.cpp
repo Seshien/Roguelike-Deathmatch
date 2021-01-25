@@ -34,3 +34,7 @@ int Item::getY() {
 bool Item::isOnMap() {
 	return this->onMap;
 }
+
+ItemType Item::getType() {
+	return this->type;
+}

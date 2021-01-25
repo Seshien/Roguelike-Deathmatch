@@ -419,6 +419,7 @@ void Client::handleGame(Parser::Event ev)
 {
 	std::string evString;
 	bool newPlayer = true;
+	bool newItem = true;
 	switch (ev.subtype)
 	{
 	case Parser::SubType::MOVE:
@@ -489,6 +490,7 @@ void Client::handleGame(Parser::Event ev)
 				this->playerInfos[i]->setPrevPosition(0, 0);
 			}
 		}
+		this->items.clear();
 		this->xOurPos = (int)ev.subdata[0];
 		this->yOurPos = (int)ev.subdata[1];
 		this->gameStage = GameStage::ALIVE;
@@ -561,8 +563,15 @@ void Client::handleGame(Parser::Event ev)
 				default:
 					Logger::log("Wrong item type received!");
 				}
-				this->items.push_back(std::make_shared<Item>((ItemType)clientItemID, -1, -1, *(tileObjectsTextures[clientItemID]), false, true));
+				for (int i = 0; i < this->items.size(); i++) {
+					if ((int)this->items[i]->getType() == clientItemID && this->items[i]->isOnMap() == false) {
+						newItem = false;
+					}
+				}
+				if (newItem) {
+					this->items.push_back(std::make_shared<Item>((ItemType)clientItemID, -1, -1, *(tileObjectsTextures[clientItemID]), false, true));
 
+				}
 				//ourPlayer->pocket.push_back(std::make_shared<Item>((ItemType)clientItemID, -1, -1, *(tileObjectsTextures[clientItemID]), false, true));
 			}
 		}
