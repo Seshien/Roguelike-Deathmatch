@@ -621,11 +621,12 @@ void Client::handleGame(Parser::Event ev)
 		// Informacja o tym, ze dany gracz wyszedl z danego pola widzenia. Jezeli to my sparwimy, ze inny gracz znajdzie sie poza naszym
 		// polem widzenia, to wtedy nie potrzebujemy eventa, ktory nas o tym powiadiomi.
 	case Parser::SubType::MOVEOUT:
-		Logger::debug("Moveout: " + ev.subdata.substr(2, ev.subdata.size() - 2));
+		Logger::debug("Moveout: " + ev.subdata.substr(4, ev.subdata.size() - 4));
 		for (int i = 0; i < this->playerInfos.size(); i++) {
 			if (ev.subdata.substr(2, ev.subdata.size() - 2) == this->playerInfos[i]->getPlayerName()) {
 				this->playerInfos[i]->setIsAlive(false);
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
+				this->playerInfos[i]->setPrevPosition((int)ev.subdata[2], (int)ev.subdata[3]);
 			}
 		}
 		break;
