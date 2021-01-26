@@ -39,5 +39,7 @@ std::shared_ptr<Tile> Map::getMovementTile(MOVEDIR movement, std::shared_ptr<Til
 	case MOVEDIR::RIGHT:
 		return getTile(x + range, y);
 		break;
+	default:
+		return getTile(x, y - range);
 	}
 }
