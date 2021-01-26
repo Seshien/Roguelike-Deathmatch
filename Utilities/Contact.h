@@ -8,11 +8,12 @@ class Contact
 {
 public:
 
-	void initClient(int clientId, SOCKET clientSocket, sockaddr_in clientInfo);
-
+	void initContact(int clientId, SOCKET clientSocket, sockaddr clientInfo);
+	std::string info();
+	
 	int playerId;
 	SOCKET clientSocket;
-	sockaddr_in clientInfo;
+	sockaddr clientInfo;
 	int timeoutTimer;
 	std::string bufferInput;
 	std::string bufferOutput;
@@ -20,7 +21,7 @@ public:
 	//char bufferOutput[Constants::bufferLength];
 	int bufferInputCounter;
 	int bufferOutputCounter;
-	int msgExpectedLenght;
+	size_t msgExpectedLenght;
 
 private:
 

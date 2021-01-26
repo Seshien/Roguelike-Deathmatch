@@ -6,10 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 project(RogueLikeDeathmatch)
 
-
 ################################################################################
 # Sub-projects
 ################################################################################
 add_subdirectory("Client RLD")
 add_subdirectory("Server RLD")
+
 

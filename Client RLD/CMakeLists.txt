@@ -47,6 +47,8 @@ set(ALL_FILES
     ${Pliki_rdowe}
 )
 
+add_subdirectory("SFML")
+
 set(SFML_STATIC_LIBRARIES TRUE)
 ################################################################################
 # Target
@@ -56,9 +58,9 @@ add_executable(${PROJECT_NAME} ${ALL_FILES})
 ################################################################################
 # Include directories
 ################################################################################
-target_include_directories(${PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/SFML/include"
-)
+#target_include_directories(${PROJECT_NAME} PRIVATE
+#   "${CMAKE_CURRENT_SOURCE_DIR}/SFML/include"
+#)
 
 ################################################################################
 # Compile definitions
@@ -76,50 +78,25 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     "_UNICODE"
 )
 
-
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 ################################################################################
 # Dependencies
 ################################################################################
-set(ADDITIONAL_LIBRARY_DEPENDENCIES
-    "$<$<CONFIG:Debug>:"
-        "sfml-window-d;"
-        "sfml-system-d;"
-        "sfml-audio-d;"
-        "sfml-graphics-d"
-    ">"
-    "$<$<CONFIG:Release>:"
-        "sfml-window;"
-        "sfml-system;"
-        "sfml-audio;"
-        "sfml-graphics"
-    ">"
-    "Ws2_32;"
-    "kernel32;"
-    "user32;"
-    "gdi32;"
-    "winspool;"
-    "comdlg32;"
-    "advapi32;"
-    "shell32;"
-    "ole32;"
-    "oleaut32;"
-    "uuid;"
-    "odbc32;"
-    "odbccp32"
-)
-target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
-target_link_directories(${PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/SFML/lib"
-)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-window sfml-system sfml-audio Ws2_32)
+
+#target_link_directories(${PROJECT_NAME} PRIVATE
+#    "${CMAKE_CURRENT_SOURCE_DIR}/SFML/lib"
+#)
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${CMAKE_CURRENT_SOURCE_DIR}/data/
                 ${CMAKE_CURRENT_BINARY_DIR}/data/)
-add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/bin/
-                ${CMAKE_CURRENT_BINARY_DIR}/)
+#add_custom_command(
+#        TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy_directory
+#                ${CMAKE_CURRENT_SOURCE_DIR}/bin/
+#                ${CMAKE_CURRENT_BINARY_DIR}/)
