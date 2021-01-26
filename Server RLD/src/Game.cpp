@@ -95,7 +95,10 @@ int Game::addPlayer(int playerID, std::string playerName)
 		}
 		else
 		{
-			this->addPlayerSpawnToTick(player);
+			if (player->readyToRespawn)
+				this->respawnAskEvent(player);
+			else
+				this->addPlayerSpawnToTick(player);
 			return 0;
 		}
 	}
