@@ -48,6 +48,8 @@ set(ALL_FILES
 )
 
 set(SFML_STATIC_LIBRARIES TRUE)
+
+add_subdirectory("SFML")
 ################################################################################
 # Target
 ################################################################################
@@ -56,9 +58,9 @@ add_executable(${PROJECT_NAME} ${ALL_FILES})
 ################################################################################
 # Include directories
 ################################################################################
-target_include_directories(${PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/SFML/include"
-)
+#target_include_directories(${PROJECT_NAME} PRIVATE
+#   "${CMAKE_CURRENT_SOURCE_DIR}/SFML/include"
+#)
 
 ################################################################################
 # Compile definitions
@@ -94,32 +96,20 @@ set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "sfml-graphics"
     ">"
     "Ws2_32;"
-    "kernel32;"
-    "user32;"
-    "gdi32;"
-    "winspool;"
-    "comdlg32;"
-    "advapi32;"
-    "shell32;"
-    "ole32;"
-    "oleaut32;"
-    "uuid;"
-    "odbc32;"
-    "odbccp32"
 )
 target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
-target_link_directories(${PROJECT_NAME} PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/SFML/lib"
-)
+#target_link_directories(${PROJECT_NAME} PRIVATE
+#    "${CMAKE_CURRENT_SOURCE_DIR}/SFML/lib"
+#)
 
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${CMAKE_CURRENT_SOURCE_DIR}/data/
                 ${CMAKE_CURRENT_BINARY_DIR}/data/)
-add_custom_command(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/bin/
-                ${CMAKE_CURRENT_BINARY_DIR}/)
+#add_custom_command(
+#        TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy_directory
+#                ${CMAKE_CURRENT_SOURCE_DIR}/bin/
+#                ${CMAKE_CURRENT_BINARY_DIR}/)
