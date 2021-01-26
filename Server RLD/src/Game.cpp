@@ -149,6 +149,15 @@ Parser::Messenger Game::loopGame(Parser::Messenger input)
 	{
 		switch (ev.subtype)
 		{
+		case Parser::SubType::KEY:
+			handleKey(ev);
+			break;
+		case Parser::SubType::NEWPLAYER:
+			addPlayer(ev.receiver, ev.subdata);
+			break;
+		case Parser::SubType::RESPAWN:
+			handleRespawn(ev);
+			break;
 		case Parser::SubType::MOVE:
 			//handleMovement(ev);
 			break;
@@ -157,15 +166,6 @@ Parser::Messenger Game::loopGame(Parser::Messenger input)
 			break;
 		case Parser::SubType::ACTION:
 			//do something
-			break;
-		case Parser::SubType::NEWPLAYER:
-			addPlayer(ev.receiver, ev.subdata);
-			break;
-		case Parser::SubType::RESPAWN:
-			handleRespawn(ev);
-			break;
-		case Parser::SubType::KEY:
-			handleKey(ev);
 			break;
 		default:
 			Logger::error("Error: Unknown Game Subtype");
@@ -452,6 +452,7 @@ void Game::killPlayer(std::shared_ptr<PlayerObject> player)
 	player->startSpawnTimer();
 	this->despawnPlayerEvent(player);
 	this->deathCountEvent(player);
+
 	// tworzyc nowy obiekt z trupem
 	std::shared_ptr<ItemObject> body = std::make_shared<ItemObject>(itemID++, SpawnableObjectType::BODY, player->getTile());
 	body->spawn();
