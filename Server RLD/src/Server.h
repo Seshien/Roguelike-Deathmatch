@@ -79,7 +79,7 @@ class Server
 		std::vector<Player *> refreshActivePlayerList();
 		Player * getPlayer(int playerID);
 
-
+		std::string port="7777";
 		int gameTickTimer = 0;
 		Network network;
 		Game game;
@@ -88,6 +88,10 @@ class Server
 		int activePlayerCount;
 		StateChange stateChange;
 		std::string winner;
+
+		void loadConfig();
+		void processConfigLine(std::string line);
+		void setConfigValue(std::string token, std::string value);
 
 		std::chrono::system_clock::time_point gameStartTime;
 		std::chrono::system_clock::time_point turntimer;
