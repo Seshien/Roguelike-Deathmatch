@@ -454,41 +454,41 @@ void Client::handleGame(Parser::Event ev)
 		evString = evString.substr(4, ev.subdata.size() - 4);
 		Logger::debug("Ruch:" + evString + "x: " + std::to_string(ev.subdata[0]) + "y: " + std::to_string(ev.subdata[1]));
 		for (int i = 0; i < this->playerInfos.size(); i++) {
+			//
 			if (this->playerInfos[i]->getPlayerName() == evString) {
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
 				this->playerInfos[i]->setIsAlive(true);
 				this->playerInfos[i]->setPrevPosition((int)ev.subdata[2], (int)ev.subdata[3]);
-				}
 				newPlayer = false;
-				if (this->playerInfos[i]->getPlayerName() == this->playerName) {
-					if (this->playerName == evString) {
-						this->xOurPos = this->playerInfos[i]->getX();
-						this->yOurPos = this->playerInfos[i]->getY();
+				}
+			if (this->playerInfos[i]->getPlayerName() == this->playerName) {
+				if (this->playerName == evString) {
+					this->xOurPos = this->playerInfos[i]->getX();
+					this->yOurPos = this->playerInfos[i]->getY();
+				}
+				for (int j = 0; j < this->playerInfos.size(); j++) {
+					Logger::debug("Our player found.");
+					if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Config::sightValue) {
+						this->playerInfos[j]->setIsAlive(false);
+						Logger::debug("Player moved out from another player");
 					}
-					for (int j = 0; j < this->playerInfos.size(); j++) {
-						Logger::debug("Our player found.");
-						if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Config::sightValue) {
-							this->playerInfos[j]->setIsAlive(false);
-							Logger::debug("Player moved out from another player");
+					else {
+						Logger::debug("Player didnt move out from another player");
+					}
+				}
+				for (auto it = items.begin(); it != items.end();) {
+					Logger::debug("Checking items despawn.");
+					if ((*it)->isOnMap()) {
+						if (abs((int)ev.subdata[0] - (*it)->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - (*it)->getY()) >= Config::sightValue) {
+							it = items.erase(it);
+							Logger::debug("Player moved out from item");
 						}
 						else {
-							Logger::debug("Player didnt move out from another player");
-						}
-					}
-					for (auto it = items.begin(); it != items.end();) {
-						Logger::debug("Checking items despawn.");
-						if ((*it)->isOnMap()) {
-							if (abs((int)ev.subdata[0] - (*it)->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - (*it)->getY()) >= Config::sightValue) {
-								it = items.erase(it);
-								Logger::debug("Player moved out from item");
-							}
-							else {
-								++it;
-							}
-						}
-						else
 							++it;
+						}
 					}
+					else
+						++it;
 				}
 			}
 		}
