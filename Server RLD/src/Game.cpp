@@ -534,7 +534,7 @@ void Game::moveOutEvent(std::shared_ptr<Tile> oldTile, std::shared_ptr<PlayerObj
 	for (auto player : gamePlayerList)
 	{
 		if (this->map.checkRange(oldTile, player->getTile()) && !this->map.checkRange(obj->getTile(), player->getTile()))
-			output.addEventMovedOut(Config::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY());
+			output.addEventMovedOut(Config::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY(), oldTile->getX(), oldTile->getY());
 	}
 }
 void Game::spawnPlayerEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr<PlayerObject> object)
