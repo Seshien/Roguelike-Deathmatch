@@ -21,7 +21,7 @@ public:
 	//char bufferOutput[Constants::bufferLength];
 	int bufferInputCounter;
 	int bufferOutputCounter;
-	size_t msgExpectedLenght;
+	int msgExpectedLenght;
 
 private:
 
