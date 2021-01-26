@@ -104,7 +104,7 @@ private:
 	int currentTextureSet;
 
 	boolean voted;
-
+	
 	boolean spawnedFirstTime;
 
 	sf::Clock turnTimer;

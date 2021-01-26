@@ -14,7 +14,7 @@ namespace Parser
 	const static std::string typeNames[] = { "Type Error", "Server", "Lobby", "Game", "Inner", "Error" };
 
 	const static std::string subTypeNames[] = { "SUBERROR", "NEWPLAYER", "INITPLAYER", "DISCPLAYER", "VOTE", "TIMEOUT", "TIMEOUTANSWER",
-		"MOVE", "MOVEOUT", "ACTION", "ATTACK", "HIT", "DAMAGE", "SPAWN","PSPAWN", "ASKRESPAWN", "DESPAWN", "PDESPAWN", "PICKUP", "KILLCOUNT", "DEATHCOUNT",
+		"MOVE", "MOVEOUT", "ACTION", "ATTACK", "HIT", "DAMAGE", "SPAWN","PSPAWN", "ASKRESPAWN", "DESPAWN", "MAXHEALTH", "PDESPAWN", "PICKUP", "KILLCOUNT", "DEATHCOUNT",
 		"CHANGESTATE", "START", "INFODUMP_LOBBY", "MAP", "INFODUMP_GAME_END", "INFODUMP_GAME_MID", "NOCONTACT", "KEY", "ERRORNET" };
 
 	Type convertToType(int type);

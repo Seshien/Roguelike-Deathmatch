@@ -58,7 +58,6 @@ void PlayerObject::spawn()
 	this->items.clear();
 	this->readyToRespawn = false;
 	this->cooldownTimer = 0;
-
 }
 
 void PlayerObject::despawn()

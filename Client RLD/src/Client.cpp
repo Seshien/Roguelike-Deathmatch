@@ -465,6 +465,21 @@ void Client::handleGame(Parser::Event ev)
 				if (this->playerName == evString) {
 					this->xOurPos = this->playerInfos[i]->getX();
 					this->yOurPos = this->playerInfos[i]->getY();
+					for (auto it = items.begin(); it != items.end();) {
+						Logger::debug("Checking items despawn.");
+						if ((*it)->isOnMap()) {
+							if (abs((int)ev.subdata[0] - (*it)->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - (*it)->getY()) >= Config::sightValue) {
+								it = items.erase(it);
+								Logger::debug("Player moved out from item");
+							}
+							else {
+								Logger::debug("Player didn't move out from item");
+								++it;
+							}
+						}
+						else
+							++it;
+					}
 				}
 				for (int j = 0; j < this->playerInfos.size(); j++) {
 					Logger::debug("Our player found.");
@@ -476,25 +491,12 @@ void Client::handleGame(Parser::Event ev)
 						Logger::debug("Player didnt move out from another player");
 					}
 				}
-				for (auto it = items.begin(); it != items.end();) {
-					Logger::debug("Checking items despawn.");
-					if ((*it)->isOnMap()) {
-						if (abs((int)ev.subdata[0] - (*it)->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - (*it)->getY()) >= Config::sightValue) {
-							it = items.erase(it);
-							Logger::debug("Player moved out from item");
-						}
-						else {
-							++it;
-						}
-					}
-					else
-						++it;
-				}
 			}
 		}
 		if (newPlayer) {
 			Logger::debug("Other player spawn new info received.");
 			this->playerInfos.push_back(std::make_shared<PlayerInfo>(evString, (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
+			this->playerInfos[this->playerInfos.size() - 1]->setPrevPosition((int)ev.subdata[2], (int)ev.subdata[3]);
 			this->currentTextureSet++;
 			if (this->currentTextureSet == 4) {
 				this->currentTextureSet = 0;
@@ -537,21 +539,51 @@ void Client::handleGame(Parser::Event ev)
 	case Parser::SubType::PSPAWN:
 		newPlayer = true;
 		evString = std::string(ev.subdata);
-		Logger::debug("PSpawn:" + evString.substr(2, evString.size() - 2) + "x: " + evString.substr(0, 1) + "y: " + evString.substr(1, 1));
+		Logger::debug("PSpawn:" + evString.substr(3, evString.size() - 3) + "x: " + evString.substr(0, 1) + "y: " + evString.substr(1, 1));
 		for (int i = 0; i < this->playerInfos.size(); i++) {
-			if (this->playerInfos[i]->getPlayerName() == evString.substr(2, evString.size() - 2)) {
+			if (this->playerInfos[i]->getPlayerName() == evString.substr(3, evString.size() - 3)) {
 				Logger::debug("Other player spawn existing info received");
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
 				this->playerInfos[i]->setIsAlive(true);
 				newPlayer = false;
+				switch (ev.subdata[2]) {
+				case 'W':
+					this->playerInfos[i]->setPrevPosition(this->playerInfos[i]->getX(), this->playerInfos[i]->getY() + 1);
+					break;
+				case 'A':
+					this->playerInfos[i]->setPrevPosition(this->playerInfos[i]->getX()+1, this->playerInfos[i]->getY());
+					break;
+				case 'S':
+					this->playerInfos[i]->setPrevPosition(this->playerInfos[i]->getX(), this->playerInfos[i]->getY() - 1);
+					break;
+				case 'D':
+					this->playerInfos[i]->setPrevPosition(this->playerInfos[i]->getX()-1, this->playerInfos[i]->getY());
+					break;
+
+				}
+				
 			}
 		}
 		if (newPlayer == true) {
 			Logger::debug("Other player spawn new info received.");
-			this->playerInfos.push_back(std::make_shared<PlayerInfo>(evString.substr(2, evString.size() - 2), (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
+			this->playerInfos.push_back(std::make_shared<PlayerInfo>(evString.substr(3, evString.size() - 3), (int)ev.subdata[0], (int)ev.subdata[1], this->playerTextures[this->currentTextureSet], 0));
 			this->currentTextureSet++;
 			if (this->currentTextureSet == 4) {
 				this->currentTextureSet = 0;
+			}
+			switch (ev.subdata[2]) {
+			case 'W':
+				this->playerInfos[this->playerInfos.size() - 1]->setPrevPosition(this->playerInfos[this->playerInfos.size() - 1]->getX(), this->playerInfos[this->playerInfos.size() - 1]->getY() + 1);
+				break;
+			case 'A':
+				this->playerInfos[this->playerInfos.size() - 1]->setPrevPosition(this->playerInfos[this->playerInfos.size() - 1]->getX() + 1, this->playerInfos[this->playerInfos.size() - 1]->getY());
+				break;
+			case 'S':
+				this->playerInfos[this->playerInfos.size() - 1]->setPrevPosition(this->playerInfos[this->playerInfos.size() - 1]->getX(), this->playerInfos[this->playerInfos.size() - 1]->getY() - 1);
+				break;
+			case 'D':
+				this->playerInfos[this->playerInfos.size() - 1]->setPrevPosition(this->playerInfos[this->playerInfos.size() - 1]->getX() - 1, this->playerInfos[this->playerInfos.size() - 1]->getY() + 1);
+				break;
 			}
 		}
 		break;
@@ -623,7 +655,7 @@ void Client::handleGame(Parser::Event ev)
 	case Parser::SubType::MOVEOUT:
 		Logger::debug("Moveout: " + ev.subdata.substr(4, ev.subdata.size() - 4));
 		for (int i = 0; i < this->playerInfos.size(); i++) {
-			if (ev.subdata.substr(2, ev.subdata.size() - 2) == this->playerInfos[i]->getPlayerName()) {
+			if (ev.subdata.substr(4, ev.subdata.size() - 4) == this->playerInfos[i]->getPlayerName()) {
 				this->playerInfos[i]->setIsAlive(false);
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
 				this->playerInfos[i]->setPrevPosition((int)ev.subdata[2], (int)ev.subdata[3]);

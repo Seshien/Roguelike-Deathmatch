@@ -14,7 +14,7 @@ namespace Config
 	const static int msgLengthLimit = 50;
 	const static std::string confName = "./data/config.txt";
 
-
+	
 	const static bool debug = false;
 
 	//to mozna dac w configu potem

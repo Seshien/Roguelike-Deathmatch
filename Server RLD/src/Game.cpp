@@ -648,6 +648,7 @@ void Game::handleRespawn(std::shared_ptr<PlayerObject> object)
 	if (object->readyToRespawn)
 	{
 		object->spawn();
+		object->lastMove = 'S';
 		this->spawnPlayerEvent(object);
 		this->respawnEvent(object);
 		this->damageEvent(object, object->getHealth());
