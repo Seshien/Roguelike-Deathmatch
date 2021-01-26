@@ -323,25 +323,25 @@ void Game::checkVisionTiles(std::shared_ptr<PlayerObject> player, std::shared_pt
 	switch (movement)
 	{
 	case Map::MOVEDIR::UP:
-		for (int i = x - Config::sightValue; i < x + Config::sightValue; i++)
+		for (int i = x - Config::sightValue + 1; i < x + Config::sightValue; i++)
 		{
 			getVision(player, this->map.getTile(i, y - Config::sightValue + 1));
 		}
 		break;
 	case Map::MOVEDIR::DOWN:
-		for (int i = x - Config::sightValue + 1; i <= x + Config::sightValue; i++)
+		for (int i = x - Config::sightValue + 1; i < x + Config::sightValue; i++)
 		{
 			getVision(player, this->map.getTile(i, y + Config::sightValue - 1));
 		}
 		break;
 	case Map::MOVEDIR::LEFT:
-		for (int i = y - Config::sightValue; i < y + Config::sightValue; i++)
+		for (int i = y - Config::sightValue + 1; i < y + Config::sightValue; i++)
 		{
 			getVision(player, this->map.getTile(x - Config::sightValue + 1, i));
 		}
 		break;
 	case Map::MOVEDIR::RIGHT:
-		for (int i = y - Config::sightValue + 1; i <= y + Config::sightValue; i++)
+		for (int i = y - Config::sightValue + 1; i < y + Config::sightValue; i++)
 		{
 			getVision(player, this->map.getTile(x + Config::sightValue - 1, i));
 		}
