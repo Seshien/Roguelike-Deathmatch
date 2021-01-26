@@ -29,23 +29,7 @@ class Server
 		{
 
 		}
-		void StartServer()
-		{
-			startLogger();
-			Config::loadConfig();
-			startMap();
-
-			if (network.startServer(Config::port))
-			{
-				Logger::log("Server network start failed. Closing server.");
-				return;
-			}
-			startLobby();
-			mainLoop();
-			//startGame();
-			//loopGame();
-			return;
-		}
+		void StartServer();
 
 	private:
 		Parser::Messenger output;
@@ -59,10 +43,8 @@ class Server
 
 		void startLobby();
 		void mainLoop();
-		void startGame()
-		{
-			gameStartTime = std::chrono::system_clock::now();
-		}
+		void startGame();
+
 		void handleEvents(Parser::Messenger parser);
 
 		void handleServer(Parser::Event ev);

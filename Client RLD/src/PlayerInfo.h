@@ -22,14 +22,20 @@ class PlayerInfo
 
 public:
 	PlayerInfo(std::string playerName, int x, int y, std::vector<std::shared_ptr<sf::Texture>> textureSet, int killCount);
-	// Sets realXPos and realYPos for given frame 
 	std::string getPlayerName();
+	// Ustawia realXPos i realYPos, aktualnie ta funkcja od razu przenosi gracza na dana kratke, nie ma plynnego ruchu
 	void interpolate(double time, double maxTime);
+	
 	void setNewPosition(int x, int y);
-	// Only for respawn purposes
+
+	// W konstruktorze prevPositions s¹ ustawiane automatycznie, ta procedura jest wywolywana tylko jezeli gracz dostal event respawn
 	void setPrevPosition(int x, int y);
+	
 	void draw(sf::RenderWindow& window);
+
+	// Zwraca kierunek w jakim odwrocony jest gracz na podstawie jego poprzedniej pozycji i aktualnej
 	std::string getFacing();
+
 	void setIsAlive(bool isAlive);
 	int getX();
 	int getY();

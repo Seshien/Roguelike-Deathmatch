@@ -34,7 +34,7 @@ void PlayerInfo::setPrevPosition(int x, int y) {
 }
 
 std::string PlayerInfo::getFacing() {
-	// For respawn purposes only
+	// For respawn purposes only (0, 0) set at respawn!
 	if (prevxPos == 0 && prevyPos == 0) {
 		return std::string("down");
 	}
