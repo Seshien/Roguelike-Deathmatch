@@ -8,10 +8,11 @@ void Server::startLogger()
 void Server::StartServer()
 {
 	startLogger();
-	Config::loadConfig();
+	//Config::loadConfig();
+	this->loadConfig();
 	startMap();
 
-	if (network.startServer(Config::port))
+	if (network.startServer(this->port))
 	{
 		Logger::log("Server network start failed. Closing server.");
 		return;
@@ -476,4 +477,51 @@ int Server::getPlayerCount(Player::State state)
 		if (player.state == state)
 			count++;
 	return count;
+}
+
+
+void Server::loadConfig()
+{
+	std::ifstream file;
+	std::string line;
+	file.open("data/config.txt");
+	if (file.is_open())
+	{
+		Logger::info("Config file opened:");
+		while (std::getline(file, line))
+		{
+			Logger::debug(line);
+			processConfigLine(line);
+		}
+	}
+
+	else
+	{
+		Logger::debug("Config file not found");
+		//something something
+
+	}
+	file.close();
+}
+
+void Server::processConfigLine(std::string line)
+{
+	std::string delimiter = ":";
+	int pos = line.find(delimiter);
+	if (pos == -1)
+	{
+		Logger::error("Error during parsing of config file");
+		return;
+	}
+	std::string token = line.substr(0, pos);
+	std::string value = line.substr(pos + 1, line.length() - 1);
+	Logger::debug("Token: " + token + " Value: " + value);
+	setConfigValue(token, value);
+	return;
+}
+
+void Server::setConfigValue(std::string token, std::string value)
+{
+	if (token == "port") this->port = value;
+	else Logger::debug("(Unknown / Not Handled) line in config file");
 }
