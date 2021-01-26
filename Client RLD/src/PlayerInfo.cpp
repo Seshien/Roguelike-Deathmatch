@@ -92,3 +92,7 @@ int PlayerInfo::getKillCount() {
 void PlayerInfo::setKillCount(int killNum) {
 	this->killCount = killNum;
 }
+
+bool PlayerInfo::getIsAlive() {
+	return this->isAlive();
+}
