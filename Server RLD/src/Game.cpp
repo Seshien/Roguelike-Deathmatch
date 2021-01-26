@@ -69,6 +69,7 @@ int Game::addPlayer(int playerID, std::string playerName)
 					tile->setPlayerSpawner(false);
 					auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
 					gamePlayerList.push_back(player);
+
 					this->addPlayerSpawnToTick(player);
 					allKillCountsEvent(player);
 					this->allDeathCountsEvent(player);
@@ -224,7 +225,7 @@ void Game::handleMovement(std::shared_ptr<PlayerObject> player, std::shared_ptr<
 	if (tile->canMove())
 	{
 		player->move(tile);
-		this->moveEvent(player);
+		this->moveEvent(player, oldTile);
 		this->moveOutEvent(oldTile, player);
 		this->checkVisionTiles(player, player->getTile());
 		if (tile->haveItem())
@@ -236,12 +237,13 @@ void Game::handleMovement(std::shared_ptr<PlayerObject> player, std::shared_ptr<
 		case TileType::GROUND_SLIPPY:
 			while (1)
 			{
+				oldTile = tile;
 				tile = this->map.getMovementTile(movement, tile);
 				if (tile->getType() == TileType::GROUND_SLIPPY)
 				{
 					player->move(tile);
-					this->moveEvent(player);
-					this->moveOutEvent(tile, player);
+					this->moveEvent(player, oldTile);
+					this->moveOutEvent(oldTile, player);
 					this->checkVisionTiles(player, player->getTile());
 					if (tile->haveItem())
 						pickupItem(player, tile->getItemID());
@@ -518,12 +520,12 @@ void Game::pickupItem(std::shared_ptr<PlayerObject> player, int itemID)
 	this->despawnEvent(item);
 }
 
-void Game::moveEvent(std::shared_ptr<PlayerObject> obj)
+void Game::moveEvent(std::shared_ptr<PlayerObject> obj, std::shared_ptr<Tile> oldTile)
 {
 	for (auto player : gamePlayerList)
 	{
 		if (this->map.checkRange(obj->getTile(), player->getTile()))
-			output.addEventMovement(Config::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY());
+			output.addEventMovement(Config::SERVER_ID, player->getPlayerID(), obj->getName(), obj->getX(), obj->getY(), oldTile->getX(), oldTile->getY());
 	}
 }
 void Game::moveOutEvent(std::shared_ptr<Tile> oldTile, std::shared_ptr<PlayerObject> obj)

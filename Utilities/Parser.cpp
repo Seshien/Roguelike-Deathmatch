@@ -69,9 +69,9 @@ void Messenger::addEventTimeoutReached(int sender, int receiver) {
 	Logger::debug(ev);
 }
 
-void Messenger::addEventMovement(int sender, int receiver, std::string playerName, int x, int y)
+void Messenger::addEventMovement(int sender, int receiver, std::string playerName, int x, int y, int oldX, int oldY)
 {
-	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
+	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + std::string(1, (char)oldX) + std::string(1, (char)oldY) + playerName;
 	Event ev = Event(sender, receiver, Type::GAME, SubType::MOVE, subdata);
 	eventList.push_back(ev);
 	Logger::debug(ev);

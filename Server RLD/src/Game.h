@@ -68,7 +68,7 @@ public:
 
 	void pickupItem(std::shared_ptr<PlayerObject> player, int itemID);
 
-	void moveEvent(std::shared_ptr<PlayerObject> obj);
+	void moveEvent(std::shared_ptr<PlayerObject> obj, std::shared_ptr<Tile> oldTile);
 
 	void moveOutEvent(std::shared_ptr<Tile> oldTile, std::shared_ptr<PlayerObject> obj);
 
