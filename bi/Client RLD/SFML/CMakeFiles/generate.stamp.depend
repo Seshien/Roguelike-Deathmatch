@@ -1,0 +1,12 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.19/Modules/BasicConfigVersion-SameMajorVersion.cmake.in
+C:/Program Files/CMake/share/cmake-3.19/Modules/CMakePackageConfigHelpers.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CheckIncludeFile.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CheckIncludeFileCXX.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/CheckTypeSize.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/WriteBasicConfigVersionFile.cmake
+C:/Users/Michal/Desktop/Sudoku/Roguelike/Roguelike-Deathmatch/Client RLD/SFML/CMakeLists.txt
+C:/Users/Michal/Desktop/Sudoku/Roguelike/Roguelike-Deathmatch/Client RLD/SFML/cmake/Config.cmake
+C:/Users/Michal/Desktop/Sudoku/Roguelike/Roguelike-Deathmatch/Client RLD/SFML/cmake/SFMLConfig.cmake.in
+C:/Users/Michal/Desktop/Sudoku/Roguelike/Roguelike-Deathmatch/Client RLD/SFML/cmake/SFMLConfigDependencies.cmake.in

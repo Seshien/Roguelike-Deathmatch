@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Config.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Contact.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Event.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Logger.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Network.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Parser.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Client RLD.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Client.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Damage.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Item.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Map.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\OurPlayerInfo.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\PlayerInfo.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Tile.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\UIBar.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\UIButton.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Config.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Contact.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Event.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Logger.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Network.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Utilities\Parser.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Client.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Damage.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Item.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Map.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\OurPlayerInfo.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\PlayerInfo.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\Tile.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\UIBar.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\src\UIButton.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Michal\Desktop\Sudoku\Roguelike\Roguelike-Deathmatch\Client RLD\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Pliki nagłówkowe">
+      <UniqueIdentifier>{B8A94962-E3EA-3DE2-ABDB-ED33F4BBA96B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pliki źródłowe">
+      <UniqueIdentifier>{8E0092A7-8570-3E3C-9792-C96AC331256A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

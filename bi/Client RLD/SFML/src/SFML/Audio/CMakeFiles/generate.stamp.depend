@@ -1,0 +1,7 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-3.19/Modules/FindOpenAL.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.19/Modules/FindPackageMessage.cmake
+C:/Users/Michal/Desktop/Sudoku/Roguelike/Roguelike-Deathmatch/Client RLD/SFML/cmake/Modules/FindFLAC.cmake
+C:/Users/Michal/Desktop/Sudoku/Roguelike/Roguelike-Deathmatch/Client RLD/SFML/cmake/Modules/FindVORBIS.cmake
+C:/Users/Michal/Desktop/Sudoku/Roguelike/Roguelike-Deathmatch/Client RLD/SFML/src/SFML/Audio/CMakeLists.txt
