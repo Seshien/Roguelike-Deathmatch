@@ -40,6 +40,7 @@ public:
 	int getX();
 	int getY();
 	int getKillCount();
+	bool getIsAlive();
 	void setKillCount(int killNum);
 };
 

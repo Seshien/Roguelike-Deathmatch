@@ -81,6 +81,7 @@ void Client::connectClient()
 		this->cState = ConnectionState::CONNECTED;
 		Logger::info("Connecting to server succeed");
 		output.addEventNewPlayer(ID, Config::SERVER_ID, playerName);
+		this->getIn.changeVisibility(false);
 	}
 	else
 	{
@@ -307,7 +308,6 @@ void Client::handleIntEvents()
 			{
 				if (getIn.isClickInBounds(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
 					this->connectClient();
-					getIn.changeVisibility(false);
 					vote.changeVisibility(true);
 					Logger::debug("Get in button clicked!");
 				}
@@ -451,12 +451,14 @@ void Client::handleGame(Parser::Event ev)
 	case Parser::SubType::MOVE:
 		// To jest madry sposob na wybieranie czesci char arraya do sstringa
 		evString = std::string(ev.subdata);
-		evString = evString.substr(2, ev.subdata.size() - 2);
+		evString = evString.substr(4, ev.subdata.size() - 4);
 		Logger::debug("Ruch:" + evString + "x: " + std::to_string(ev.subdata[0]) + "y: " + std::to_string(ev.subdata[1]));
 		for (int i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerInfos[i]->getPlayerName() == evString) {
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
 				this->playerInfos[i]->setIsAlive(true);
+				this->playerInfos[i]->setPrevPosition((int)ev.subdata[2], (int)ev.subdata[3]);
+				}
 				newPlayer = false;
 				if (this->playerInfos[i]->getPlayerName() == this->playerName) {
 					if (this->playerName == evString) {
@@ -486,10 +488,6 @@ void Client::handleGame(Parser::Event ev)
 						}
 						else
 							++it;
-					}
-
-					for (int j = 0; j < this->items.size(); j++) {
-
 					}
 				}
 			}
