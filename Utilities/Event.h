@@ -33,26 +33,8 @@ namespace Parser
 		SubType subtype; // typ eventu, moze dac jako enumerator 
 		std::string subdata;
 
-		Event(int _sender, int _receiver, Type _type, SubType _subtype, std::string _subdata)
-		{
-			int temp = 4 * sizeof(char) + _subdata.size();
-			size = std::to_string((temp)) + "|";
-			sender = _sender;
-			receiver = _receiver;
-			type = _type;
-			subtype = _subtype;
-			subdata = std::string(_subdata);
-		}
-		Event(int _sender, int _receiver, int _type, int _subtype, std::string _subdata)
-		{
-			int temp = 4 * sizeof(char) + _subdata.size();
-			size = std::to_string((temp)) + "|";
-			sender = _sender;
-			receiver = _receiver;
-			type = convertToType(_type);
-			subtype = convertToSubType(_subtype);
-			subdata = std::string(_subdata);
-		}
+		Event(int _sender, int _receiver, Type _type, SubType _subtype, std::string _subdata);
+		Event(int _sender, int _receiver, int _type, int _subtype, std::string _subdata);
 	};
 
 	Event decodeBytes(std::string data);

@@ -5,6 +5,24 @@ void Server::startLogger()
 	Logger::startLogger("Server", Config::debug);
 }
 
+void Server::StartServer()
+{
+	startLogger();
+	Config::loadConfig();
+	startMap();
+
+	if (network.startServer(Config::port))
+	{
+		Logger::log("Server network start failed. Closing server.");
+		return;
+	}
+	startLobby();
+	mainLoop();
+	//startGame();
+	//loopGame();
+	return;
+}
+
 // void GenerateMap();
 
 void Server::startMap()
@@ -76,6 +94,11 @@ void Server::mainLoop()
 		this->output = Parser::Messenger();
 	}
 
+}
+
+void Server::startGame()
+{
+	gameStartTime = std::chrono::system_clock::now();
 }
 
 void Server::handleEvents(Parser::Messenger mess)
@@ -364,7 +387,7 @@ void Server::handleVote(Parser::Event ev)
 	Logger::debug("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
 	for (auto player : this->activePlayerList)
 		output.addEventVote(Config::SERVER_ID, player->playerID, numOfVotes);
-	if (this->activePlayerCount >= 1 && this->numOfVotes >= this->activePlayerCount / 2)
+	if (this->activePlayerCount >= 2 && this->numOfVotes >= this->activePlayerCount / 2)
 	{
 		this->stateChange = StateChange::VOTE_END;
 	}

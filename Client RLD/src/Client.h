@@ -17,6 +17,7 @@
 #include "UIButton.h"
 #include "UIBar.h"
 
+// Glowna klasa zajmujaca sie obsluga dzialan klienta i przetwarzaniem informacji, ktore dostanie od serwera.
 class Client
 {
 public:
@@ -33,6 +34,8 @@ public:
 private:
 
 	enum class ConnectionState {NOTCONNECTED, CONNECTED, FAILED};
+	// NOTJOINED - po wlaczeniu klienta, LOBBY - po kliknieciu Login, DEAD - gracz nie zyje i nie moze wykonywac akcji (oprocz zrespawnowania sie),
+	// ALIVE - gracz moze wykonywac akcje, END - pokazuje wygranego gracza
 	enum class GameStage {NOTJOINED, LOBBY, DEAD, ALIVE, END};
 		
 

@@ -15,7 +15,7 @@ namespace Config
 	const static std::string confName = "./data/config.txt";
 
 
-	const static bool debug = 0;
+	const static bool debug = true;
 
 	//to mozna dac w configu potem
 	static int sightValue = 5;

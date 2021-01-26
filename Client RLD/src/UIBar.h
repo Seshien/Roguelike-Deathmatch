@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 
+// Klasa odpowiedzialna za wyswietlanie paska zycia
 class UIBar
 {
 	int xPos;
@@ -13,6 +14,7 @@ class UIBar
 
 public:
 	UIBar() {};
+	// Tworzy pasek zycia - fillPercent przyjmuje wartosc od 0 do 1 i jest przekazywano jako Hp/MaxHp
 	UIBar(int x, int y, int width, int height, sf::Texture& tex, double fillPercent);
 
 	void draw(sf::RenderWindow& window);
