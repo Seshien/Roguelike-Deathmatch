@@ -18,7 +18,7 @@ bool UIButton::isClickInBounds(int clickX, int clickY) {
 void UIButton::draw(sf::RenderWindow& window) {
 	//this->sprite.scale(sf::Vector2f(2.0f, 2.0f));
 	if (this->visibility) {
-		this->sprite.setPosition(sf::Vector2f(this->xPos, this->yPos));
+		this->sprite.setPosition(sf::Vector2f((float)this->xPos, (float)this->yPos));
 		window.draw(this->sprite);
 		sf::Text buttonText;
 		sf::Font font;
@@ -26,7 +26,7 @@ void UIButton::draw(sf::RenderWindow& window) {
 		buttonText.setFont(font);
 		buttonText.setString(this->text);
 		buttonText.setFillColor(sf::Color(0, 0, 0, 255));
-		buttonText.setPosition(this->xPos + 10, this->yPos + 10);
+		buttonText.setPosition((float)this->xPos + 10, (float)this->yPos + 10);
 		window.draw(buttonText);
 	}
 }

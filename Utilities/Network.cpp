@@ -63,7 +63,7 @@ Parser::Messenger Network::inputNetwork(double time)
 	//jezeli czas trwania cyklu jest dluzszy od ustalonego, WSAPoll jest natychmiastowy
 	if (descrList.size() > 0)
 	{
-		result = WSAPoll(&this->descrList[0], this->descrList.size(), time * 1000);
+		result = WSAPoll(&this->descrList[0], this->descrList.size(), (int)time * 1000);
 	}
 	else
 	{

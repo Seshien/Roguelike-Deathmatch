@@ -16,11 +16,11 @@ void UIBar::changeVisibility(bool visibility) {
 
 void UIBar::draw(sf::RenderWindow& window) {
 	if (this->visibility) {
-		sf::RectangleShape rectangle(sf::Vector2f(304.0f * this->fillPercent / 100.0f, 48));
-		rectangle.setPosition(this->xPos + 8, this->xPos + 8);
+		sf::RectangleShape rectangle(sf::Vector2f((float)(304.0f * this->fillPercent / 100.0f), (float)48));
+		rectangle.setPosition((float)this->xPos + 8, (float)this->xPos + 8);
 		rectangle.setFillColor(sf::Color(255, 0, 0));
 		window.draw(rectangle);
-		this->sprite.setPosition(sf::Vector2f(this->xPos, this->yPos));
+		this->sprite.setPosition(sf::Vector2f((float)this->xPos, (float)this->yPos));
 		window.draw(this->sprite);
 	}
 }

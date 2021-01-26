@@ -11,14 +11,14 @@ Item::Item(ItemType type, int x, int y, sf::Texture& tex, bool onMap, bool inPoc
 
 void Item::draw(sf::RenderWindow& window) {
 	if (this->onMap){
-		this->sprite.setPosition(this->x * Config::SPRITE_WIDTH, this->y * Config::SPRITE_HEIGHT);
+		this->sprite.setPosition((float)this->x * Config::SPRITE_WIDTH, (float)this->y * Config::SPRITE_HEIGHT);
 		window.draw(this->sprite);
 	}
 }
 
 void Item::drawInPocket(sf::RenderWindow& window, int posX, int posY) {
 	if (this->inPocket) {
-		this->sprite.setPosition(posX, posY);
+		this->sprite.setPosition((float)posX, (float)posY);
 		window.draw(this->sprite);
 	}
 }

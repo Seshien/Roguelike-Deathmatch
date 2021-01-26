@@ -13,7 +13,7 @@ void Damage::decreaseTimer() {
 
 void Damage::draw(sf::RenderWindow& window) {
 	this->sprite.setTexture(*(this->textureSet[3 - (int)this->timer]));
-	this->sprite.setPosition(x, y);
+	this->sprite.setPosition((float)x, (float)y);
 	window.draw(this->sprite);
 }
 
