@@ -93,9 +93,9 @@ void Messenger::addEventSpawn(int sender, int receiver, int objectType, int x, i
 	Logger::debug(ev);
 }
 
-void Messenger::addEventPlayerSpawn(int sender, int receiver, std::string playerName, int x, int y)
+void Messenger::addEventPlayerSpawn(int sender, int receiver, std::string playerName, int x, int y, int lastMove)
 {
-	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
+	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + std::string(1, (char)lastMove) + playerName;
 	Event ev = Event(sender, receiver, Type::GAME, SubType::PSPAWN, subdata);
 	eventList.push_back(ev);
 	Logger::debug(ev);

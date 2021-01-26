@@ -45,7 +45,7 @@ namespace Parser
 		void addEventMovement(int sender, int receiver, std::string playerName, int x, int y, int oldX, int oldY);
 		void addEventMovedOut(int sender, int receiver, std::string playerName, int x, int y, int oldX, int oldY);
 		void addEventSpawn(int sender, int receiver, int objectType, int x, int y);
-		void addEventPlayerSpawn(int sender, int receiver, std::string, int x, int y);
+		void addEventPlayerSpawn(int sender, int receiver, std::string, int x, int y, int lastMove);
 		void addEventKillCount(int sender, int receiver, std::string playerName, int killcount);
 		void addEventDeathCount(int sender, int receiver, std::string playerName, int deathcount);
 

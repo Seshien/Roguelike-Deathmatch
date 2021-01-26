@@ -541,7 +541,7 @@ void Game::spawnPlayerEvent(std::shared_ptr<PlayerObject>player, std::shared_ptr
 {
 	if (player->getPlayerID() != object->getPlayerID())
 	{
-		output.addEventPlayerSpawn(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
+		output.addEventPlayerSpawn(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY(), object->lastMove);
 		output.addEventKillCount(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getKillCount());
 	}
 
@@ -553,7 +553,7 @@ void Game::spawnPlayerEvent(std::shared_ptr<PlayerObject> object)
 	{
 		if (player->getPlayerID() != object->getPlayerID())
 			if (this->map.checkRange(object->getTile(), player->getTile()))
-				output.addEventPlayerSpawn(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY());
+				output.addEventPlayerSpawn(Config::SERVER_ID, player->getPlayerID(), object->getName(), object->getX(), object->getY(), object->lastMove);
 	}
 }
 

@@ -387,7 +387,7 @@ void Server::handleVote(Parser::Event ev)
 	Logger::debug("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
 	for (auto player : this->activePlayerList)
 		output.addEventVote(Config::SERVER_ID, player->playerID, numOfVotes);
-	if (this->activePlayerCount >= 2 && this->numOfVotes >= this->activePlayerCount / 2)
+	if (this->activePlayerCount >= Config::PlayersNeededToStartGame && this->numOfVotes >= this->activePlayerCount / 2)
 	{
 		this->stateChange = StateChange::VOTE_END;
 	}

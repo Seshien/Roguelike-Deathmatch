@@ -18,6 +18,7 @@ namespace Config
 	const static bool debug = false;
 
 	//to mozna dac w configu potem
+	static int PlayersNeededToStartGame = 1;
 	static int sightValue = 5;
 	static int timeoutValue = 10000;
 	static int spikeDmg = 2;
