@@ -30,7 +30,7 @@ public:
 		int j = 0;
 		if (file.is_open()) {
 			while (std::getline(file, line)) {
-				for (int i = 0; i < line.size(); i += 2) {
+				for (size_t i = 0; i < line.size(); i += 2) {
 					tileArray[i / 2][j] = std::make_shared<Tile>((TileType)(line[i] - 'A'), i/2 , j);
 				}
 				j++;

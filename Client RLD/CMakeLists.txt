@@ -47,9 +47,9 @@ set(ALL_FILES
     ${Pliki_rdowe}
 )
 
-set(SFML_STATIC_LIBRARIES TRUE)
-
 add_subdirectory("SFML")
+
+set(SFML_STATIC_LIBRARIES TRUE)
 ################################################################################
 # Target
 ################################################################################
@@ -78,26 +78,13 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     "_UNICODE"
 )
 
-
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 ################################################################################
 # Dependencies
 ################################################################################
-set(ADDITIONAL_LIBRARY_DEPENDENCIES
-    "$<$<CONFIG:Debug>:"
-        "sfml-window-d;"
-        "sfml-system-d;"
-        "sfml-audio-d;"
-        "sfml-graphics-d"
-    ">"
-    "$<$<CONFIG:Release>:"
-        "sfml-window;"
-        "sfml-system;"
-        "sfml-audio;"
-        "sfml-graphics"
-    ">"
-    "Ws2_32;"
-)
-target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
+
+
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-window sfml-system sfml-audio Ws2_32)
 
 #target_link_directories(${PROJECT_NAME} PRIVATE
 #    "${CMAKE_CURRENT_SOURCE_DIR}/SFML/lib"

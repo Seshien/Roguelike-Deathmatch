@@ -320,10 +320,12 @@ int Network::createClientSocket()
 	descrList.push_back(fd);
 
 	//czy to w ogole zadziala?
-	sockaddr_in clientData = *((sockaddr_in *)result->ai_addr);
+	sockaddr clientData = *result->ai_addr;
 
 	//w tym wypadku klientem jest serwer, serwer ma zawsze playerID = 0
-	client.initClient(0, mainSocket, clientData);
+	client.initContact(0, mainSocket, clientData);
+
+	Logger::debug(client.info());
 	// addEventNewPlayer bedzie sie robil w kliencie, nie tutaj
 	//input.addEventNewPlayer(playerID, -1);
 	this->clientList.push_back(client);
@@ -392,12 +394,12 @@ void Network::manageConnectionEvent()
 
 void Network::acceptClient()
 {
-	sockaddr_in infoStorage;
+	sockaddr infoStorage;
 	socklen_t addressSize = sizeof(infoStorage);
 	auto client = Contact();
 
 
-	auto clientFd = accept(this->mainSocket, (struct sockaddr*)& infoStorage, &addressSize);
+	auto clientFd = accept(this->mainSocket, &infoStorage, &addressSize);
 	if (clientFd == INVALID_SOCKET)
 	{
 		Logger::error("Accepting new client failed");
@@ -420,7 +422,7 @@ void Network::acceptClient()
 	descrList.push_back(fd);
 
 
-	client.initClient(playerID, clientFd, infoStorage);
+	client.initContact(playerID, clientFd, infoStorage);
 
 
 	Logger::info("New connection accepted");
@@ -428,8 +430,7 @@ void Network::acceptClient()
 	//	+ ":" + std::to_string(clientFd);
 	//Logger::log(message);
 	//Parser wiadomosc o przyjeciu nowego gracza z tymczasowym ID
-	//jednak z tego rezygnujemy, tymczasowy gracz istnieje, ale musi poprosic o dostep i podac swoj nick
-	//input.addEventNewPlayer(playerID, 0);
+	Logger::debug(client.info());
 
 	playerID--;
 
