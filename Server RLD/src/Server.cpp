@@ -5,6 +5,25 @@ void Server::startLogger()
 	Logger::startLogger("Server", Config::debug);
 }
 
+void Server::StartServer()
+{
+	startLogger();
+	//Config::loadConfig();
+	this->loadConfig();
+	startMap();
+
+	if (network.startServer(this->port))
+	{
+		Logger::log("Server network start failed. Closing server.");
+		return;
+	}
+	startLobby();
+	mainLoop();
+	//startGame();
+	//loopGame();
+	return;
+}
+
 // void GenerateMap();
 
 void Server::startMap()
@@ -76,6 +95,11 @@ void Server::mainLoop()
 		this->output = Parser::Messenger();
 	}
 
+}
+
+void Server::startGame()
+{
+	gameStartTime = std::chrono::system_clock::now();
 }
 
 void Server::handleEvents(Parser::Messenger mess)
@@ -364,7 +388,7 @@ void Server::handleVote(Parser::Event ev)
 	Logger::debug("Amount of vote changed. Votes:" + std::to_string(this->numOfVotes) + "/" + std::to_string(this->activePlayerCount));
 	for (auto player : this->activePlayerList)
 		output.addEventVote(Config::SERVER_ID, player->playerID, numOfVotes);
-	if (this->activePlayerCount >= 1 && this->numOfVotes >= this->activePlayerCount / 2)
+	if (this->activePlayerCount >= Config::PlayersNeededToStartGame && this->numOfVotes >= this->activePlayerCount / 2)
 	{
 		this->stateChange = StateChange::VOTE_END;
 	}
@@ -453,4 +477,51 @@ int Server::getPlayerCount(Player::State state)
 		if (player.state == state)
 			count++;
 	return count;
+}
+
+
+void Server::loadConfig()
+{
+	std::ifstream file;
+	std::string line;
+	file.open("data/config.txt");
+	if (file.is_open())
+	{
+		Logger::info("Config file opened:");
+		while (std::getline(file, line))
+		{
+			Logger::debug(line);
+			processConfigLine(line);
+		}
+	}
+
+	else
+	{
+		Logger::debug("Config file not found");
+		//something something
+
+	}
+	file.close();
+}
+
+void Server::processConfigLine(std::string line)
+{
+	std::string delimiter = ":";
+	int pos = line.find(delimiter);
+	if (pos == -1)
+	{
+		Logger::error("Error during parsing of config file");
+		return;
+	}
+	std::string token = line.substr(0, pos);
+	std::string value = line.substr(pos + 1, line.length() - 1);
+	Logger::debug("Token: " + token + " Value: " + value);
+	setConfigValue(token, value);
+	return;
+}
+
+void Server::setConfigValue(std::string token, std::string value)
+{
+	if (token == "port") this->port = value;
+	else Logger::debug("(Unknown / Not Handled) line in config file");
 }

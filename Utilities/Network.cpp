@@ -692,4 +692,5 @@ Contact * Network::FindClient(int index, SOCKET sock = -1)
 					break;
 				}
 		}
+	return nullptr;
 }

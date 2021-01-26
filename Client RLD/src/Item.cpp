@@ -30,3 +30,11 @@ int Item::getX() {
 int Item::getY() {
 	return this->y;
 }
+
+bool Item::isOnMap() {
+	return this->onMap;
+}
+
+ItemType Item::getType() {
+	return this->type;
+}

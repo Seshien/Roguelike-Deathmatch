@@ -8,14 +8,18 @@ namespace Parser
 	//sprobujmy tak zrobic zeby ERRSUB i ERRORNET byly na poczatku i koncu
 	enum class SubType {
 		SUBERROR, NEWPLAYER, INITPLAYER, DISCPLAYER, VOTE, TIMEOUT, TIMEOUTANSWER,
-		MOVE, MOVEOUT, ACTION, ATTACK, HIT, DAMAGE, SPAWN, PSPAWN, ASKRESPAWN, RESPAWN, DESPAWN, PDESPAWN, PICKUP, KILLCOUNT, DEATHCOUNT,
+		MOVE, MOVEOUT, ACTION, ATTACK, HIT, DAMAGE,
+		SPAWN, PSPAWN, ASKRESPAWN, RESPAWN, DESPAWN, PDESPAWN,
+		MAXHEALTH, PICKUP, KILLCOUNT, DEATHCOUNT,
 		CHANGESTATE, START, INFODUMP_LOBBY, MAP, INFODUMP_GAME_END, INFODUMP_GAME_MID, NOCONTACT, NOACCEPT, KEY, ERRORNET
 	};
 	const static std::string typeNames[] = { "Type Error", "Server", "Lobby", "Game", "Inner", "Error" };
 
 	const static std::string subTypeNames[] = { "SUBERROR", "NEWPLAYER", "INITPLAYER", "DISCPLAYER", "VOTE", "TIMEOUT", "TIMEOUTANSWER",
-		"MOVE", "MOVEOUT", "ACTION", "ATTACK", "HIT", "DAMAGE", "SPAWN","PSPAWN", "ASKRESPAWN", "DESPAWN", "PDESPAWN", "PICKUP", "KILLCOUNT", "DEATHCOUNT",
-		"CHANGESTATE", "START", "INFODUMP_LOBBY", "MAP", "INFODUMP_GAME_END", "INFODUMP_GAME_MID", "NOCONTACT", "KEY", "ERRORNET" };
+		"MOVE", "MOVEOUT", "ACTION", "ATTACK", "HIT", "DAMAGE",
+		"SPAWN","PSPAWN", "ASKRESPAWN", "RESPAWN", "DESPAWN", "PDESPAWN",
+		"MAXHEALTH", "PICKUP", "KILLCOUNT", "DEATHCOUNT",
+		"CHANGESTATE", "START", "INFODUMP_LOBBY", "MAP", "INFODUMP_GAME_END", "INFODUMP_GAME_MID", "NOCONTACT", "NOACCEPT", "KEY", "ERRORNET" };
 
 	Type convertToType(int type);
 	SubType convertToSubType(int type);
@@ -33,26 +37,8 @@ namespace Parser
 		SubType subtype; // typ eventu, moze dac jako enumerator 
 		std::string subdata;
 
-		Event(int _sender, int _receiver, Type _type, SubType _subtype, std::string _subdata)
-		{
-			int temp = 4 * sizeof(char) + _subdata.size();
-			size = std::to_string((temp)) + "|";
-			sender = _sender;
-			receiver = _receiver;
-			type = _type;
-			subtype = _subtype;
-			subdata = std::string(_subdata);
-		}
-		Event(int _sender, int _receiver, int _type, int _subtype, std::string _subdata)
-		{
-			int temp = 4 * sizeof(char) + _subdata.size();
-			size = std::to_string((temp)) + "|";
-			sender = _sender;
-			receiver = _receiver;
-			type = convertToType(_type);
-			subtype = convertToSubType(_subtype);
-			subdata = std::string(_subdata);
-		}
+		Event(int _sender, int _receiver, Type _type, SubType _subtype, std::string _subdata);
+		Event(int _sender, int _receiver, int _type, int _subtype, std::string _subdata);
 	};
 
 	Event decodeBytes(std::string data);

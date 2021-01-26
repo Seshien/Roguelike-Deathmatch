@@ -38,7 +38,7 @@ private:
 
 	Parser::Messenger input;
 	Parser::Messenger output;
-	int networkID;
+	size_t networkID;
 	bool isServer;
 	bool isClient;
 	// player id, only increases so two players never have the same id

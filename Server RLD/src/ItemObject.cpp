@@ -17,12 +17,14 @@ void ItemObject::spawn()
 	this->isExist = true;
 	this->occupiedTile->setItem(true);
 	this->occupiedTile->setItemID(itemID);
-}
+}  
 
 void ItemObject::despawn()
 {
 	this->isExist = false;
 	this->occupiedTile->setItem(false);
+	//lepiej to zrobic
+	this->type = (SpawnableObjectType) (((int)type + 1) % 4);
 	// Operacje na obiekcie map
 }
 

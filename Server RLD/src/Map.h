@@ -13,7 +13,7 @@ public:
 	
 public:
 
-	enum class MOVEDIR { UP, DOWN, LEFT, RIGHT };
+	enum class MOVEDIR { UP='W', DOWN='S', LEFT='A', RIGHT='D' };
 	Map()
 	{
 	}

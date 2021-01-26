@@ -69,17 +69,17 @@ void Messenger::addEventTimeoutReached(int sender, int receiver) {
 	Logger::debug(ev);
 }
 
-void Messenger::addEventMovement(int sender, int receiver, std::string playerName, int x, int y)
+void Messenger::addEventMovement(int sender, int receiver, std::string playerName, int x, int y, int oldX, int oldY)
 {
-	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
+	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + std::string(1, (char)oldX) + std::string(1, (char)oldY) + playerName;
 	Event ev = Event(sender, receiver, Type::GAME, SubType::MOVE, subdata);
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }
 
-void Messenger::addEventMovedOut(int sender, int receiver, std::string playerName, int x, int y)
+void Messenger::addEventMovedOut(int sender, int receiver, std::string playerName, int x, int y, int oldX, int oldY)
 {
-	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
+	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + std::string(1, (char)oldX) + std::string(1, (char)oldY) + playerName;
 	Event ev = Event(sender, receiver, Type::GAME, SubType::MOVEOUT, subdata);
 	eventList.push_back(ev);
 	Logger::debug(ev);
@@ -93,9 +93,9 @@ void Messenger::addEventSpawn(int sender, int receiver, int objectType, int x, i
 	Logger::debug(ev);
 }
 
-void Messenger::addEventPlayerSpawn(int sender, int receiver, std::string playerName, int x, int y)
+void Messenger::addEventPlayerSpawn(int sender, int receiver, std::string playerName, int x, int y, int lastMove)
 {
-	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + playerName;
+	auto subdata = std::string(1, (char)x) + std::string(1, (char)y) + std::string(1, (char)lastMove) + playerName;
 	Event ev = Event(sender, receiver, Type::GAME, SubType::PSPAWN, subdata);
 	eventList.push_back(ev);
 	Logger::debug(ev);
@@ -158,10 +158,17 @@ void Messenger::addEventHit(int sender, int receiver, std::string playerName, in
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }
-
+//przekazuje dmg
 void Messenger::addEventDamaged(int sender, int receiver, int newHealth)
 {
 	Event ev = Event(sender, receiver, Type::GAME, SubType::DAMAGE, std::to_string(newHealth));
+	eventList.push_back(ev);
+	Logger::debug(ev);
+}
+
+void Messenger::addEventMaxHealth(int sender, int receiver, int newHealth)
+{
+	Event ev = Event(sender, receiver, Type::GAME, SubType::MAXHEALTH, std::to_string(newHealth));
 	eventList.push_back(ev);
 	Logger::debug(ev);
 }

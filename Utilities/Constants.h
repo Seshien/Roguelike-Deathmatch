@@ -10,7 +10,7 @@ namespace Constants
 	const static int spikeDmg = 2;
 	const static int defaultHealth = 10;
 	const static int defaultDmg = 3;
-	const static int bodyHeal = 2;
+	const static int bodyBonus = 2;
 	const static int attackRange = 3;
 	const static int attackCooldown = 3;
 	//zmiana tego zepsuje program

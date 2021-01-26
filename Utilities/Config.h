@@ -14,24 +14,34 @@ namespace Config
 	const static int msgLengthLimit = 50;
 	const static std::string confName = "./data/config.txt";
 
-
-	const static bool debug = 0;
-
 	//to mozna dac w configu potem
+	static bool debug = false;
+	static int PlayersNeededToStartGame = 1;
 	static int sightValue = 5;
 	static int timeoutValue = 10000;
 	static int spikeDmg = 2;
+	static int lavaDmg = 30;
 	static int defaultHealth = 10;
 	static int defaultDmg = 3;
-	static int bodyHeal = 2;
+	static int bodyBonus = 2;
 	static int attackRange = 3;
-	static int attackCooldown = 3;
+	static int attackCooldown = 10;
+
+	static int shieldBonus = 10;
+	static int potionBonus = 10;
+	static int swordBonus = 2;
+	static int bootsBonus = 2;
+
+
 	static int mapID = 0;
+
+
+
 	static std::string port= "7777";
 	static std::string playerName = "Player";
 	static std::string IPAddress = "127.0.0.1";
 
-	static int ITEM_RESPAWN_TIME = 30;
+	static int ITEM_RESPAWN_TIME = 90;
 	static int PLAYER_RESPAWN_TIME = 5;
 
 	//zmiana tego zepsuje program

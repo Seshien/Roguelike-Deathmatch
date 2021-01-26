@@ -29,23 +29,7 @@ class Server
 		{
 
 		}
-		void StartServer()
-		{
-			startLogger();
-			Config::loadConfig();
-			startMap();
-
-			if (network.startServer(Config::port))
-			{
-				Logger::log("Server network start failed. Closing server.");
-				return;
-			}
-			startLobby();
-			mainLoop();
-			//startGame();
-			//loopGame();
-			return;
-		}
+		void StartServer();
 
 	private:
 		Parser::Messenger output;
@@ -59,10 +43,8 @@ class Server
 
 		void startLobby();
 		void mainLoop();
-		void startGame()
-		{
-			gameStartTime = std::chrono::system_clock::now();
-		}
+		void startGame();
+
 		void handleEvents(Parser::Messenger parser);
 
 		void handleServer(Parser::Event ev);
@@ -97,7 +79,7 @@ class Server
 		std::vector<Player *> refreshActivePlayerList();
 		Player * getPlayer(int playerID);
 
-
+		std::string port="7777";
 		int gameTickTimer = 0;
 		Network network;
 		Game game;
@@ -106,6 +88,10 @@ class Server
 		int activePlayerCount;
 		StateChange stateChange;
 		std::string winner;
+
+		void loadConfig();
+		void processConfigLine(std::string line);
+		void setConfigValue(std::string token, std::string value);
 
 		std::chrono::system_clock::time_point gameStartTime;
 		std::chrono::system_clock::time_point turntimer;
