@@ -791,6 +791,7 @@ void Client::handleLostConnection(Parser::Event ev)
 	this->output.addInnerDiscPlayer(Config::SERVER_ID, this->ID);
 	this->cState = ConnectionState::FAILED;
 	this->gameStage = GameStage::NOTJOINED;
+	this->reconnect();
 }
 
 void Client::handleTimeout(Parser::Event ev)
@@ -894,6 +895,17 @@ void Client::setConfigValue(std::string token, std::string value)
 	else if (token == "playerName") this->playerName = value;
 	else if (token == "Server Address") this->IPAddress = value;
 	else Logger::debug("Unknown line in config file");
+}
+
+void Client::reconnect() {
+	this->currentTextureSet = 0;
+	this->spawnedFirstTime = false;
+	this->health = Config::defaultHealth;
+	this->maxHealth = Config::defaultHealth;
+	this->playerInfos.clear();
+	this->items.clear();
+	this->damages.clear();
+	getIn.changeVisibility(true);
 }
 
 // Wywolywane w momencie wyjscia z fazy GameEnd. Resetujemy stan naszej mapy, UI.
