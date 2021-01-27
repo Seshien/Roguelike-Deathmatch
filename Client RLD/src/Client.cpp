@@ -133,7 +133,7 @@ void Client::centerMap() {
 		x = this->map.MAP_WIDTH * Config::SPRITE_WIDTH - Config::GAME_SCREEN_WIDTH / 2;
 	if (y > this->map.MAP_HEIGHT* Config::SPRITE_HEIGHT - Config::GAME_SCREEN_HEIGHT / 2)
 		y = this->map.MAP_HEIGHT * Config::SPRITE_HEIGHT - Config::GAME_SCREEN_HEIGHT / 2;
-	gameView.setCenter(x, y);
+	gameView.setCenter((float)x, (float)y);
 }
 
 // Wyswietlanie grafik
@@ -156,20 +156,20 @@ void Client::graphicsUpdate() {
 		for (int i = 0; i < this->map.MAP_WIDTH; i++) {
 			for (int j = 0; j < this->map.MAP_HEIGHT; j++) {
 				if (i <= this->xOurPos - Config::sightValue || i >= this->xOurPos + Config::sightValue || j <= this->yOurPos - Config::sightValue || j >= this->yOurPos + Config::sightValue) {
-					fog.setPosition(i * Config::SPRITE_WIDTH, j * Config::SPRITE_HEIGHT);
+					fog.setPosition((float)i * Config::SPRITE_WIDTH, (float)j * Config::SPRITE_HEIGHT);
 					window.draw(fog);
 				}
 			}
 		}
 		// Rysujemy wszystkich graczy, ktorzy sa w naszym polu widzenia (ci, ktorzy znalezli sie za nim maja ustawione isAlive na false
 		// gdyz gracz nie wie czy aktualnie zyja czy tez nie)
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			// Interpolacja aktualnie odbywa sie w jednym kroku zeby uniknac problemow
 			this->playerInfos[i]->interpolate(1.0f, 1.0f);
 			this->playerInfos[i]->draw(window);
 		}
 		// Rysuje wszystkie przedmioty znajdujace sie na mapie w polu widzenia gracza
-		for (int i = 0; i < this->items.size(); i++) {
+		for (size_t i = 0; i < this->items.size(); i++) {
 			this->items[i]->draw(window);
 		}
 		// Rysuje wszystkie animacje dostania obrazen (w przypadku, kiedy ich czas zycia sie skonczy to sa usuwane z wektora)
@@ -209,7 +209,7 @@ void Client::graphicsUpdate() {
 		hpBar.changeFillPercent((double)this->health / (double)this->maxHealth * 100.0f);
 		hpBar.changeVisibility(true);
 		hpBar.draw(window);
-		for (int i = 0; i < this->items.size(); i++) {
+		for (size_t i = 0; i < this->items.size(); i++) {
 			this->items[i]->drawInPocket(window, 330 + (i * (Config::SPRITE_WIDTH + 5)), 65);
 		}
 	}
@@ -232,7 +232,7 @@ void Client::graphicsUpdate() {
 	}
 	// Tworzymy stringa z nazwami graczy i iloscia ich zabojstw (dostepne tylko podczas gry)
 	if (this->gameStage == Client::GameStage::ALIVE || this->gameStage == Client::GameStage::DEAD) {
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			str.append(this->playerInfos[i]->getPlayerName());
 			str.append(" [");
 			str.append(std::to_string(this->playerInfos[i]->getKillCount()));
@@ -306,12 +306,12 @@ void Client::handleIntEvents()
 		{
 			if (event.mouseButton.button == sf::Mouse::Left)
 			{
-				if (getIn.isClickInBounds(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+				if (getIn.isClickInBounds((int)(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f), event.mouseButton.y)) {
 					this->connectClient();
 					vote.changeVisibility(true);
 					Logger::debug("Get in button clicked!");
 				}
-				else if (vote.isClickInBounds(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+				else if (vote.isClickInBounds((int)(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f), event.mouseButton.y)) {
 					output.addEventVote(this->ID, Config::SERVER_ID);
 					this->voted = !this->voted;
 					Logger::debug("Vote button clicked!");
@@ -320,7 +320,7 @@ void Client::handleIntEvents()
 					else
 						vote.setText("Vote");
 				}
-				else if (respawn.isClickInBounds(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f, event.mouseButton.y)) {
+				else if (respawn.isClickInBounds((int)(event.mouseButton.x - Config::SCREEN_WIDTH * 0.8f), event.mouseButton.y)) {
 					Logger::debug("Respawn button clicked!");
 					respawn.changeVisibility(false);
 					this->output.addEventWillToRespawn(this->ID, Config::SERVER_ID);
@@ -453,7 +453,7 @@ void Client::handleGame(Parser::Event ev)
 		evString = std::string(ev.subdata);
 		evString = evString.substr(4, ev.subdata.size() - 4);
 		Logger::debug("Ruch:" + evString + "x: " + std::to_string(ev.subdata[0]) + "y: " + std::to_string(ev.subdata[1]));
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			//
 			if (this->playerInfos[i]->getPlayerName() == evString) {
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
@@ -481,7 +481,7 @@ void Client::handleGame(Parser::Event ev)
 							++it;
 					}
 				}
-				for (int j = 0; j < this->playerInfos.size(); j++) {
+				for (size_t j = 0; j < this->playerInfos.size(); j++) {
 					Logger::debug("Our player found.");
 					if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Config::sightValue) {
 						this->playerInfos[j]->setIsAlive(false);
@@ -522,7 +522,7 @@ void Client::handleGame(Parser::Event ev)
 			}
 			this->spawnedFirstTime = true;
 		}
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerInfos[i]->getPlayerName() == this->playerName) {
 				this->playerInfos[i]->setIsAlive(true);
 				this->playerInfos[i]->setNewPosition(ev.subdata[0], ev.subdata[1]);
@@ -540,7 +540,7 @@ void Client::handleGame(Parser::Event ev)
 		newPlayer = true;
 		evString = std::string(ev.subdata);
 		Logger::debug("PSpawn:" + evString.substr(3, evString.size() - 3) + "x: " + evString.substr(0, 1) + "y: " + evString.substr(1, 1));
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerInfos[i]->getPlayerName() == evString.substr(3, evString.size() - 3)) {
 				Logger::debug("Other player spawn existing info received");
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
@@ -590,7 +590,7 @@ void Client::handleGame(Parser::Event ev)
 		// Informacja o tym jak zmienilo sie nasze HP
 	case Parser::SubType::DAMAGE:
 		Logger::debug("Player new hp: " + ev.subdata);
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
 				OurPlayerInfo *ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
 				ourPlayer->health = std::stoi(ev.subdata);
@@ -601,7 +601,7 @@ void Client::handleGame(Parser::Event ev)
 		break;
 		// Informacja o tym jak zmieniolo sie nasze MaxHp (w przypadku zebrania tarczy)
 	case Parser::SubType::MAXHEALTH:
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
 				OurPlayerInfo* ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
 				ourPlayer->maxHealth = std::stoi(ev.subdata);
@@ -613,7 +613,7 @@ void Client::handleGame(Parser::Event ev)
 		// Informacja o tym, ze podnieslismy dany przedmiot
 	case Parser::SubType::PICKUP:
 		Logger::debug("Picked item: " + ev.subdata[0]);
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerName == this->playerInfos[i]->getPlayerName()) {
 				OurPlayerInfo* ourPlayer = (OurPlayerInfo*)(&*(this->playerInfos[i]));
 				// Na serwerze ITEM_SWORD, ITEM_SHIELD, ITEM_BOOTS, ITEM_POTION, PLAYER, BODY
@@ -637,7 +637,7 @@ void Client::handleGame(Parser::Event ev)
 				default:
 					Logger::error("Wrong item type received!");
 				}
-				for (int i = 0; i < this->items.size(); i++) {
+				for (size_t i = 0; i < this->items.size(); i++) {
 					if ((int)this->items[i]->getType() == clientItemID && this->items[i]->isOnMap() == false) {
 						newItem = false;
 					}
@@ -654,7 +654,7 @@ void Client::handleGame(Parser::Event ev)
 		// polem widzenia, to wtedy nie potrzebujemy eventa, ktory nas o tym powiadiomi.
 	case Parser::SubType::MOVEOUT:
 		Logger::debug("Moveout: " + ev.subdata.substr(4, ev.subdata.size() - 4));
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (ev.subdata.substr(4, ev.subdata.size() - 4) == this->playerInfos[i]->getPlayerName()) {
 				this->playerInfos[i]->setIsAlive(false);
 				this->playerInfos[i]->setNewPosition((int)ev.subdata[0], (int)ev.subdata[1]);
@@ -700,7 +700,7 @@ void Client::handleGame(Parser::Event ev)
 	case Parser::SubType::DESPAWN:
 		// Despawnuje item na danym X i Y wiec musze znalezc w vectorze itemsow miejsce w ktorym jest item o danym X i Y
 	 	Logger::debug("Despawn item: " + std::string(" X: ") + ev.subdata[0] + " Y: " + ev.subdata[1]);
-		for (int i = 0; i < this->items.size(); i++) {
+		for (size_t i = 0; i < this->items.size(); i++) {
 			if (this->items[i]->getX() == (int)ev.subdata[0] && this->items[i]->getY() == (int)ev.subdata[1]) {
 				this->items.erase(this->items.begin() + i);
 				Logger::debug("Despawning item " + std::to_string(i));
@@ -711,7 +711,7 @@ void Client::handleGame(Parser::Event ev)
 		// Informacja o zniknieciu danego gracza
 	case Parser::SubType::PDESPAWN:
 		Logger::debug("Player despawn: " + ev.subdata.substr(2, ev.subdata.size() - 2));
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (ev.subdata.substr(2, ev.subdata.size() - 2) == this->playerInfos[i]->getPlayerName()) {
 				this->playerInfos[i]->setIsAlive(false);
 			}
@@ -720,7 +720,7 @@ void Client::handleGame(Parser::Event ev)
 		// Informacja o liczbie zabojstw danego gracza
 	case Parser::SubType::KILLCOUNT:
 		Logger::debug("Killcount" + ev.subdata.substr(1, ev.subdata.size()-1) + "num:" + std::to_string((int)ev.subdata[0]));
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (ev.subdata.substr(1, ev.subdata.size() - 1) == this->playerInfos[i]->getPlayerName()) {
 				this->playerInfos[i]->setKillCount((int)ev.subdata[0]);
 			}
@@ -729,7 +729,7 @@ void Client::handleGame(Parser::Event ev)
 		// Informacja o tym, ze jakis gracz zostal uderzony (tylko powoduje stworzeniu obiektu animacji)
 	case Parser::SubType::HIT:
 		Logger::debug("Hit: " + ev.subdata);
-		for (int i = 0; i < this->playerInfos.size(); i++) {
+		for (size_t i = 0; i < this->playerInfos.size(); i++) {
 			if (this->playerInfos[i]->getPlayerName() == ev.subdata) {
 				this->damages.push_back(Damage(Config::SPRITE_WIDTH* this->playerInfos[i]->getX(), Config::SPRITE_WIDTH* this->playerInfos[i]->getY(), damageTextures, 3));
 			}
@@ -772,7 +772,7 @@ void Client::handleNewPlayer(Parser::Event ev)
 void Client::handleDisconnectPlayer(Parser::Event ev)
 {
 	std::string playerName = ev.subdata;
-	for (int i=0;i<playerList.size();i++)
+	for (size_t i=0;i<playerList.size();i++)
 		if (playerList[i] == playerName)
 		{
 			playerList.erase(playerList.begin() + i);
@@ -791,6 +791,7 @@ void Client::handleLostConnection(Parser::Event ev)
 	this->output.addInnerDiscPlayer(Config::SERVER_ID, this->ID);
 	this->cState = ConnectionState::FAILED;
 	this->gameStage = GameStage::NOTJOINED;
+	this->reconnect();
 }
 
 void Client::handleTimeout(Parser::Event ev)
@@ -894,6 +895,17 @@ void Client::setConfigValue(std::string token, std::string value)
 	else if (token == "playerName") this->playerName = value;
 	else if (token == "Server Address") this->IPAddress = value;
 	else Logger::debug("Unknown line in config file");
+}
+
+void Client::reconnect() {
+	this->currentTextureSet = 0;
+	this->spawnedFirstTime = false;
+	this->health = Config::defaultHealth;
+	this->maxHealth = Config::defaultHealth;
+	this->playerInfos.clear();
+	this->items.clear();
+	this->damages.clear();
+	getIn.changeVisibility(true);
 }
 
 // Wywolywane w momencie wyjscia z fazy GameEnd. Resetujemy stan naszej mapy, UI.

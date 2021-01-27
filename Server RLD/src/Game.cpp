@@ -42,7 +42,7 @@ void Game::spawnObjects()
 
 void Game::addPlayers(std::vector<int> playerID, std::vector<std::string> playerName)
 {
-	for (int x = 0; x < playerID.size(); x++)
+	for (size_t x = 0; x < playerID.size(); x++)
 	{
 		if (addPlayer(playerID[x], playerName[x]))
 		{
@@ -701,7 +701,7 @@ void Game::deleteItem(int itemID)
 int Game::getPlayerIndex(int playerID)
 {
 	//if (gamePlayerList[playerID - 1]->getplayerID() == playerID) return playerID - 1;
-	for (int i = 0; i < gamePlayerList.size(); i++)
+	for (size_t i = 0; i < gamePlayerList.size(); i++)
 		if (gamePlayerList[i]->getPlayerID() == playerID)
 			return i;
 
@@ -711,7 +711,7 @@ int Game::getPlayerIndex(int playerID)
 int Game::getItemIndex(int itemID)
 {
 	//if (this->gameObjectList[itemID]->getItemID() == itemID) return itemID;
-	for (int i = 0; i < gameObjectList.size(); i++)
+	for (size_t i = 0; i < gameObjectList.size(); i++)
 		if (gameObjectList[i]->getItemID() == itemID)
 			return i;
 

@@ -137,6 +137,6 @@ private:
 	void setConfigValue(std::string token, std::string value);
 
 	void gameReset();
-
+	void reconnect();
 };
 
