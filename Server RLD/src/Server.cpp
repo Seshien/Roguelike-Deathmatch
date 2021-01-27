@@ -347,6 +347,7 @@ void Server::handleTimeout(Parser::Event ev)
 	if (player->timeout)
 	{
 		handleDisconnect(player->playerID);
+		player->timeout = false;
 	}
 	else
 	{
