@@ -350,6 +350,7 @@ void Server::handleTimeout(Parser::Event ev)
 	}
 	else
 	{
+		player->timeout = true;
 		output.addEventTimeoutReached(Config::SERVER_ID, player->playerID);
 	}
 

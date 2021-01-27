@@ -15,10 +15,10 @@ namespace Config
 	const static std::string confName = "./data/config.txt";
 
 	//to mozna dac w configu potem
-	static bool debug = false;
+	static bool debug = true;
 	static int PlayersNeededToStartGame = 1;
 	static int sightValue = 5;
-	static int timeoutValue = 10000;
+	static int timeoutValue = 100;
 	static int spikeDmg = 2;
 	static int lavaDmg = 30;
 	static int defaultHealth = 10;
