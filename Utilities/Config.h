@@ -10,7 +10,7 @@ namespace Config
 
 	//real static
 
-	const static int bufferLength = 200;
+	const static int bufferLength = 4096;
 	const static int msgLengthLimit = 50;
 	const static std::string confName = "./data/config.txt";
 

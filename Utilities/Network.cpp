@@ -502,7 +502,7 @@ void Network::readFromClient(Contact* client)
 
 	//odbieranie wiadomosci
 	Logger::debug("Receiving message");
-	int result = recv(client->clientSocket, &bufferTemp[0], limit - client->bufferInput.size(), 0);
+	int result = recv(client->clientSocket, &bufferTemp[0], Config::bufferLength - 1, 0);
 
 
 	if (result == -1 || result == 0)
