@@ -104,6 +104,8 @@ public:
 
 	void getFullVision(std::shared_ptr<PlayerObject> player);
 
+	std::shared_ptr<Tile> getPlayerSpawnTile();
+
 	void deletePlayer(int playerID);
 
 	void deleteItem(int itemID);

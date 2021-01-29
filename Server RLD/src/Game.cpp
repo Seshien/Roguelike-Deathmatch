@@ -57,26 +57,12 @@ int Game::addPlayer(int playerID, std::string playerName)
 
 	if (int playerIndex = this->getPlayerIndex(playerID) == -1)
 	{
-		for (int i = 0; i < map.MAP_HEIGHT; i++)
-		{
-			for (int j = 0; j < map.MAP_WIDTH; j++)
-			{
-				auto tile = this->map.getTile(i, j);//map.tileArray[i][j];
-				if (tile == nullptr)
-					continue;
-				if (tile->isPlayerSpawner())
-				{
-					tile->setPlayerSpawner(false);
-					auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, tile);
-					gamePlayerList.push_back(player);
-
-					this->addPlayerSpawnToTick(player);
-					allKillCountsEvent(player);
-					this->allDeathCountsEvent(player);
-					return 0;
-				}
-			}
-		}
+		auto player = std::make_shared<PlayerObject>(playerID, playerName, SpawnableObjectType::PLAYER, this->map.getTile(0, 0));
+		gamePlayerList.push_back(player);
+		this->addPlayerSpawnToTick(player);
+		allKillCountsEvent(player);
+		this->allDeathCountsEvent(player);
+		return 0;
 	}
 	else
 	{
@@ -463,9 +449,9 @@ void Game::killPlayer(std::shared_ptr<PlayerObject> player)
 	this->gameObjectList.push_back(body);
 
 	//poruszamy gracza do respawna
-	auto tile = this->map.getTile(player->getspawnX(), player->getspawnY());
-	if (tile != nullptr)
-		player->move(tile);
+	//auto tile = this->map.getTile(player->getspawnX(), player->getspawnY());
+	//if (tile != nullptr)
+	//	player->move(tile);
 
 	//dodajemy do tickow
 	this->tickObjList.push_back(body);
@@ -650,6 +636,14 @@ void Game::handleRespawn(std::shared_ptr<PlayerObject> object)
 {
 	if (object->readyToRespawn)
 	{
+		auto tile = this->getPlayerSpawnTile();
+		if (tile == nullptr)
+		{
+			this->respawnAskEvent(object);
+			return;
+		}
+
+		object->move(tile);
 		object->spawn();
 		object->lastMove = 'S';
 		this->spawnPlayerEvent(object);
@@ -658,6 +652,25 @@ void Game::handleRespawn(std::shared_ptr<PlayerObject> object)
 		this->maxHealthEvent(object);
 		this->getFullVision(object);
 	}
+}
+
+std::shared_ptr<Tile> Game::getPlayerSpawnTile()
+{
+	for (int i = 0; i < map.MAP_HEIGHT; i++)
+	{
+		for (int j = 0; j < map.MAP_WIDTH; j++)
+		{
+			auto tile = this->map.getTile(i, j);//map.tileArray[i][j];
+			if (tile == nullptr)
+				continue;
+			if (tile->isPlayerSpawner() && tile->canSpawn())
+			{
+				//tile->setPlayerSpawner(false);
+				return tile;
+			}
+		}
+	}
+	return nullptr;
 }
 
 void Game::getFullVision(std::shared_ptr<PlayerObject> player)
