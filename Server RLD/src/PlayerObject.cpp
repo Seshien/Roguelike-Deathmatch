@@ -30,10 +30,12 @@ void PlayerObject::move(std::shared_ptr<Tile> newTile)
 		this->occupiedTile->setPlayer(false);
 		this->occupiedTile->setPlayerID(-1);
 		this->occupiedTile->setMove(true);
+		this->occupiedTile->setSpawn(true);
 
 		newTile->setPlayer(true);
 		newTile->setPlayerID(this->playerID);
 		newTile->setMove(false);
+		newTile->setSpawn(false);
 	}
 
 	this->occupiedTile = newTile;
@@ -50,6 +52,7 @@ void PlayerObject::spawn()
 	this->occupiedTile->setPlayer(true);
 	this->occupiedTile->setPlayerID(this->playerID);
 	this->occupiedTile->setMove(false);
+	this->occupiedTile->setSpawn(false);
 
 	this->health = Config::defaultHealth;
 	this->maxHealth = Config::defaultHealth;
@@ -66,6 +69,7 @@ void PlayerObject::despawn()
 	this->occupiedTile->setPlayer(false);
 	this->occupiedTile->setPlayerID(this->playerID);
 	this->occupiedTile->setMove(true);
+	this->occupiedTile->setSpawn(true);
 	this->deathCount++;
 	// Operacje na obiekcie map
 }
