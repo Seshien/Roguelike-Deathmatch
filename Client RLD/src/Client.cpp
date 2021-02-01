@@ -480,15 +480,15 @@ void Client::handleGame(Parser::Event ev)
 						else
 							++it;
 					}
-				}
-				for (size_t j = 0; j < this->playerInfos.size(); j++) {
-					Logger::debug("Our player found.");
-					if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Config::sightValue) {
-						this->playerInfos[j]->setIsAlive(false);
-						Logger::debug("Player moved out from another player");
-					}
-					else {
-						Logger::debug("Player didnt move out from another player");
+					for (size_t j = 0; j < this->playerInfos.size(); j++) {
+						Logger::debug("Our player found.");
+						if (abs((int)ev.subdata[0] - this->playerInfos[j]->getX()) >= Config::sightValue || abs((int)ev.subdata[1] - this->playerInfos[j]->getY()) >= Config::sightValue) {
+							this->playerInfos[j]->setIsAlive(false);
+							Logger::debug("Player moved out from another player");
+						}
+						else {
+							Logger::debug("Player didnt move out from another player");
+						}
 					}
 				}
 			}

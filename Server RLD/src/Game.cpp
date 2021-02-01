@@ -679,8 +679,8 @@ void Game::getFullVision(std::shared_ptr<PlayerObject> player)
 	int y1 = player->getY() - Config::sightValue;
 	int x2 = player->getX() + Config::sightValue;
 	int y2 = player->getY() + Config::sightValue;
-	for (int i = x1; i <= x2; i++)
-		for (int j = y1; j <= y2; j++)
+	for (int i = x1 + 1; i < x2; i++)
+		for (int j = y1 + 1; j < y2; j++)
 			this->getVision(player, this->map.getTile(i, j));
 
 }
