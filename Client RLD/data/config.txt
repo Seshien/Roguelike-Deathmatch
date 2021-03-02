@@ -1,4 +1,4 @@
 time:60
 special:yes
-playerName:Seshi
+playerName:Seshieee
 Server Address:127.0.0.1

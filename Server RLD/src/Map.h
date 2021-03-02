@@ -23,7 +23,7 @@ public:
 	}
 	void loadFromFile(std::string path)
 	{
-		Logger::log("Loading map from file");
+		Logger::debug("Loading map from file");
 		std::fstream file;
 		std::string line;
 		file.open(path);
@@ -35,10 +35,10 @@ public:
 				}
 				j++;
 			}
-			Logger::log("Map loading completed!");
+			Logger::debug("Map loading completed!");
 		}
 		else {
-			Logger::log("Error. Map with filename " + path + "not found!");
+			Logger::error("Error. Map with filename " + path + "not found!");
 		}
 		file.close();
 	}
@@ -53,7 +53,7 @@ public:
 	}
 
 	std::shared_ptr<Tile> getTile(int x, int y);
-	bool checkRange(std::shared_ptr<Tile> objectF, std::shared_ptr<Tile> objectS, int range = Config::sightValue);
+	bool checkRange(std::shared_ptr<Tile> objectF, std::shared_ptr<Tile> objectS, int range = Config::getConfigHandler()->sightValue);
 	
 	std::array<std::array<std::shared_ptr<Tile>, MAP_HEIGHT>, MAP_WIDTH> tileArray;
 	std::vector<SpawnableObject> upperLayer;

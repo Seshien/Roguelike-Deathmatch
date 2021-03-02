@@ -456,7 +456,7 @@ void Network::manageClientEvent(int cIndex)
 	else
 	{
 		for (size_t i = 0; i<clientList.size(); i++)
-			if (clientList[i].clientSocket = sock)
+			if (clientList[i].clientSocket == sock)
 			{
 				managed = &clientList[i];
 				index = i;
@@ -496,6 +496,7 @@ void Network::readFromClient(int index)
 
 void Network::readFromClient(Contact* client)
 {
+	auto cof = Config::getConfigHandler();
 	char bufferTemp[Config::bufferLength];
 	//nie znamy jeszcze dlugosci wiadomosci
 	int limit = max(Config::msgLengthLimit, client->msgExpectedLenght);
@@ -660,7 +661,7 @@ void Network::increaseTimeout()
 	for (size_t i = 0; i < this->clientList.size(); i++)
 	{
 		clientList[i].timeoutTimer++;
-		if (clientList[i].timeoutTimer > Config::timeoutValue)
+		if (clientList[i].timeoutTimer > Config::getConfigHandler()->timeoutValue)
 		{
 			Logger::debug("Network Event: Player " + std::to_string(clientList[i].playerId) + " reached timeout time");
 			this->input.addEventTimeoutReached(clientList[i].playerId, 0);
@@ -687,7 +688,7 @@ Contact * Network::FindClient(int index, SOCKET sock = -1)
 		else
 		{
 			for (size_t i = 0; i < clientList.size(); i++)
-				if (clientList[i].clientSocket = sock)
+				if (clientList[i].clientSocket == sock)
 				{
 					return &clientList[i];
 					break;

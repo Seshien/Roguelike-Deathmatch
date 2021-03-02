@@ -29,14 +29,13 @@ class Server
 		{
 
 		}
-		void StartServer();
+		void startServer();
 
 	private:
 		Parser::Messenger output;
 		Parser::Messenger input;
 		Parser::Messenger gameInput;
-
-		void startLogger();
+		std::shared_ptr<Config::ConfigHandler> conf;
 
 		// void GenerateMap();
 		void startMap();
@@ -79,7 +78,6 @@ class Server
 		std::vector<Player *> refreshActivePlayerList();
 		Player * getPlayer(int playerID);
 
-		std::string port="7777";
 		int gameTickTimer = 0;
 		Network network;
 		Game game;
@@ -88,10 +86,6 @@ class Server
 		int activePlayerCount;
 		StateChange stateChange;
 		std::string winner;
-
-		void loadConfig();
-		void processConfigLine(std::string line);
-		void setConfigValue(std::string token, std::string value);
 
 		std::chrono::system_clock::time_point gameStartTime;
 		std::chrono::system_clock::time_point turntimer;

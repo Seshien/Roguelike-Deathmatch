@@ -33,6 +33,8 @@ public:
 
 private:
 
+
+	std::shared_ptr<Config::ConfigHandler> conf;
 	enum class ConnectionState {NOTCONNECTED, CONNECTED, FAILED};
 	// NOTJOINED - po wlaczeniu klienta, LOBBY - po kliknieciu Login, DEAD - gracz nie zyje i nie moze wykonywac akcji (oprocz zrespawnowania sie),
 	// ALIVE - gracz moze wykonywac akcje, END - pokazuje wygranego gracza
@@ -65,8 +67,6 @@ private:
 	ConnectionState cState;
 	GameStage gameStage;
 
-	std::string port;
-	std::string IPAddress;
 
 	std::vector<std::string> playerList;
 
@@ -130,11 +130,6 @@ private:
 	void graphicsUpdate();
 
 	void centerMap();
-
-
-	void loadConfig();
-	void processConfigLine(std::string line);
-	void setConfigValue(std::string token, std::string value);
 
 	void gameReset();
 	void reconnect();

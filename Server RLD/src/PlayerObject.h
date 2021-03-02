@@ -19,6 +19,8 @@ class PlayerObject : public SpawnableObject
 	std::vector<ItemType> items;
 	std::string playerName;
 
+	std::shared_ptr<Config::ConfigHandler> conf;
+
 public:
 	PlayerObject(int id, std::string playerName, SpawnableObjectType type, std::shared_ptr<Tile> tile);
 

@@ -28,10 +28,10 @@ tickResult SpawnableObject::tick()
 
 void SpawnableObject::startSpawnTimer() {
 	if (this->type == SpawnableObjectType::PLAYER) 
-		this->timetoRespawn = Config::PLAYER_RESPAWN_TIME;
+		this->timetoRespawn = Config::getConfigHandler()->PLAYER_RESPAWN_TIME;
 	else if (this->type == SpawnableObjectType::BODY)
-		this->timetoDespawn = Config::PLAYER_RESPAWN_TIME;
+		this->timetoDespawn = Config::getConfigHandler()->PLAYER_RESPAWN_TIME;
 	else
-		this->timetoRespawn = Config::ITEM_RESPAWN_TIME;
+		this->timetoRespawn = Config::getConfigHandler()->ITEM_RESPAWN_TIME;
 }
 

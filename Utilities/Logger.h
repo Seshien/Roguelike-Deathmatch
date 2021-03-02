@@ -10,7 +10,9 @@
 
 namespace Logger
 {
-	void startLogger(std::string name, int logLevel);
+	void startLogger(std::string name);
+
+	void setLogLevel(int logLevel);
 
 	void endLogger();
 
@@ -27,12 +29,6 @@ namespace Logger
 	void debug(std::string text);
 	void debug(std::string text, int value);
 	void debug(Parser::Event ev);
-
-
-
-	void log(std::string text);
-	void log(std::string text, int error_code);
-	void log(Parser::Event ev);
 
 	void logNetworkError();
 

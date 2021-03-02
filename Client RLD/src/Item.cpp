@@ -11,7 +11,9 @@ Item::Item(ItemType type, int x, int y, sf::Texture& tex, bool onMap, bool inPoc
 
 void Item::draw(sf::RenderWindow& window) {
 	if (this->onMap){
-		this->sprite.setPosition((float)this->x * Config::SPRITE_WIDTH, (float)this->y * Config::SPRITE_HEIGHT);
+		auto conf = Config::getConfigHandler();
+
+		this->sprite.setPosition((float)this->x * conf->SPRITE_WIDTH, (float)this->y * conf->SPRITE_HEIGHT);
 		window.draw(this->sprite);
 	}
 }

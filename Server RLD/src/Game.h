@@ -15,7 +15,6 @@ class Game
 public:
 	Game()
 	{
-
 	}
 
 	void startGame(std::vector<int> playerID, std::vector<std::string> playerName);
@@ -118,6 +117,7 @@ public:
 
 private:
 
+	std::shared_ptr<Config::ConfigHandler> conf;
 	Map map;
 	Parser::Messenger output;
 	int itemID=0;

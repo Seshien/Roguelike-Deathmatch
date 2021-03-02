@@ -49,7 +49,7 @@ set(ALL_FILES
 
 add_subdirectory("SFML")
 
-set(SFML_STATIC_LIBRARIES TRUE)
+#set(SFML_STATIC_LIBRARIES TRUE)
 ################################################################################
 # Target
 ################################################################################

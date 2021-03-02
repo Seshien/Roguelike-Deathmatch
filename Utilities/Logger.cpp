@@ -8,10 +8,9 @@ namespace Logger
 	bool _file = false;
 	int debug_mode = 0;
 
-	void startLogger(std::string name, int logLevel)
+	void startLogger(std::string name)
 	{
 		int number = 0;
-		debug_mode = logLevel;
 		while (true)
 		{
 			if (!std::filesystem::is_directory("log")) 
@@ -31,101 +30,110 @@ namespace Logger
 		_file = true;
 	}
 
+	void setLogLevel(int logLevel)
+	{
+		debug_mode = logLevel;
+	}
+
 	void endLogger()
 	{
 		file.close();
+		_file = false;
+	}
+
+
+	void log(std::string text, std::ostream& ostr)
+	{
+		if (!_file)
+		{
+			std::cout << "Logger is not initialized" << std::endl;
+			return;
+		}
+		ostr << text << std::endl << std::flush;
+	}
+
+	void log(std::string text, int value, std::ostream& ostr)
+	{
+		if (!_file)
+		{
+			std::cout << "Logger is not initialized" << std::endl;
+			return;
+		}
+		ostr << text << " " << value << std::endl << std::flush;
+	}
+
+	void log(Parser::Event ev, std::ostream& ostr)
+	{
+		if (!_file)
+		{
+			std::cout << "Logger is not initialized" << std::endl;
+			return;
+		}
+
+		ostr << "----------" << std::endl << "Event:" << std::endl <<
+			"sender:receiver - " << ev.sender << " : " << ev.receiver << std::endl <<
+			"type:subtype - " << Parser::convertToString(ev.type) << " : " << Parser::convertToString(ev.subtype) << std::endl <<
+			"subdata - " << ev.subdata << std::endl << "----------" << std::endl << std::flush;
 	}
 
 	void error(std::string text)
 	{
-		log(text);
+		log(text, std::cout);
+		log(text, file);
 	}
 
 	void error(std::string text, int value)
 	{
-		log(text, value);
+		log(text, value, std::cout);
+		log(text, file);
 	}
 
 	void error(Parser::Event ev)
 	{
-		log(ev);
+		log(ev, std::cout);
+		log(ev, file);
 	}
 
 	void debug(std::string text)
 	{
-		if (debug_mode) 
-			log(text);
+		if (debug_mode >= 1)
+			log(text, std::cout);
+		log(text, file);
 	}
 
 	void debug(std::string text, int value)
 	{
-		if (debug_mode)
-			log(text, value);
+		if (debug_mode >= 1)
+			log(text, value, std::cout);
+		log(text, value, file);
 	}
 
 	void debug(Parser::Event ev)
 	{
-		if (debug_mode)
-			log(ev);
+		if (debug_mode >= 1)
+			log(ev, std::cout);
+		log(ev, file);
 	}
 
 	void info(std::string text)
 	{
 		if (debug_mode >= 0)
-			log(text);
+			log(text, std::cout);
+		log(text, file);
 	}
 
 	void info(std::string text, int value)
 	{
 		if (debug_mode >= 0)
-			log(text, value);
+			log(text, value, std::cout);
+		log(text, value, file);
 	}
 
 	void info(Parser::Event ev)
 	{
 		if (debug_mode >= 0)
-			log(ev);
-	}
-
-	void log(std::string text)
-	{
-		if (!_file)
-		{
-			std::cout << "Logger is not initialized" << std::endl;
-			return;
-		}
-		std::cout << text << std::endl << std::flush;
-		file << text << std::endl << std::flush;
-	}
-
-	void log(std::string text, int value)
-	{
-		if (!_file)
-		{
-			std::cout << "Logger is not initialized" << std::endl;
-			return;
-		}
-		std::cout << text << " " << value << std::endl << std::flush;
-		file << text << " " << value << std::endl << std::flush;
-	}
-
-	void log(Parser::Event ev)
-	{
-		if (!_file)
-		{
-			std::cout << "Logger is not initialized" << std::endl;
-			return;
-		}
-		
-		std::cout << "----------" << std::endl << "Event:" << std::endl <<
-			"sender:receiver - " << ev.sender << " : " << ev.receiver << std::endl <<
-			"type:subtype - " << Parser::convertToString(ev.type) << " : " << Parser::convertToString(ev.subtype) << std::endl <<
-			"subdata - " << ev.subdata << std::endl << "----------" << std::endl << std::flush;
-
-		file << "----------" << std::endl << "Event:" << std::endl <<
-			"sender:receiver - " << ev.sender << " : " << ev.receiver << std::endl <<
-			"type:subtype - " << Parser::convertToString(ev.type) << " : " << Parser::convertToString(ev.subtype) << std::endl <<
-			"subdata - " << ev.subdata << std::endl << "----------" << std::endl << std::flush;
+			log(ev, std::cout);
+		log(ev, file);
 	}
 
 	void logNetworkError() {

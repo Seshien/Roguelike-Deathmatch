@@ -32,9 +32,10 @@ void Map::loadFromFile(std::string path, std::vector<std::shared_ptr<sf::Texture
 }
 
 void Map::drawMap(sf::RenderWindow& window) {
+	auto conf = Config::getConfigHandler();
 	for (int j = 0; j < this->MAP_HEIGHT; j++) {
 		for (int i = 0; i < this->MAP_WIDTH; i++) {
-			this->tileArray[i][j]->draw(window, i * Config::SPRITE_WIDTH, j * Config::SPRITE_HEIGHT);
+			this->tileArray[i][j]->draw(window, i * conf->SPRITE_WIDTH, j * conf->SPRITE_HEIGHT);
 		}
 	}
 }

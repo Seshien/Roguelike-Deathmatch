@@ -2,6 +2,7 @@
 
 PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType type, std::shared_ptr<Tile> tile)
 {
+	conf = Config::getConfigHandler();
 	this->lastMove = 1;
 	this->x = tile->getX();
 	this->y = tile->getY();
@@ -14,10 +15,10 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 	this->occupiedTile = tile;
 	this->occupiedTile->setSpawn(false);
 	this->occupiedTile->setMove(false);
-	this->health = Config::defaultHealth;
-	this->maxHealth = Config::defaultHealth;
-	this->dmg = Config::defaultDmg;
-	this->attackRange = Config::attackRange;
+	this->health = conf->defaultHealth;
+	this->maxHealth = conf->defaultHealth;
+	this->dmg = conf->defaultDmg;
+	this->attackRange = conf->attackRange;
 	this->readyToRespawn = false;
 	this->deathCount = 0;
 	this->killCount = 0;
@@ -54,10 +55,10 @@ void PlayerObject::spawn()
 	this->occupiedTile->setMove(false);
 	this->occupiedTile->setSpawn(false);
 
-	this->health = Config::defaultHealth;
-	this->maxHealth = Config::defaultHealth;
-	this->dmg = Config::defaultDmg;
-	this->attackRange = Config::attackRange;
+	this->health = conf->defaultHealth;
+	this->maxHealth = conf->defaultHealth;
+	this->dmg = conf->defaultDmg;
+	this->attackRange = conf->attackRange;
 	this->items.clear();
 	this->readyToRespawn = false;
 	this->cooldownTimer = 0;

@@ -7,7 +7,7 @@
 int main()
 {
 	Server server;
-	server.StartServer();
+	server.startServer();
 }
 
 // Uruchomienie programu: Ctrl + F5 lub menu Debugowanie > Uruchom bez debugowania
