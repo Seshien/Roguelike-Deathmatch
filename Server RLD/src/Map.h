@@ -14,50 +14,27 @@ public:
 public:
 
 	enum class MOVEDIR { UP='W', DOWN='S', LEFT='A', RIGHT='D' };
-	Map()
-	{
-	}
-	void init(std::string path)
-	{
-		loadFromFile(std::string("data/map1.txt"));
-	}
-	void loadFromFile(std::string path)
-	{
-		Logger::debug("Loading map from file");
-		std::fstream file;
-		std::string line;
-		file.open(path);
-		int j = 0;
-		if (file.is_open()) {
-			while (std::getline(file, line)) {
-				for (size_t i = 0; i < line.size(); i += 2) {
-					tileArray[i / 2][j] = std::make_shared<Tile>((TileType)(line[i] - 'A'), i/2 , j);
-				}
-				j++;
-			}
-			Logger::debug("Map loading completed!");
-		}
-		else {
-			Logger::error("Error. Map with filename " + path + "not found!");
-		}
-		file.close();
-	}
-	void refresh()
-	{
-		for (auto& arr : tileArray)
-			for (auto& tile : arr)
-			{
-				if (tile == nullptr) break;
-				tile = std::make_shared<Tile>(tile->getType(), tile->getX(), tile->getY());
-			}
-	}
+
+	Map();
+
+	void init(std::string path);
+
+	void loadFromFile(std::string path);
+
+	void refresh();
 
 	std::shared_ptr<Tile> getTile(int x, int y);
+	std::shared_ptr<Tile> getTile(int xy);
+	std::vector<std::shared_ptr<Tile>> getAllTiles(int xOrigin, int yOrigin, int xRange, int yRange);
+
 	bool checkRange(std::shared_ptr<Tile> objectF, std::shared_ptr<Tile> objectS, int range = Config::getConfigHandler()->sightValue);
 	
-	std::array<std::array<std::shared_ptr<Tile>, MAP_HEIGHT>, MAP_WIDTH> tileArray;
+	//std::array<std::array<std::shared_ptr<Tile>, MAP_HEIGHT>, MAP_WIDTH> tileArray;
+	std::vector<std::shared_ptr<Tile>> tileArray;
 	std::vector<SpawnableObject> upperLayer;
-	std::shared_ptr<Tile> getMovementTile(MOVEDIR movement, std::shared_ptr<Tile> tile, int range = 1);
+	std::shared_ptr<Tile> getNextTile(MOVEDIR movement, std::shared_ptr<Tile> tile, int range = 1);
+	std::vector<std::shared_ptr<Tile>> getMovableTiles(int xOrigin, int yOrigin, int xRange, int yRange);
 
+	int transformMD(MOVEDIR movement);
 };
 

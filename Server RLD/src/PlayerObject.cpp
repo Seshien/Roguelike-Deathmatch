@@ -13,7 +13,7 @@ PlayerObject::PlayerObject(int id, std::string playerName, SpawnableObjectType t
 	this->type = type;
 	this->isExist = false;
 	this->occupiedTile = tile;
-	this->occupiedTile->setSpawn(false);
+	this->occupiedTile->setSolid(false);
 	this->occupiedTile->setMove(false);
 	this->health = conf->defaultHealth;
 	this->maxHealth = conf->defaultHealth;
@@ -31,12 +31,12 @@ void PlayerObject::move(std::shared_ptr<Tile> newTile)
 		this->occupiedTile->setPlayer(false);
 		this->occupiedTile->setPlayerID(-1);
 		this->occupiedTile->setMove(true);
-		this->occupiedTile->setSpawn(true);
+		this->occupiedTile->setSolid(true);
 
 		newTile->setPlayer(true);
 		newTile->setPlayerID(this->playerID);
 		newTile->setMove(false);
-		newTile->setSpawn(false);
+		newTile->setSolid(false);
 	}
 
 	this->occupiedTile = newTile;
@@ -53,7 +53,7 @@ void PlayerObject::spawn()
 	this->occupiedTile->setPlayer(true);
 	this->occupiedTile->setPlayerID(this->playerID);
 	this->occupiedTile->setMove(false);
-	this->occupiedTile->setSpawn(false);
+	this->occupiedTile->setSolid(false);
 
 	this->health = conf->defaultHealth;
 	this->maxHealth = conf->defaultHealth;
@@ -70,7 +70,7 @@ void PlayerObject::despawn()
 	this->occupiedTile->setPlayer(false);
 	this->occupiedTile->setPlayerID(this->playerID);
 	this->occupiedTile->setMove(true);
-	this->occupiedTile->setSpawn(true);
+	this->occupiedTile->setSolid(true);
 	this->deathCount++;
 	// Operacje na obiekcie map
 }

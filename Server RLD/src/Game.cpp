@@ -204,7 +204,7 @@ void Game::handleMovement(int playerID, Map::MOVEDIR movement)
 
 void Game::handleMovement(std::shared_ptr<PlayerObject> player)
 {
-	handleMovement(player, this->map.getMovementTile((Map::MOVEDIR) player->lastMove, player->getTile()));
+	handleMovement(player, this->map.getNextTile((Map::MOVEDIR) player->lastMove, player->getTile()));
 }
 
 void Game::handleMovement(std::shared_ptr<PlayerObject> player, std::shared_ptr<Tile> tile)
@@ -227,7 +227,7 @@ void Game::handleMovement(std::shared_ptr<PlayerObject> player, std::shared_ptr<
 			while (1)
 			{
 				oldTile = tile;
-				tile = this->map.getMovementTile(movement, tile);
+				tile = this->map.getNextTile(movement, tile);
 				if (tile->getType() == TileType::GROUND_SLIPPY)
 				{
 					player->move(tile);
@@ -277,7 +277,7 @@ void Game::handleAttack(std::shared_ptr<PlayerObject> player)
 	auto iterTile = player->getTile();
 	for (int i = 0; i < player->getRange(); i++)
 	{
-		iterTile = this->map.getMovementTile(movement, iterTile);
+		iterTile = this->map.getNextTile(movement, iterTile);
 		if (iterTile == nullptr) break;
 		if (iterTile->havePlayer())
 		{
@@ -663,7 +663,7 @@ std::shared_ptr<Tile> Game::getPlayerSpawnTile()
 			auto tile = this->map.getTile(i, j);//map.tileArray[i][j];
 			if (tile == nullptr)
 				continue;
-			if (tile->isPlayerSpawner() && tile->canSpawn())
+			if (tile->isPlayerSpawner() && tile->isSolid())
 			{
 				//tile->setPlayerSpawner(false);
 				return tile;
