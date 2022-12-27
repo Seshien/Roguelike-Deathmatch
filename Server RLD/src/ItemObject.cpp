@@ -7,7 +7,7 @@ ItemObject::ItemObject(int itemID, SpawnableObjectType type, std::shared_ptr<Til
 	this->occupiedTile = tile;
 	this->occupiedTile->setItem(false);
 	this->occupiedTile->setItemID(itemID);
-	this->occupiedTile->setSpawn(false);
+	this->occupiedTile->setSolid(false);
 	this->x = tile->getX();
 	this->y = tile->getY();
 };
@@ -32,7 +32,7 @@ void ItemObject::deleteItem()
 {
 	this->occupiedTile->setItem(false);
 	this->occupiedTile->setItemID(-1);
-	this->occupiedTile->setSpawn(true);
+	this->occupiedTile->setSolid(true);
 
 }
 

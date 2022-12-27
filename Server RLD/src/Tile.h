@@ -15,7 +15,7 @@ private:
 	int itemID;
 	bool isItem;
 	bool isPlayer;
-	bool isSpawnable;
+	bool solid;
 	bool isMovable;
 	int playerID;
 	bool canPlayerSpawn;
@@ -30,33 +30,33 @@ public:
 		this->type = tileType;
 		this->x = x;
 		this->y = y;
-		if ((int)tileType == 23) {
+		if (tileType == TileType::PLAYER_SPAWN) {
 			isMovable = true;
-			isSpawnable = true;
+			solid = false;
 			canPlayerSpawn = true;
 			canItemSpawn = false;
 		}
-		else if ((int)tileType == 24) {
+		else if (tileType == TileType::ITEM_SPAWN) {
 			isMovable = true;
-			isSpawnable = true;
+			solid = false;
 			canPlayerSpawn = false;
 			canItemSpawn = true;
 		}
-		else if ((int)tileType == 9)
+		else if (tileType == TileType::GROUND)
 		{
-			isSpawnable = true;
+			solid = false;
 			isMovable = true;
 			canPlayerSpawn = false;
 			canItemSpawn = false;
 		}
-		else if ((int)tileType == 11 || (int)tileType == 10 || (int)tileType == 12 ) {
+		else if (tileType == TileType::SPIKES || tileType == TileType::LAVA || tileType == TileType::GROUND_SLIPPY) {
 			isMovable = true;
-			isSpawnable = false;
+			solid = false;
 			canPlayerSpawn = false;
 			canItemSpawn = false;
 		}
 		else {
-			isSpawnable = false;
+			solid = true;
 			isMovable = false;
 			canPlayerSpawn = false;
 			canItemSpawn = false;
@@ -75,8 +75,8 @@ public:
 	int getItemID() { return itemID; };
 	void setItemID(int value) { this->itemID = value; };
 
-	bool canSpawn() { return isSpawnable; };
-	void setSpawn(bool value) { this->isSpawnable = value; };
+	bool isSolid() { return solid; };
+	void setSolid(bool value) { this->solid = value; };
 
 	bool isPlayerSpawner() { return canPlayerSpawn; };
 	void setPlayerSpawner(bool value) { this->canPlayerSpawn = value; };
